@@ -6,7 +6,7 @@ function App() {
     <div className="App">
       <header className="App-header">
         <p>
-          good.tools v{packageJson.version}
+          <strong>good.tools</strong> v{packageJson.version}
         </p>
       </header>
     </div>
