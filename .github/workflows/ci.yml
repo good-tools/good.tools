@@ -1,0 +1,57 @@
+name: Test, Release & Deploy
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    if: |
+      !contains(github.event.head_commit.message, 'skip-ci')
+    strategy:
+      matrix:
+        node-version: [18.x]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm ci
+    - run: npm test
+
+  release:
+    needs: [ test ]
+    runs-on: ubuntu-latest
+    if: |
+      success() &&
+      github.ref == "refs/heads/master" &&
+      github.repository == "good-tools/${{ github.event.repository.name }}"
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Configure Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+        cache: 'npm'
+
+    - name: Load Dependencies
+      run: npm ci
+
+    - name: Release
+      id: release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: npx semantic-release
+
+    - name: Configure AWS credentials
+      if: steps.release.outputs.released == '1'
+      uses: aws-actions/configure-aws-credentials@13d241b293754004c80624b5567555c4a39ffbe3
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Deploy
+      if: steps.release.outputs.released == '1'
+      run: aws s3 sync ./build/ s3://${{ secrets.S3_BUCKET }}
