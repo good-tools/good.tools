@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/good-tools/good.tools/compare/v1.0.1...v1.0.2) (2022-12-19)
+
+
+### Bug Fixes
+
+* test CI with invalidation ([53ff6ce](https://github.com/good-tools/good.tools/commit/53ff6ce406c9f607b811d41c7526e31bbc657e8b))
+
 ## [1.0.1](https://github.com/good-tools/good.tools/compare/v1.0.0...v1.0.1) (2022-12-18)
 
 
