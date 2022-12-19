@@ -25,7 +25,7 @@ module.exports =  {
       "releasedLabels": false
     }],
     ["@semantic-release/exec", {
-      "prepareCmd": "npm run build && tar -czf build.tar.gz build/",
+      "prepareCmd": "CI=false npm run build && tar -czf build.tar.gz build/",
       "successCmd": "echo \"released=1\" >> " + process.env.GITHUB_OUTPUT
     }],
   ]
