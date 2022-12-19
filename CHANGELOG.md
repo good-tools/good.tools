@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/good-tools/good.tools/compare/v1.0.3...v1.1.0) (2022-12-19)
+
+
+### Features
+
+* adding tailwindui and stubs ([40f6346](https://github.com/good-tools/good.tools/commit/40f6346413e9fa84dfb4856342f0d5d07b132c41))
+
 ## [1.0.3](https://github.com/good-tools/good.tools/compare/v1.0.2...v1.0.3) (2022-12-19)
 
 
