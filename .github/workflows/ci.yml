@@ -54,4 +54,8 @@ jobs:
 
     - name: Deploy
       if: steps.release.outputs.released == '1'
-      run: aws s3 sync ./build/ s3://${{ secrets.S3_BUCKET }}
+      run: aws s3 sync ./build/ s3://${{ secrets.S3_BUCKET }} --delete
+    
+    - name: CF Invalidation
+      if: steps.release.outputs.released == '1'
+      run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CF_DISTRIBUTION_ID }} --paths "/*"
