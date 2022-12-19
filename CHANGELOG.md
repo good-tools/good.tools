@@ -1,6 +1,18 @@
 # [1.1.0](https://github.com/good-tools/good.tools/compare/v1.0.3...v1.1.0) (2022-12-19)
 
 
+### Bug Fixes
+
+* do not treat warnings as errors for now ([668ea94](https://github.com/good-tools/good.tools/commit/668ea9432f8d66f86bd6ca8f5369c9d2e3b32bd9))
+
+
+### Features
+
+* adding tailwindui and stubs ([40f6346](https://github.com/good-tools/good.tools/commit/40f6346413e9fa84dfb4856342f0d5d07b132c41))
+
+# [1.1.0](https://github.com/good-tools/good.tools/compare/v1.0.3...v1.1.0) (2022-12-19)
+
+
 ### Features
 
 * adding tailwindui and stubs ([40f6346](https://github.com/good-tools/good.tools/commit/40f6346413e9fa84dfb4856342f0d5d07b132c41))
