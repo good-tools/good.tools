@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/good-tools/good.tools/compare/v1.0.2...v1.0.3) (2022-12-19)
+
+
+### Bug Fixes
+
+* updating title ([14a6952](https://github.com/good-tools/good.tools/commit/14a69522686280f2697bf471558f4666b596542a))
+
 ## [1.0.2](https://github.com/good-tools/good.tools/compare/v1.0.1...v1.0.2) (2022-12-19)
 
 
