@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/good-tools/good.tools/compare/v1.2.0...v1.3.0) (2022-12-20)
+
+
+### Features
+
+* adding base64 encoder with pretty preview ([b942010](https://github.com/good-tools/good.tools/commit/b9420101a29df302f41886a8d64426f4ba414128))
+
 # [1.2.0](https://github.com/good-tools/good.tools/compare/v1.1.0...v1.2.0) (2022-12-20)
 
 
