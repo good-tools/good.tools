@@ -1,8 +1,5 @@
+import clsx from "clsx";
 import { Link } from "react-router-dom";
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ')
-}
 
 function ToolList(props) {
   const { actions } = props;
@@ -11,7 +8,7 @@ function ToolList(props) {
       {actions.map((action, actionIdx) => (
         <div
           key={action.title}
-          className={classNames(
+          className={clsx(
             actionIdx === 0 ? 'rounded-tl-lg rounded-tr-lg sm:rounded-tr-none' : '',
             actionIdx === 1 ? 'sm:rounded-tr-lg' : '',
             actionIdx === actions.length - 2 ? 'sm:rounded-bl-lg' : '',
@@ -21,7 +18,7 @@ function ToolList(props) {
         >
           <div>
             <span
-              className={classNames(
+              className={clsx(
                 action.iconBackground,
                 action.iconForeground,
                 'rounded-lg inline-flex p-3 ring-4 ring-white'

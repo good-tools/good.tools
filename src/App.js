@@ -14,8 +14,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
-          {tools.map(t => (
-            <Route path={t.href} element={<WrappedTool tool={t} />} />
+          {tools.map((t, idx) => (
+            <Route key={`r-${idx}`} path={t.href} element={<WrappedTool tool={t} />} />
           ))}
         </Routes>
       </BrowserRouter>
