@@ -2,22 +2,13 @@ import {
   AcademicCapIcon,
   BanknotesIcon,
   CheckBadgeIcon,
-  ClockIcon,
   ReceiptRefundIcon,
-  UsersIcon,
 } from '@heroicons/react/24/outline'
 import React from 'react'
 
+export const serviceBaseUrl = "https://api.good.tools"
+
 export const tools = [
-  {
-    title: 'XML Formatter',
-    href: '/xml-formatter',
-    icon: ClockIcon,
-    iconForeground: 'text-teal-700',
-    iconBackground: 'bg-teal-50',
-    tags: ['xml', 'format', 'formatter', 'pretty'],
-    component: React.lazy(() => import('./tools/ExampleTool')),
-  },
   {
     title: 'Base64 Encoder and Decoder',
     href: '/base64',
@@ -28,22 +19,22 @@ export const tools = [
     component: React.lazy(() => import('./tools/Base64')),
   },
   {
-    title: 'JSON Formatter',
-    href: '/json-formatter',
-    icon: UsersIcon,
-    iconForeground: 'text-sky-700',
-    iconBackground: 'bg-sky-50',
-    tags: ['json', 'format', 'formatter', 'pretty'],
-    component: React.lazy(() => import('./tools/ExampleTool')),
-  },
-  {
-    title: 'JWT Parser',
-    href: '/jwt',
+    title: 'Example Tool',
+    href: '/example-tool',
     icon: BanknotesIcon,
     iconForeground: 'text-yellow-700',
     iconBackground: 'bg-yellow-50',
-    tags: ['jwt', 'json', 'token', 'parser'],
+    tags: ['example', 'tool'],
     component: React.lazy(() => import('./tools/ExampleTool')),
+  },
+  {
+    title: 'Whats My IP',
+    href: '/whats-my-ip',
+    icon: AcademicCapIcon,
+    iconForeground: 'text-rose-700',
+    iconBackground: 'bg-rose-50',
+    tags: ['what', 'whats', 'my', 'ip', 'address'],
+    component: React.lazy(() => import('./tools/WhatsMyIP')),
   },
   {
     title: 'IP to Location',
@@ -52,15 +43,6 @@ export const tools = [
     iconForeground: 'text-rose-700',
     iconBackground: 'bg-rose-50',
     tags: ['ip', 'address', 'location'],
-    component: React.lazy(() => import('./tools/ExampleTool')),
-  },
-  {
-    title: 'PDF Filler',
-    href: '/pdf-filler',
-    icon: AcademicCapIcon,
-    iconForeground: 'text-indigo-700',
-    iconBackground: 'bg-indigo-50',
-    tags: ['pdf', 'fill', 'filler', 'sign', 'signer'],
-    component: React.lazy(() => import('./tools/ExampleTool')),
+    component: React.lazy(() => import('./tools/IP2Location')),
   },
 ]
