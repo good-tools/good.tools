@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/good-tools/good.tools/compare/v1.1.0...v1.2.0) (2022-12-20)
+
+
+### Features
+
+* add token filtering, tool wrapper layout and an example tool ([6792833](https://github.com/good-tools/good.tools/commit/679283393a6d9472175752eb994399d3a16272b3))
+
 # [1.1.0](https://github.com/good-tools/good.tools/compare/v1.0.3...v1.1.0) (2022-12-19)
 
 
