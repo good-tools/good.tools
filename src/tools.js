@@ -1,0 +1,66 @@
+import {
+  AcademicCapIcon,
+  BanknotesIcon,
+  CheckBadgeIcon,
+  ClockIcon,
+  ReceiptRefundIcon,
+  UsersIcon,
+} from '@heroicons/react/24/outline'
+import React from 'react'
+
+export const tools = [
+  {
+    title: 'XML Formatter',
+    href: '/xml-formatter',
+    icon: ClockIcon,
+    iconForeground: 'text-teal-700',
+    iconBackground: 'bg-teal-50',
+    tags: ['xml', 'format', 'formatter', 'pretty'],
+    component: React.lazy(() => import('./tools/ExampleTool')),
+  },
+  {
+    title: 'Base64 Encoder and Decoder',
+    href: '/base64',
+    icon: CheckBadgeIcon,
+    iconForeground: 'text-purple-700',
+    iconBackground: 'bg-purple-50',
+    tags: ['base64', 'base', '64', 'encode', 'encoder', 'decode', 'decoder'],
+    component: React.lazy(() => import('./tools/Base64')),
+  },
+  {
+    title: 'JSON Formatter',
+    href: '/json-formatter',
+    icon: UsersIcon,
+    iconForeground: 'text-sky-700',
+    iconBackground: 'bg-sky-50',
+    tags: ['json', 'format', 'formatter', 'pretty'],
+    component: React.lazy(() => import('./tools/ExampleTool')),
+  },
+  {
+    title: 'JWT Parser',
+    href: '/jwt',
+    icon: BanknotesIcon,
+    iconForeground: 'text-yellow-700',
+    iconBackground: 'bg-yellow-50',
+    tags: ['jwt', 'json', 'token', 'parser'],
+    component: React.lazy(() => import('./tools/ExampleTool')),
+  },
+  {
+    title: 'IP to Location',
+    href: '/ip-location',
+    icon: ReceiptRefundIcon,
+    iconForeground: 'text-rose-700',
+    iconBackground: 'bg-rose-50',
+    tags: ['ip', 'address', 'location'],
+    component: React.lazy(() => import('./tools/ExampleTool')),
+  },
+  {
+    title: 'PDF Filler',
+    href: '/pdf-filler',
+    icon: AcademicCapIcon,
+    iconForeground: 'text-indigo-700',
+    iconBackground: 'bg-indigo-50',
+    tags: ['pdf', 'fill', 'filler', 'sign', 'signer'],
+    component: React.lazy(() => import('./tools/ExampleTool')),
+  },
+]
