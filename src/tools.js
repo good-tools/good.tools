@@ -28,6 +28,15 @@ export const tools = [
     component: React.lazy(() => import('./tools/ExampleTool')),
   },
   {
+    title: 'Certificate Decoder',
+    href: '/certificate-decoder',
+    icon: BanknotesIcon,
+    iconForeground: 'text-yellow-700',
+    iconBackground: 'bg-yellow-50',
+    tags: ['cert', 'certificate', 'ssl', 'decode', 'decoder'],
+    component: React.lazy(() => import('./tools/CertificateDecoder')),
+  },
+  {
     title: 'Whats My IP',
     href: '/whats-my-ip',
     icon: AcademicCapIcon,
