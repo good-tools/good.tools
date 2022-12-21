@@ -28,6 +28,15 @@ export const tools = [
     component: React.lazy(() => import('./tools/ExampleTool')),
   },
   {
+    title: 'Diff Checker',
+    href: '/diff-checker',
+    icon: BanknotesIcon,
+    iconForeground: 'text-yellow-700',
+    iconBackground: 'bg-yellow-50',
+    tags: ['diff', 'text', 'check', 'checker'],
+    component: React.lazy(() => import('./tools/DiffChecker')),
+  },
+  {
     title: 'Whats My IP',
     href: '/whats-my-ip',
     icon: AcademicCapIcon,
