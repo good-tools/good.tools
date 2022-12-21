@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/good-tools/good.tools/compare/v1.4.0...v1.5.0) (2022-12-21)
+
+
+### Features
+
+* adding certificate decoder ([8a75d73](https://github.com/good-tools/good.tools/commit/8a75d737428d8aee644b52c9a99597dfc85dfd03))
+
 # [1.4.0](https://github.com/good-tools/good.tools/compare/v1.3.0...v1.4.0) (2022-12-20)
 
 
