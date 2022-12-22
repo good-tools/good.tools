@@ -1,80 +1,57 @@
 import { useState } from "react"
-import { diffLines } from "diff"
+import { DiffEditor, default as Editor } from "@monaco-editor/react";
+import clsx from "clsx";
+import { Tab } from "@headlessui/react";
 
 function DiffChecker() {
   const [ original, setOriginal ] = useState("")
   const [ changed, setChanged ] = useState("")
-  const [ result, setResult ] = useState(null)
 
-  const computeDiff = () => {
-    const diff = diffLines(original, changed)
-    let originalLines = 0
-    let changedLines = 0
-    let additions = 0
-    let removals = 0
-    
-    diff.forEach(d => {
-      if (d.added) {
-        changedLines += d.count
-        additions += d.count
-      } else if (d.removed) {
-        originalLines += d.count
-        removals += d.count
-      } else {
-        changedLines += d.count
-        originalLines += d.count
-      }
-    })
-    
-    setResult({
-      diff: diff,
-      original: {
-        lines: originalLines,
-        changes: removals,
-      },
-      changed: {
-        lines: changedLines,
-        changes: additions,
-      },
-    })
+  function handleEditorDidMount(editor, _) {
+    editor.updateOptions({ readOnly: true })
   }
 
-  console.log(result)
-
   return (
-    <div className="">
-      {result !== null && (
-        <>
-        </>
-      )}
-      <dl className="grid grid-cols-2 gap-x-4 gap-y-8">
-        <textarea
-          id="original"
-          name="original"
-          rows={8}
-          value={original}
-          onChange={(e) => setOriginal(e.target.value)}
-          className="block w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-          placeholder={'Original'}
-        />
-        <textarea
-          id="changed"
-          name="changed"
-          rows={8}
-          value={changed}
-          onChange={(e) => setChanged(e.target.value)}
-          className="block w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-          placeholder={'Changed'}
-        />
-      </dl>
-      <button
-        type="button"
-        onClick={computeDiff}
-        className="mt-2 w-full block items-center rounded border border-transparent bg-indigo-600 px-2.5 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-      >
-        Find Difference
-      </button>
-    </div>
+    <Tab.Group>
+      <Tab.List className="flex space-x-4">
+        <Tab className={({ selected }) => clsx(
+            selected ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:text-gray-700',
+            'px-3 py-2 font-medium text-sm rounded-md'
+        )}>Original</Tab>
+        <Tab className={({ selected }) => clsx(
+            selected ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:text-gray-700',
+            'px-3 py-2 font-medium text-sm rounded-md'
+        )}>Modified</Tab>
+        <Tab className={({ selected }) => clsx(
+            selected ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:text-gray-700',
+            'px-3 py-2 font-medium text-sm rounded-md'
+        )}>Diff</Tab>
+      </Tab.List>
+      <Tab.Panels className="mt-2">
+        <Tab.Panel>
+          <Editor 
+            height="50vh"
+            value={original}
+            onChange={(v) => setOriginal(v)}
+          />
+        </Tab.Panel>
+        <Tab.Panel>
+          <Editor 
+            height="50vh"
+            value={changed}
+            onChange={(v) => setChanged(v)}
+          />
+        </Tab.Panel>
+        <Tab.Panel>
+          <DiffEditor
+            height="50vh"
+            original={original}
+            modified={changed}
+            onMount={handleEditorDidMount}
+          />
+        </Tab.Panel>
+      </Tab.Panels>
+    </Tab.Group>
   )
 }
 
