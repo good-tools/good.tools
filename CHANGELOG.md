@@ -1,3 +1,15 @@
+# [1.6.0](https://github.com/good-tools/good.tools/compare/v1.5.0...v1.6.0) (2022-12-22)
+
+
+### Bug Fixes
+
+* fix merge conflicts ([2bfdd1b](https://github.com/good-tools/good.tools/commit/2bfdd1b496789a133a614492120952973820e555))
+
+
+### Features
+
+* adding diff checker using monaco ([e398c84](https://github.com/good-tools/good.tools/commit/e398c84aa45145a4105ed11e765976bd4ac9b930))
+
 # [1.5.0](https://github.com/good-tools/good.tools/compare/v1.4.0...v1.5.0) (2022-12-21)
 
 
