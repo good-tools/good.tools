@@ -16,7 +16,7 @@ function Home() {
     const tokens = query.toLowerCase().replace(/[^a-z ]/g, "").split(/\W+/).filter(x => x.length > 0)
 
     if (tokens.length > 0) {
-      setFiltered(tools.filter(t => tokens.every(token => t.tags.includes(token))))
+      setFiltered(tools.filter(t => tokens.every(token => t.tags.some(x => x.startsWith(token)))))
     } else {
       setFiltered(tools)
     }

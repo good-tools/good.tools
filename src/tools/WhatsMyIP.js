@@ -16,7 +16,7 @@ function WhatsMyIP() {
 
   useEffect(() => {
     load()
-  })
+  }, [])
 
   if (loading) {
     return (
