@@ -15,7 +15,7 @@ export const tools = [
     icon: CheckBadgeIcon,
     iconForeground: 'text-purple-700',
     iconBackground: 'bg-purple-50',
-    tags: ['base64', 'base', '64', 'encode', 'encoder', 'decode', 'decoder'],
+    tags: ['base64', 'base', '64', 'encoder', 'decoder'],
     component: React.lazy(() => import('./tools/Base64')),
   },
   {
@@ -33,7 +33,7 @@ export const tools = [
     icon: BanknotesIcon,
     iconForeground: 'text-yellow-700',
     iconBackground: 'bg-yellow-50',
-    tags: ['diff', 'text', 'check', 'checker'],
+    tags: ['diff', 'text', 'checker'],
     component: React.lazy(() => import('./tools/DiffChecker')),
   },
   {
@@ -42,8 +42,17 @@ export const tools = [
     icon: BanknotesIcon,
     iconForeground: 'text-yellow-700',
     iconBackground: 'bg-yellow-50',
-    tags: ['cert', 'certificate', 'ssl', 'decode', 'decoder'],
+    tags: ['certificate', 'ssl', 'decoder'],
     component: React.lazy(() => import('./tools/CertificateDecoder')),
+  },
+  {
+    title: 'Docker Browser',
+    href: '/docker-browser',
+    icon: BanknotesIcon,
+    iconForeground: 'text-yellow-700',
+    iconBackground: 'bg-yellow-50',
+    tags: ['docker', 'image', 'browser', 'oci', 'container'],
+    component: React.lazy(() => import('./tools/ImageBrowser')),
   },
   {
     title: 'Whats My IP',
@@ -51,7 +60,7 @@ export const tools = [
     icon: AcademicCapIcon,
     iconForeground: 'text-rose-700',
     iconBackground: 'bg-rose-50',
-    tags: ['what', 'whats', 'my', 'ip', 'address'],
+    tags: ['whats', 'my', 'ip', 'address'],
     component: React.lazy(() => import('./tools/WhatsMyIP')),
   },
   {
