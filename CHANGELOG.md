@@ -1,3 +1,10 @@
+## [1.7.4](https://github.com/good-tools/good.tools/compare/v1.7.3...v1.7.4) (2022-12-29)
+
+
+### Bug Fixes
+
+* better search, adding more tools ([f42b1d8](https://github.com/good-tools/good.tools/commit/f42b1d84d3ab4d091d147ab1869bd61d3ee1579c))
+
 ## [1.7.3](https://github.com/good-tools/good.tools/compare/v1.7.2...v1.7.3) (2022-12-29)
 
 
