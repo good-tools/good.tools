@@ -14,6 +14,9 @@ const imageBrowserUrl = "https://image-browser.fly.dev"
 
 // TODO: make it exhaustive?
 const isReadable = (mime) => {
+  if (typeof mime === "undefined")
+    return false
+
   if (mime.includes("text/") || mime.includes("application/json"))
     return true
 
