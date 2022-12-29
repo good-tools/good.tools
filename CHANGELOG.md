@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/good-tools/good.tools/compare/v1.7.0...v1.7.1) (2022-12-29)
+
+
+### Bug Fixes
+
+* update tool wrapper width, fix tree styling and added metadata ([88b4ab4](https://github.com/good-tools/good.tools/commit/88b4ab496eedb2c1514f0a5968c068357920facc))
+
 # [1.7.0](https://github.com/good-tools/good.tools/compare/v1.6.0...v1.7.0) (2022-12-28)
 
 
