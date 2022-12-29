@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { pki } from "node-forge"
 import moment from "moment"
+import { CodeGroup } from "../components/Code"
 
 function CertificateDecoder() {
 
@@ -103,9 +104,9 @@ function CertificateDecoder() {
               <div className="sm:col-span-2">
                 <dt className="text-sm font-medium text-gray-500">Public Key</dt>
                 <dd className="mt-1 text-sm text-gray-900">
-                  <pre>
-                    {pki.publicKeyToPem(decoded.publicKey)}
-                  </pre>
+                  <CodeGroup>
+                    <code>{pki.publicKeyToPem(decoded.publicKey)}</code>
+                  </CodeGroup>
                 </dd>
               </div>
             </dl>
