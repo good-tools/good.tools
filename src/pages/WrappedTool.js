@@ -54,7 +54,7 @@ function WrappedTool(props) {
         </div>
         <main>
           <div className="relative px-6 lg:px-8">
-            <div className="mx-auto max-w-3xl pt-5 pb-5 sm:pt-5 sm:pb-5">
+            <div className="mx-auto max-w-5xl pt-5 pb-5 sm:pt-5 sm:pb-5">
               <div>
                 <div>
                   <h1 className="text-4xl font-bold tracking-tight sm:text-center sm:text-6xl">
