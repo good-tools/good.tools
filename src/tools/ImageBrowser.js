@@ -12,10 +12,19 @@ import Editor from "@monaco-editor/react"
 
 const imageBrowserUrl = "https://image-browser.fly.dev"
 
+// TODO: make it exhaustive?
+const isReadable = (mime) => {
+  if (mime.includes("text/") || mime.includes("application/json"))
+    return true
+
+  return false
+}
+
 function ImageBrowser() {
   const [ loading, setLoading ] = useState(false)
   const [ data, setData ] = useState(null)
   const [ ref, setRef ] = useState("")
+  const [ pulledRef, setPulledRef ] = useState("")
   const [ error, setError ] = useState(null)
   const [ content, setContent ] = useState("")
   const [ selected, setSelected ] = useState(null)
@@ -25,7 +34,7 @@ function ImageBrowser() {
   useEffect(() => {
     setSelected(null)
     setContent("")
-  }, [ ref ])
+  }, [ pulledRef ])
 
   function handleEditorDidMount(editor, monaco) {
     editorRef.current = editor;
@@ -35,13 +44,13 @@ function ImageBrowser() {
     setContent("")
     setSelected(node)
 
-    if (!node.mime_type?.includes("text/plain")) {
+    if (!isReadable(node.mime_type)) {
       return
     }
 
     const path = node.id
     const params = {
-      ref: ref,
+      ref: pulledRef,
       path: path
     }
 
@@ -52,7 +61,7 @@ function ImageBrowser() {
     } catch (e) {
       //
     }
-  }, [ ref ])
+  }, [ pulledRef ])
 
   useEffect(() => {
     if (editorRef.current) {
@@ -63,7 +72,7 @@ function ImageBrowser() {
   const list = useCallback(async (node) => {
     const path = node === null ? "" : node.id
     const params = {
-      ref: ref,
+      ref: pulledRef,
       path: path
     }
 
@@ -84,7 +93,7 @@ function ImageBrowser() {
       //
     }
     return []
-  }, [ref])
+  }, [ pulledRef ])
 
   const pull = useCallback(async () => {
     if (ref.length <= 0) {
@@ -107,6 +116,7 @@ function ImageBrowser() {
         throw new Error(data.message);
       }
 
+      setPulledRef(ref)
       setData(data)
       setLoading(false)
     } catch (e) {
@@ -326,7 +336,7 @@ function ImageBrowser() {
                             </div>
                           </dl>
                         </div>
-                        {!selected.mime_type?.includes("text/plain") ? (
+                        {!isReadable(selected.mime_type) ? (
                           <div className="p-8">
                             <p>The file content appears to be binary and cannot be viewed in the browser. You may still download the file by clicking the download link above.</p>
                             <p className="mt-5">At the moment, downloading files referenced by symlinks are not allowed.</p>
