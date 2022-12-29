@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Buffer } from "buffer"
 import BufferTextArea from "../components/BufferTextArea"
 import { Tab } from '@headlessui/react'
@@ -8,15 +8,21 @@ import { CodeGroup } from "../components/Code"
 function Encoder() {
   const [ encoded, setEncoded ] = useState('')
   const [ decoded, setDecoded ] = useState('')
+  const decodedRef = useRef();
 
   const encode = () => {
     const val = Buffer.from(decoded, 'utf8');
     setEncoded(val)
   }
 
+  useEffect(() => {
+    decodedRef.current.focus()
+  }, [ decodedRef ])
+
   return (
     <div>
       <textarea
+        ref={decodedRef}
         id="decoded"
         name="decoded"
         rows={8}
@@ -42,15 +48,21 @@ function Encoder() {
 function Decoder() {
   const [ encoded, setEncoded ] = useState('')
   const [ decoded, setDecoded ] = useState('')
+  const encodedRef = useRef()
 
   const decode = () => {
     const val = Buffer.from(encoded, 'base64');
     setDecoded(val)
   }
 
+  useEffect(() => {
+    encodedRef.current.focus()
+  }, [ encodedRef ])
+
   return (
     <div>
       <textarea
+        ref={encodedRef}
         id="encoded"
         name="encoded"
         rows={8}

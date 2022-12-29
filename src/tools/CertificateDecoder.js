@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { pki } from "node-forge"
 import moment from "moment"
 import { CodeGroup } from "../components/Code"
@@ -7,6 +7,7 @@ function CertificateDecoder() {
 
   const [ encoded, setEncoded ] = useState('')
   const [ decoded, setDecoded ] = useState(null)
+  const encodedRef = useRef()
 
   const decode = () => {
     try {
@@ -20,9 +21,14 @@ function CertificateDecoder() {
     }
   }
 
+  useEffect(() => {
+    encodedRef.current.focus()
+  }, [encodedRef])
+
   return (
     <div>
       <textarea
+        ref={encodedRef}
         id="encoded"
         name="encoded"
         rows={8}
