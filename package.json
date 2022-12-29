@@ -3,10 +3,12 @@
   "version": "1.7.3",
   "private": true,
   "dependencies": {
+    "@algolia/autocomplete-core": "^1.7.4",
     "@headlessui/react": "^1.7.7",
     "@heroicons/react": "^2.0.13",
     "@monaco-editor/react": "^4.4.6",
     "@tailwindcss/forms": "^0.5.3",
+    "@tailwindcss/typography": "^0.5.8",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",

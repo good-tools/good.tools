@@ -16,18 +16,7 @@ function ToolList(props) {
             'relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500'
           )}
         >
-          <div>
-            <span
-              className={clsx(
-                action.iconBackground,
-                action.iconForeground,
-                'rounded-lg inline-flex p-3 ring-4 ring-white'
-              )}
-            >
-              <action.icon className="h-6 w-6" aria-hidden="true" />
-            </span>
-          </div>
-          <div className="mt-8">
+          <div className="mt-0">
             <h3 className="text-lg font-medium">
               <Link to={action.href} className="focus:outline-none">
                 {/* Extend touch target to entire panel */}
@@ -35,10 +24,6 @@ function ToolList(props) {
                 {action.title}
               </Link>
             </h3>
-            <p className="mt-2 text-sm text-gray-500">
-              Doloribus dolores nostrum quia qui natus officia quod et dolorem. Sit repellendus qui ut at blanditiis et
-              quo et molestiae.
-            </p>
           </div>
           <span
             className="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400"

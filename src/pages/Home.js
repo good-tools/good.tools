@@ -1,61 +1,18 @@
-import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import packageJson from '../../package.json';
+import { MobileSearch, Search } from '../components/Search';
 import ToolList from '../components/ToolList';
 import { tools } from '../tools';
 
 function Home() {
-
-  const [ query, setQuery ] = useState("");
-  const [ filtered, setFiltered ] = useState(tools);
-
-  useEffect(() => {
-    // very basic tokenization
-    const tokens = query.toLowerCase().replace(/[^a-z ]/g, "").split(/\W+/).filter(x => x.length > 0)
-
-    if (tokens.length > 0) {
-      setFiltered(tools.filter(t => tokens.every(token => t.tags.some(x => x.startsWith(token)))))
-    } else {
-      setFiltered(tools)
-    }
-
-  }, [ query ])
 
   return (
     <>
       <Helmet>
         <title>good.tools · Purpose built online tools</title>
       </Helmet>
-      <div className="isolate bg-white">
-        <div className="absolute inset-x-0 top-[-10rem] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[-20rem]">
-          <svg
-            className="relative left-[calc(50%-11rem)] -z-10 h-[21.1875rem] max-w-none -translate-x-1/2 rotate-[30deg] sm:left-[calc(50%-30rem)] sm:h-[42.375rem]"
-            viewBox="0 0 1155 678"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fill="url(#45de2b6b-92d5-4d68-a6a0-9b9b2abad533)"
-              fillOpacity=".3"
-              d="M317.219 518.975L203.852 678 0 438.341l317.219 80.634 204.172-286.402c1.307 132.337 45.083 346.658 209.733 145.248C936.936 126.058 882.053-94.234 1031.02 41.331c119.18 108.451 130.68 295.337 121.53 375.223L855 299l21.173 362.054-558.954-142.079z"
-            />
-            <defs>
-              <linearGradient
-                id="45de2b6b-92d5-4d68-a6a0-9b9b2abad533"
-                x1="1155.49"
-                x2="-78.208"
-                y1=".177"
-                y2="474.645"
-                gradientUnits="userSpaceOnUse"
-              >
-                <stop stopColor="#9089FC" />
-                <stop offset={1} stopColor="#FF80B5" />
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
+      <div className="isolate">
         <div className="px-6 pt-6 lg:px-8">
           <div>
             <nav className="flex h-9 items-center justify-between" aria-label="Global">
@@ -78,59 +35,17 @@ function Home() {
                   <h1 className="text-4xl font-bold tracking-tight sm:text-center sm:text-6xl">
                     good.tools
                   </h1>
-                  <p className="mt-6 text-lg leading-8 text-gray-600 sm:text-center">
+                  <div className="flex justify-center w-full mt-6">
+                    <Search />
+                    <MobileSearch />
+                  </div>
+                  <p className="mt-6 mb-6 text-lg leading-8 text-gray-600 sm:text-center">
                     Purpose built, online, free-to-use tools for increasing productivity.
                   </p>
-                  <div className="w-full mt-2">
-                    <label htmlFor="search" className="sr-only">
-                      Search
-                    </label>
-                    <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                      </div>
-                      <input
-                        id="search"
-                        name="search"
-                        value={query}
-                        onChange={e => setQuery(e.target.value)}
-                        className="block w-full rounded-md border border-gray-300 bg-white py-2 pl-10 pr-3 leading-5 placeholder-gray-500 focus:border-indigo-500 focus:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
-                        placeholder="Search (e.g. ip location, base64 encoder)"
-                        type="search"
-                      />
-                    </div>
-                  </div>
-                  <ToolList actions={filtered} />
+                  <ToolList actions={tools} />
                   <p className="mt-8 flex sm:justify-center text-neutral-400">
                     v{packageJson.version}
                   </p>
-                </div>
-                <div className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]">
-                  <svg
-                    className="relative left-[calc(50%+3rem)] h-[21.1875rem] max-w-none -translate-x-1/2 sm:left-[calc(50%+36rem)] sm:h-[42.375rem]"
-                    viewBox="0 0 1155 678"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fill="url(#ecb5b0c9-546c-4772-8c71-4d3f06d544bc)"
-                      fillOpacity=".3"
-                      d="M317.219 518.975L203.852 678 0 438.341l317.219 80.634 204.172-286.402c1.307 132.337 45.083 346.658 209.733 145.248C936.936 126.058 882.053-94.234 1031.02 41.331c119.18 108.451 130.68 295.337 121.53 375.223L855 299l21.173 362.054-558.954-142.079z"
-                    />
-                    <defs>
-                      <linearGradient
-                        id="ecb5b0c9-546c-4772-8c71-4d3f06d544bc"
-                        x1="1155.49"
-                        x2="-78.208"
-                        y1=".177"
-                        y2="474.645"
-                        gradientUnits="userSpaceOnUse"
-                      >
-                        <stop stopColor="#9089FC" />
-                        <stop offset={1} stopColor="#FF80B5" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
                 </div>
               </div>
             </div>

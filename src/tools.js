@@ -7,6 +7,7 @@ import {
 import React from 'react'
 
 export const serviceBaseUrl = "https://api.good.tools"
+export const internetToolsBaseUrl = "https://internet-tools.fly.dev"
 
 export const tools = [
   {
@@ -53,6 +54,24 @@ export const tools = [
     iconBackground: 'bg-yellow-50',
     tags: ['docker', 'image', 'browser', 'oci', 'container'],
     component: React.lazy(() => import('./tools/ImageBrowser')),
+  },
+  {
+    title: 'WHOIS',
+    href: '/whois',
+    icon: BanknotesIcon,
+    iconForeground: 'text-yellow-700',
+    iconBackground: 'bg-yellow-50',
+    tags: ['whois', 'lookup'],
+    component: React.lazy(() => import('./tools/Whois')),
+  },
+  {
+    title: 'DNS Lookup',
+    href: '/dns',
+    icon: BanknotesIcon,
+    iconForeground: 'text-yellow-700',
+    iconBackground: 'bg-yellow-50',
+    tags: ['dns', 'lookup'],
+    component: React.lazy(() => import('./tools/DNS')),
   },
   {
     title: 'Whats My IP',

@@ -32,6 +32,7 @@ function ImageBrowser() {
   const [ content, setContent ] = useState("")
   const [ selected, setSelected ] = useState(null)
   const editorRef = useRef(null);
+  const inputRef = useRef();
 
   // reset
   useEffect(() => {
@@ -71,6 +72,10 @@ function ImageBrowser() {
       editorRef.current.setScrollPosition({scrollTop: 0});
     }
   }, [ content, ref, editorRef ])
+
+  useEffect(() => {
+    inputRef.current.focus()
+  }, [inputRef])
 
   const list = useCallback(async (node) => {
     const path = node === null ? "" : node.id
@@ -133,12 +138,18 @@ function ImageBrowser() {
       <div className="mt-5 sm:flex sm:items-center">
         <div className="w-full">
           <input
+            ref={inputRef}
             type="text"
             name="image"
             id="image"
             value={ref}
             disabled={loading}
             onChange={(e) => setRef(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                pull()
+              }
+            }}
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             placeholder="docker.io/library/nginx:latest"
           />

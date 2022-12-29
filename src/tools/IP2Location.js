@@ -1,49 +1,58 @@
-import { useState } from "react"
-import { serviceBaseUrl } from "../tools";
-
-const IP_REGEX = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/gi;
+import { XCircleIcon } from "@heroicons/react/24/outline";
+import { useEffect, useRef, useState } from "react"
+import { internetToolsBaseUrl } from "../tools";
 
 function IP2Location() {
   const [ address, setAddress ] = useState('')
   const [ loading, setLoading ] = useState(false)
   const [ data, setData ] = useState(null)
+  const [ error, setError ] = useState(null)
+  const addressRef = useRef()
 
   const load = async () => {
-    
-    if (!IP_REGEX.test(address)) {
-      return
+    setData(null)
+    setError(null)
+    setLoading(true)
+
+    const params = {
+      ip: address
     }
 
-    setLoading(true)
-    const res = await fetch(`${serviceBaseUrl}/ip`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        ip: address,
-      })
-    })
-
-    const data = await res.json()
-
-    data.address = address
-    
-    setData(data)
-    setLoading(false)
+    try {
+      const response = await fetch(`${internetToolsBaseUrl}/ip?${new URLSearchParams(params)}`)
+      const data = await response.json()
+      if (response.status >= 400 && response.status < 600) {
+        throw new Error(data.message);
+      }
+      setData(data)
+      setLoading(false)
+    } catch (e) {
+      setLoading(false)
+      setError(e.message)
+    }
   }
+
+  useEffect(() => {
+    addressRef.current.focus()
+  }, [addressRef])
 
   return (
     <div>
       <div className="mt-5 sm:flex sm:items-center">
         <div className="w-full">
           <input
+            ref={addressRef}
             type="text"
             name="ip"
             id="ip"
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             placeholder="8.8.8.8"
             value={address}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                load()
+              }
+            }}
             onChange={(e) => setAddress(e.target.value)}
             autoComplete={"off"}
           />
@@ -64,32 +73,86 @@ function IP2Location() {
           )}
         </button>
       </div>
-      {data && (
-        <div className="mt-3 overflow-hidden w-full bg-white shadow sm:rounded-lg">
-          <div className="px-4 py-5 sm:px-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900">{data.address}</h3>
-          </div>
-          <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
-            <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
-              <div className="sm:col-span-1">
-                <dt className="text-sm font-medium text-gray-500">Country</dt>
-                <dd className="mt-1 text-sm text-gray-900">{data.country}</dd>
-              </div>
-              <div className="sm:col-span-1">
-                <dt className="text-sm font-medium text-gray-500">Region</dt>
-                <dd className="mt-1 text-sm text-gray-900">{data.region}</dd>
-              </div>
-              <div className="sm:col-span-1">
-                <dt className="text-sm font-medium text-gray-500">City</dt>
-                <dd className="mt-1 text-sm text-gray-900">{data.city}</dd>
-              </div>
-              <div className="sm:col-span-1">
-                <dt className="text-sm font-medium text-gray-500">Timezone</dt>
-                <dd className="mt-1 text-sm text-gray-900">{data.timezone}</dd>
-              </div>
-            </dl>
+      {error != null && (
+        <div className="rounded-md bg-red-50 p-4 mt-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">{error}</h3>
+            </div>
           </div>
         </div>
+      )}
+      {data && (
+        <>
+          <div className="mt-3 overflow-hidden w-full bg-white shadow sm:rounded-lg">
+            <div className="px-4 py-5 sm:px-6">
+              <h3 className="text-lg font-medium leading-6 text-gray-900">{data.ip}</h3>
+            </div>
+            <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
+              <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
+                <div className="sm:col-span-1">
+                  <dt className="text-sm font-medium text-gray-500">Continent</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{data.continent || "Not Found"}</dd>
+                </div>
+                <div className="sm:col-span-1">
+                  <dt className="text-sm font-medium text-gray-500">Country</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{data.country || "Not Found"}</dd>
+                </div>
+                <div className="sm:col-span-1">
+                  <dt className="text-sm font-medium text-gray-500">Region</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{data.subdivisions.join(", ") || "Not Found"}</dd>
+                </div>
+                <div className="sm:col-span-1">
+                  <dt className="text-sm font-medium text-gray-500">City</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{data.city || "Not Found"}</dd>
+                </div>
+                <div className="sm:col-span-1">
+                  <dt className="text-sm font-medium text-gray-500">Timezone</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{data.time_zone}</dd>
+                </div>
+                <div className="sm:col-span-1">
+                  <dt className="text-sm font-medium text-gray-500">Location</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{data.location.lat}, {data.location.lng} ({data.location.accuracy} KM, {data.postal_code})</dd>
+                </div>
+                <div className="sm:col-span-1">
+                  <dt className="text-sm font-medium text-gray-500">Traits</dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    <ul>
+                      <li className="flex">
+                        <div className="w-32">Anonymous Proxy</div>
+                        <div className="text-gray-600 font-bold">{data.traits.anonymous_proxy ? "Yes" : "No"}</div>
+                      </li>
+                      <li className="flex">
+                        <div className="w-32">Satellite Provider</div>
+                        <div className="text-gray-600 font-bold">{data.traits.satellite_provider ? "Yes" : "No"}</div>
+                      </li>
+                    </ul>
+                  </dd>
+                </div>
+                <div className="sm:col-span-1">
+                  <dt className="text-sm font-medium text-gray-500">ASN</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{data.asn.organization} ({data.asn.number})</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+          <div className="mt-3 w-full bg-gray-100 shadow sm:rounded-lg p-4 text-sm text-gray-600">
+            <p>This service uses the following MaxMind's GeoLite2 databases:</p>
+            <ul className="mt-2">
+              <li className="flex">
+                <div className="w-32">GeoLite2-City</div>
+                <div className="text-gray-600 font-bold">{data.build.city}</div>
+              </li>
+              <li className="flex">
+                <div className="w-32">GeoLite2-ASN</div>
+                <div className="text-gray-600 font-bold">{data.build.asn}</div>
+              </li>
+            </ul>
+          </div>
+        </>
       )}
     </div>
   )
