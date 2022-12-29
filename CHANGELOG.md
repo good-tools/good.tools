@@ -1,3 +1,10 @@
+## [1.7.3](https://github.com/good-tools/good.tools/compare/v1.7.2...v1.7.3) (2022-12-29)
+
+
+### Bug Fixes
+
+* if mime is not defined, do not attempt to read the file ([cf26b84](https://github.com/good-tools/good.tools/commit/cf26b846931529c7c09f2a5593b432fd9f48943a))
+
 ## [1.7.2](https://github.com/good-tools/good.tools/compare/v1.7.1...v1.7.2) (2022-12-29)
 
 
