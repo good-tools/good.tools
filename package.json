@@ -1,6 +1,6 @@
 {
   "name": "good.tools",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "private": true,
   "dependencies": {
     "@headlessui/react": "^1.7.7",
