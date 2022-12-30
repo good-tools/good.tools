@@ -11,15 +11,6 @@ export const internetToolsBaseUrl = "https://internet-tools.fly.dev"
 
 export const tools = [
   {
-    title: 'Base64 Encoder and Decoder',
-    href: '/base64',
-    icon: CheckBadgeIcon,
-    iconForeground: 'text-purple-700',
-    iconBackground: 'bg-purple-50',
-    tags: ['base64', 'base', '64', 'encoder', 'decoder'],
-    component: React.lazy(() => import('./tools/Base64')),
-  },
-  {
     title: 'Example Tool',
     href: '/example-tool',
     icon: BanknotesIcon,
@@ -27,6 +18,15 @@ export const tools = [
     iconBackground: 'bg-yellow-50',
     tags: ['example', 'tool'],
     component: React.lazy(() => import('./tools/ExampleTool')),
+  },
+  {
+    title: 'Base64 Encoder and Decoder',
+    href: '/base64',
+    icon: CheckBadgeIcon,
+    iconForeground: 'text-purple-700',
+    iconBackground: 'bg-purple-50',
+    tags: ['base64', 'base', '64', 'encoder', 'decoder'],
+    component: React.lazy(() => import('./tools/Base64')),
   },
   {
     title: 'Diff Checker',

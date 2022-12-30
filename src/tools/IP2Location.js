@@ -1,5 +1,6 @@
 import { XCircleIcon } from "@heroicons/react/24/outline";
 import { useEffect, useRef, useState } from "react"
+import TextInput from "../components/TextInput";
 import { internetToolsBaseUrl } from "../tools";
 
 function IP2Location() {
@@ -40,19 +41,15 @@ function IP2Location() {
     <div>
       <div className="mt-5 sm:flex sm:items-center">
         <div className="w-full">
-          <input
-            ref={addressRef}
+          <TextInput
+            innerRef={addressRef}
             type="text"
             name="ip"
             id="ip"
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="block w-full"
             placeholder="8.8.8.8"
             value={address}
-            onKeyDown={e => {
-              if (e.key === 'Enter') {
-                load()
-              }
-            }}
+            onEnter={load}
             onChange={(e) => setAddress(e.target.value)}
             autoComplete={"off"}
           />
@@ -87,39 +84,39 @@ function IP2Location() {
       )}
       {data && (
         <>
-          <div className="mt-3 overflow-hidden w-full bg-white shadow sm:rounded-lg">
+          <div className="mt-3 overflow-hidden w-full dark:bg-zinc-800 shadow dark:shadow-zinc-900 sm:rounded-lg">
             <div className="px-4 py-5 sm:px-6">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">{data.ip}</h3>
+              <h3 className="text-lg font-medium leading-6">{data.ip}</h3>
             </div>
-            <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
+            <div className="border-t border-gray-200 dark:border-zinc-700 px-4 py-5 sm:px-6">
               <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
                 <div className="sm:col-span-1">
                   <dt className="text-sm font-medium text-gray-500">Continent</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{data.continent || "Not Found"}</dd>
+                  <dd className="mt-1 text-sm">{data.continent || "Not Found"}</dd>
                 </div>
                 <div className="sm:col-span-1">
                   <dt className="text-sm font-medium text-gray-500">Country</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{data.country || "Not Found"}</dd>
+                  <dd className="mt-1 text-sm">{data.country || "Not Found"}</dd>
                 </div>
                 <div className="sm:col-span-1">
                   <dt className="text-sm font-medium text-gray-500">Region</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{data.subdivisions.join(", ") || "Not Found"}</dd>
+                  <dd className="mt-1 text-sm">{data.subdivisions.join(", ") || "Not Found"}</dd>
                 </div>
                 <div className="sm:col-span-1">
                   <dt className="text-sm font-medium text-gray-500">City</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{data.city || "Not Found"}</dd>
+                  <dd className="mt-1 text-sm">{data.city || "Not Found"}</dd>
                 </div>
                 <div className="sm:col-span-1">
                   <dt className="text-sm font-medium text-gray-500">Timezone</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{data.time_zone}</dd>
+                  <dd className="mt-1 text-sm">{data.time_zone}</dd>
                 </div>
                 <div className="sm:col-span-1">
                   <dt className="text-sm font-medium text-gray-500">Location</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{data.location.lat}, {data.location.lng} ({data.location.accuracy} KM, {data.postal_code})</dd>
+                  <dd className="mt-1 text-sm">{data.location.lat}, {data.location.lng} ({data.location.accuracy} KM, {data.postal_code})</dd>
                 </div>
                 <div className="sm:col-span-1">
                   <dt className="text-sm font-medium text-gray-500">Traits</dt>
-                  <dd className="mt-1 text-sm text-gray-900">
+                  <dd className="mt-1 text-sm">
                     <ul>
                       <li className="flex">
                         <div className="w-32">Anonymous Proxy</div>
@@ -134,21 +131,21 @@ function IP2Location() {
                 </div>
                 <div className="sm:col-span-1">
                   <dt className="text-sm font-medium text-gray-500">ASN</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{data.asn.organization} ({data.asn.number})</dd>
+                  <dd className="mt-1 text-sm">{data.asn.organization} ({data.asn.number})</dd>
                 </div>
               </dl>
             </div>
           </div>
-          <div className="mt-3 w-full bg-gray-100 shadow sm:rounded-lg p-4 text-sm text-gray-600">
+          <div className="mt-3 w-full bg-gray-100 dark:bg-zinc-700 shadow sm:rounded-lg p-4 text-sm text-gray-600 dark:text-zinc-400">
             <p>This service uses the following MaxMind's GeoLite2 databases:</p>
             <ul className="mt-2">
               <li className="flex">
                 <div className="w-32">GeoLite2-City</div>
-                <div className="text-gray-600 font-bold">{data.build.city}</div>
+                <div className="font-bold">{data.build.city}</div>
               </li>
               <li className="flex">
                 <div className="w-32">GeoLite2-ASN</div>
-                <div className="text-gray-600 font-bold">{data.build.asn}</div>
+                <div className="font-bold">{data.build.asn}</div>
               </li>
             </ul>
           </div>
