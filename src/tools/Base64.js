@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from "react"
 import { Buffer } from "buffer"
 import BufferTextArea from "../components/BufferTextArea"
 import { Tab } from '@headlessui/react'
-import clsx from "clsx"
 import { CodeGroup } from "../components/Code"
+import TabButton from "../components/TabButton"
+import TextArea from "../components/TextArea"
+import { Button } from "../components/Button"
 
 function Encoder() {
-  const [ encoded, setEncoded ] = useState('')
+  const [ encoded, setEncoded ] = useState(null)
   const [ decoded, setDecoded ] = useState('')
   const decodedRef = useRef();
 
@@ -21,33 +23,35 @@ function Encoder() {
 
   return (
     <div>
-      <textarea
-        ref={decodedRef}
+      <TextArea
+        innerRef={decodedRef}
         id="decoded"
         name="decoded"
         rows={8}
-        className="block w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
         value={decoded}
         onChange={e => setDecoded(e.target.value)}
+        onCtrlEnter={() => encode()}
         placeholder={'Paste your data'}
       />
-      <button
-        type="button"
+      <Button
+        className="mt-3"
+        variant="filled"
         onClick={() => encode()}
-        className="inline-flex items-center rounded border border-transparent bg-indigo-600 px-2.5 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
       >
         Encode
-      </button>
-      <CodeGroup title={"Base64"}>
-        <code code={encoded.toString('base64')}>{encoded.toString('base64')}</code>
-      </CodeGroup>
+      </Button>
+      {encoded && (
+        <CodeGroup title={"Base64"}>
+          <code code={encoded.toString('base64')}>{encoded.toString('base64')}</code>
+        </CodeGroup>
+      )}
     </div>
   )
 }
 
 function Decoder() {
   const [ encoded, setEncoded ] = useState('')
-  const [ decoded, setDecoded ] = useState('')
+  const [ decoded, setDecoded ] = useState(null)
   const encodedRef = useRef()
 
   const decode = () => {
@@ -61,24 +65,26 @@ function Decoder() {
 
   return (
     <div>
-      <textarea
-        ref={encodedRef}
+      <TextArea
+        innerRef={encodedRef}
         id="encoded"
         name="encoded"
         rows={8}
-        className="block w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
         value={encoded}
         onChange={e => setEncoded(e.target.value)}
+        onCtrlEnter={() => decode()}
         placeholder={'Paste your base64 encoded data'}
       />
-      <button
-        type="button"
+      <Button
+        className="mt-3"
+        variant="filled"
         onClick={() => decode()}
-        className="inline-flex items-center rounded border border-transparent bg-indigo-600 px-2.5 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
       >
         Decode
-      </button>
-      <BufferTextArea value={decoded} />
+      </Button>
+      {decoded && (
+        <BufferTextArea value={decoded} />
+      )}
     </div>
   )
 }
@@ -87,14 +93,8 @@ function Base64() {
   return (
     <Tab.Group>
       <Tab.List className="flex space-x-4">
-        <Tab className={({ selected }) => clsx(
-            selected ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:text-gray-700',
-            'px-3 py-2 font-medium text-sm rounded-md'
-        )}>Encoder</Tab>
-        <Tab className={({ selected }) => clsx(
-            selected ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:text-gray-700',
-            'px-3 py-2 font-medium text-sm rounded-md'
-        )}>Decoder</Tab>
+        <TabButton>Encoder</TabButton>
+        <TabButton>Decoder</TabButton>
       </Tab.List>
       <Tab.Panels className="mt-2">
         <Tab.Panel>

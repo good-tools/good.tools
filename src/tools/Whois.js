@@ -1,6 +1,7 @@
 import { XCircleIcon } from "@heroicons/react/24/outline"
 import { useEffect, useRef, useState } from "react"
 import { CodeGroup } from "../components/Code"
+import TextInput from "../components/TextInput"
 import { internetToolsBaseUrl } from "../tools"
 
 function Whois() {
@@ -42,19 +43,15 @@ function Whois() {
     <div>
       <div className="mt-5 sm:flex sm:items-center">
         <div className="w-full">
-          <input
-            ref={addressRef}
+          <TextInput
+            innerRef={addressRef}
             type="text"
             name="domain"
             id="domain"
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="block w-full"
             placeholder="example.com"
             value={address}
-            onKeyDown={e => {
-              if (e.key === 'Enter') {
-                load()
-              }
-            }}
+            onEnter={load}
             onChange={(e) => setAddress(e.target.value)}
             autoComplete={"off"}
           />

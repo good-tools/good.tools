@@ -38,15 +38,12 @@ function WhatsMyIP() {
   const ips = [...new Set([data.ip, dataV6.ip])]
 
   return (
-    <div className="mt-3 overflow-hidden w-full bg-white shadow sm:rounded-lg">
-      <div className="px-4 py-5 sm:px-6">
-        <h3 className="text-lg font-medium leading-6 text-gray-900">My IP Address</h3>
-      </div>
-      <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
+    <div className="mt-3 overflow-hidden w-full dark:bg-zinc-800 shadow dark:shadow-zinc-900 sm:rounded-lg">
+      <div className="border-gray-200 px-4 py-5 sm:px-6">
         <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
           <div className="sm:col-span-1">
             <dt className="text-sm font-medium text-gray-500">IP Address</dt>
-            <dd className="mt-1 text-sm text-gray-900">
+            <dd className="mt-1 text-sm">
               <ul>
                 {ips.map((ip, i) => (
                   <li key={i} className="py-1">{ip}</li>
@@ -56,7 +53,7 @@ function WhatsMyIP() {
           </div>
           <div className="sm:col-span-1">
             <dt className="text-sm font-medium text-gray-500">User Agent</dt>
-            <dd className="mt-1 text-sm text-gray-900">{data.agent}</dd>
+            <dd className="mt-1 text-sm">{data.agent}</dd>
           </div>
         </dl>
       </div>

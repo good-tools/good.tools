@@ -1,5 +1,6 @@
 import { XCircleIcon } from "@heroicons/react/24/outline"
 import { useEffect, useRef, useState } from "react"
+import TextInput from "../components/TextInput"
 import { internetToolsBaseUrl } from "../tools"
 
 function DNS() {
@@ -41,19 +42,15 @@ function DNS() {
     <div>
       <div className="mt-5 sm:flex sm:items-center">
         <div className="w-full">
-          <input
-            ref={addressRef}
+          <TextInput
+            innerRef={addressRef}
             type="text"
             name="domain"
             id="domain"
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="block w-full"
             placeholder="example.com"
             value={address}
-            onKeyDown={e => {
-              if (e.key === 'Enter') {
-                load()
-              }
-            }}
+            onEnter={load}
             onChange={(e) => setAddress(e.target.value)}
             autoComplete={"off"}
           />
@@ -87,16 +84,16 @@ function DNS() {
         </div>
       )}
       {data && (
-        <div className="mt-3 overflow-hidden w-full bg-white shadow sm:rounded-lg">
+        <div className="mt-3 overflow-hidden w-full dark:bg-zinc-800 shadow dark:shadow-zinc-900 sm:rounded-lg">
           <div className="px-4 py-5 sm:px-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900">Results</h3>
+            <h3 className="text-lg font-medium leading-6">Results</h3>
           </div>
-          <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
+          <div className="border-t border-gray-200  dark:border-zinc-700 px-4 py-5 sm:px-6">
             <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
               {Object.keys(data).map((k, i) => (
                 <div key={`rec-${i}`} className="sm:col-span-1">
                   <dt className="text-sm font-medium text-gray-500">{k}</dt>
-                  <dd className="mt-1 text-sm text-gray-900">
+                  <dd className="mt-1 text-sm">
                     <ul>
                       {data[k].map((record, j) => (
                         <li key={`rec-${i}-${j}`}>

@@ -1,14 +1,16 @@
 import { Tab } from "@headlessui/react"
 import { ArrowLongRightIcon, XCircleIcon } from "@heroicons/react/24/outline"
 import { Allotment } from "allotment"
-import clsx from "clsx"
 import { filesize } from "filesize"
 import moment from "moment"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useContext, useEffect, useRef, useState } from "react"
 import { CodeGroup } from "../components/Code"
 import FileTree from "../components/FileTree"
 import "allotment/dist/style.css";
 import Editor from "@monaco-editor/react"
+import TextInput from "../components/TextInput"
+import TabButton from "../components/TabButton"
+import { DarkModeContext } from "../components/ModeToggle"
 
 const imageBrowserUrl = "https://image-browser.fly.dev"
 
@@ -24,6 +26,7 @@ const isReadable = (mime) => {
 }
 
 function ImageBrowser() {
+  const { darkMode } = useContext(DarkModeContext)
   const [ loading, setLoading ] = useState(false)
   const [ data, setData ] = useState(null)
   const [ ref, setRef ] = useState("")
@@ -137,20 +140,16 @@ function ImageBrowser() {
     <div>
       <div className="mt-5 sm:flex sm:items-center">
         <div className="w-full">
-          <input
-            ref={inputRef}
+          <TextInput
+            innerRef={inputRef}
             type="text"
             name="image"
             id="image"
             value={ref}
             disabled={loading}
             onChange={(e) => setRef(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === 'Enter') {
-                pull()
-              }
-            }}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            onEnter={pull}
+            className="block w-full"
             placeholder="docker.io/library/nginx:latest"
           />
         </div>
@@ -185,53 +184,47 @@ function ImageBrowser() {
       {data != null && (
         <Tab.Group>
           <Tab.List className="mt-4 flex space-x-4">
-            <Tab className={({ selected }) => clsx(
-                selected ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:text-gray-700',
-                'px-3 py-2 font-medium text-sm rounded-md'
-            )}>Image</Tab>
-            <Tab className={({ selected }) => clsx(
-                selected ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:text-gray-700',
-                'px-3 py-2 font-medium text-sm rounded-md'
-            )}>File Browser</Tab>
+            <TabButton>Image</TabButton>
+            <TabButton>File Browser</TabButton>
           </Tab.List>
           <Tab.Panels className="mt-2">
             <Tab.Panel>
-              <div className="mt-3 overflow-hidden w-full bg-white shadow sm:rounded-lg">
+              <div className="mt-3 overflow-hidden w-full dark:bg-zinc-800 shadow dark:shadow-zinc-900 sm:rounded-lg">
                 <div className="px-4 py-5 sm:px-6">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">
+                  <h3 className="text-lg font-medium leading-6">
                     {data.metadata.name}
                   </h3>
                   <span className="text-sm text-gray-500">{data.metadata.digest}</span>
                 </div>
-                <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
+                <div className="border-t border-gray-200 dark:border-zinc-700 px-4 py-5 sm:px-6">
                   <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-3">
                     <div className="sm:col-span-1">
                       <dt className="text-sm font-medium text-gray-500">Platform</dt>
-                      <dd className="mt-1 text-sm text-gray-900">
+                      <dd className="mt-1 text-sm">
                       {data.image.os}/{data.image.architecture}
                       </dd>
                     </div>
                     <div className="sm:col-span-1">
                       <dt className="text-sm font-medium text-gray-500">Size</dt>
-                      <dd className="mt-1 text-sm text-gray-900">
+                      <dd className="mt-1 text-sm">
                         {filesize(data.metadata.size, {base: 2})}
                       </dd>
                     </div>
                     <div className="sm:col-span-1">
                       <dt className="text-sm font-medium text-gray-500">Created</dt>
-                      <dd className="mt-1 text-sm text-gray-900">
+                      <dd className="mt-1 text-sm">
                         {moment(data.image.created).format()}
                       </dd>
                     </div>
                     <div className="sm:col-span-1">
                       <dt className="text-sm font-medium text-gray-500">User</dt>
-                      <dd className="mt-1 text-sm text-gray-900">
+                      <dd className="mt-1 text-sm">
                         {data.image.config.User || "Not Specified"}
                       </dd>
                     </div>
                     <div className="sm:col-span-1">
                       <dt className="text-sm font-medium text-gray-500">Entrypoint</dt>
-                      <dd className="mt-1 text-sm text-gray-900">
+                      <dd className="mt-1 text-sm">
                         <pre>
                         {data.image.config.Entrypoint?.map((e, i) => (
                           <span key={`ep-${i}`}>{e}</span>
@@ -241,7 +234,7 @@ function ImageBrowser() {
                     </div>
                     <div className="sm:col-span-1">
                       <dt className="text-sm font-medium text-gray-500">Command</dt>
-                      <dd className="mt-1 text-sm text-gray-900">
+                      <dd className="mt-1 text-sm">
                         <pre>
                           {data.image.config.Cmd?.join(" ")}
                         </pre>
@@ -249,7 +242,7 @@ function ImageBrowser() {
                     </div>
                     <div className="sm:col-span-3">
                       <dt className="text-sm font-medium text-gray-500">Environment</dt>
-                      <dd className="mt-1 text-sm text-gray-900">
+                      <dd className="mt-1 text-sm">
                         <CodeGroup className="m-0">
                           <code>{data.image.config.Env?.join("\n")}</code>
                         </CodeGroup>
@@ -257,9 +250,9 @@ function ImageBrowser() {
                     </div>
                     <div className="sm:col-span-3">
                       <dt className="text-sm font-medium text-gray-500">Layers ({data.image.rootfs?.diff_ids?.length})</dt>
-                      <dd className="mt-1 text-sm text-gray-900">
+                      <dd className="mt-1 text-sm">
                         <table className="min-w-full divide-y divide-gray-300">
-                          <tbody className="divide-y divide-gray-200 bg-white">
+                          <tbody className="divide-y divide-gray-200 dark:divide-zinc-700">
                             {data.image.rootfs?.diff_ids?.map((diff, i) => (
                               <tr key={`diff-${i}`}>
                                 <td className="whitespace-nowrap font-mono py-1 pr-3 text-sm">
@@ -273,15 +266,15 @@ function ImageBrowser() {
                     </div>
                     <div className="sm:col-span-3">
                       <dt className="text-sm font-medium text-gray-500">Labels</dt>
-                      <dd className="mt-1 text-sm text-gray-900">
+                      <dd className="mt-1 text-sm">
                         <table className="min-w-full divide-y divide-gray-300">
-                          <tbody className="divide-y divide-gray-200 bg-white">
+                          <tbody className="divide-y divide-gray-200">
                             {Object.keys(data.image.config.Labels || {}).map((k, i) => (
                               <tr key={`label-${i}`}>
                                 <td className="whitespace-nowrap py-1 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">
                                   {k}
                                 </td>
-                                <td className="px-2 py-1 text-sm text-gray-900">{data.image.config.Labels[k]}</td>
+                                <td className="px-2 py-1 text-sm">{data.image.config.Labels[k]}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -296,18 +289,18 @@ function ImageBrowser() {
               <div className="h-[60vh]">
                 <Allotment>
                   <Allotment.Pane>
-                    <div className="overflow-auto h-full bg-white pt-3">
+                    <div className="overflow-auto h-full pt-3">
                       <FileTree load={list} select={select} />
                     </div>
                   </Allotment.Pane>
                   <Allotment.Pane preferredSize={"70%"}>
                     {selected != null ? (
                       <>
-                        <div className="border-t border-b border-gray-200 px-2 py-3 sm:px-4">
-                          <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-4">
+                        <div className="border-t border-b border-gray-200 dark:border-gray-500 px-2 py-3 sm:px-4">
+                          <dl className="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-4">
                             <div className="sm:col-span-4">
                               <dt className="text-sm font-medium text-gray-500">Path</dt>
-                              <dd className="mt-1 text-sm text-gray-900 whitespace-normal inline-flex items-center">
+                              <dd className="mt-1 text-sm dark:text-white whitespace-normal inline-flex items-center">
                                 {selected.id}
                                 {typeof selected.symlink !== "undefined" && (
                                   <>
@@ -319,13 +312,13 @@ function ImageBrowser() {
                             </div>
                             <div className="sm:col-span-1">
                               <dt className="text-sm font-medium text-gray-500">Size</dt>
-                              <dd className="mt-1 text-sm text-gray-900">
+                              <dd className="mt-1 text-sm">
                                 {filesize(selected.size, { base: 2 })}
                               </dd>
                             </div>
                             <div className="sm:col-span-1">
                               <dt className="text-sm font-medium text-gray-500">Download</dt>
-                              <dd className="mt-1 text-sm text-gray-900">
+                              <dd className="mt-1 text-sm">
                                 <a
                                   className="text-blue-600 dark:text-blue-500 hover:underline"
                                   target="_blank"
@@ -338,13 +331,13 @@ function ImageBrowser() {
                             </div>
                             <div className="sm:col-span-1">
                               <dt className="text-sm font-medium text-gray-500">Mode</dt>
-                              <dd className="mt-1 text-sm text-gray-900 font-mono">
+                              <dd className="mt-1 text-sm font-mono">
                                 {selected.mode}
                               </dd>
                             </div>
                             <div className="sm:col-span-1">
                               <dt className="text-sm font-medium text-gray-500">Owner</dt>
-                              <dd className="mt-1 text-sm text-gray-900">
+                              <dd className="mt-1 text-sm">
                                 UID: <strong>{selected.uid}</strong>, GID: <strong>{selected.gid}</strong>
                               </dd>
                             </div>
@@ -358,6 +351,7 @@ function ImageBrowser() {
                         ) : (
                           <Editor
                             onMount={handleEditorDidMount}
+                            theme={darkMode ? "vs-dark" : "light"}
                             value={content}
                             path={selected.id}
                             options={{
@@ -370,7 +364,7 @@ function ImageBrowser() {
                         )}
                       </>
                     ) : (
-                      <div className="p-2 pl-4 text-gray-700">
+                      <div className="p-2 pl-4">
                         Please select a file from the tree
                       </div>
                     )}
