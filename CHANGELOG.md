@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/good-tools/good.tools/compare/v1.7.4...v1.8.0) (2022-12-30)
+
+
+### Features
+
+* updated theme, support dark mode ([d541bd7](https://github.com/good-tools/good.tools/commit/d541bd726c93b3f51de80489ef5478ebde219c0b))
+
 ## [1.7.4](https://github.com/good-tools/good.tools/compare/v1.7.3...v1.7.4) (2022-12-29)
 
 
