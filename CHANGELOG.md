@@ -1,3 +1,10 @@
+## [1.8.2](https://github.com/good-tools/good.tools/compare/v1.8.1...v1.8.2) (2022-12-31)
+
+
+### Bug Fixes
+
+* fix pageview tracking using useLocation ([bddb18c](https://github.com/good-tools/good.tools/commit/bddb18cfb633a1fc2374a88c58b61de564b48864))
+
 ## [1.8.1](https://github.com/good-tools/good.tools/compare/v1.8.0...v1.8.1) (2022-12-31)
 
 
