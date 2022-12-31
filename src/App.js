@@ -1,38 +1,28 @@
 import {
-  BrowserRouter,
   Routes,
   Route,
 } from "react-router-dom";
 import Home from "./pages/Home";
 import WrappedTool from "./pages/WrappedTool";
 import { tools } from "./tools";
-import { HelmetProvider } from 'react-helmet-async';
 import { Layout } from "./pages/Layout";
-import { DarkModeProvider } from "./components/ModeToggle";
 import NotFound from "./pages/NotFound";
-import ReactGA from 'react-ga';
-
-const TRACKING_ID = "G-XX2FY53B5V"; // OUR_TRACKING_ID
-
-ReactGA.initialize(TRACKING_ID);
+import { usePageTracking } from "./lib/tracking";
 
 function App() {
+
+  usePageTracking()
+
   return (
-    <DarkModeProvider>
-      <HelmetProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route element={<Layout />}>
-              <Route path="/" element={<Home />} />
-              {tools.map((t, idx) => (
-                <Route key={`r-${idx}`} path={t.href} element={<WrappedTool tool={t} />} />
-              ))}
-              <Route path="*" element={<NotFound />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-      </HelmetProvider>
-    </DarkModeProvider>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route path="/" element={<Home />} />
+        {tools.map((t, idx) => (
+          <Route key={`r-${idx}`} path={t.href} element={<WrappedTool tool={t} />} />
+        ))}
+        <Route path="*" element={<NotFound />} />
+      </Route>
+    </Routes>
   )
 }
 
