@@ -11,6 +11,7 @@ import Editor from "@monaco-editor/react"
 import TextInput from "../components/TextInput"
 import TabButton from "../components/TabButton"
 import { DarkModeContext } from "../components/ModeToggle"
+import LRU from "lru-cache"
 
 const imageBrowserUrl = "https://image-browser.fly.dev"
 
@@ -24,6 +25,9 @@ const isReadable = (mime) => {
 
   return false
 }
+
+const listCache = new LRU({ max: 100 })
+const contentCache = new LRU({ max: 50 })
 
 function ImageBrowser() {
   const { darkMode } = useContext(DarkModeContext)
@@ -56,6 +60,14 @@ function ImageBrowser() {
     }
 
     const path = node.id
+
+    const cacheKey = `${pulledRef}:${path}`
+
+    if (contentCache.has(cacheKey)) {
+      setContent(contentCache.get(cacheKey))
+      return
+    }
+
     const params = {
       ref: pulledRef,
       path: path
@@ -64,6 +76,10 @@ function ImageBrowser() {
     try {
       const response = await fetch(`${imageBrowserUrl}/download?${new URLSearchParams(params)}`)
       const data = await response.text()
+
+      // TODO: this can be big!
+      contentCache.set(cacheKey, data)
+
       setContent(data)
     } catch (e) {
       //
@@ -82,6 +98,13 @@ function ImageBrowser() {
 
   const list = useCallback(async (node) => {
     const path = node === null ? "" : node.id
+
+    const cacheKey = `${pulledRef}:${path}`
+
+    if (listCache.has(cacheKey)) {
+      return listCache.get(cacheKey)
+    }
+
     const params = {
       ref: pulledRef,
       path: path
@@ -95,10 +118,14 @@ function ImageBrowser() {
         throw new Error(data.message);
       }
 
-      return data.map(d => { return {
+      const result =  data.map(d => { return {
         id: `${path}/${d.name}`,
         ...d
       }}).sort((a,b) => a.directory && b.directory ? 0 : a.directory ? -1 : 1)
+
+      listCache.set(cacheKey, result)
+
+      return result
 
     } catch (e) {
       //
@@ -110,6 +137,10 @@ function ImageBrowser() {
     if (ref.length <= 0) {
       return
     }
+
+    // TODO: should we clear out the cache?
+    // listCache.clear()
+    // contentCache.clear()
 
     setData(null)
     setError(null)
