@@ -10,6 +10,11 @@ import { HelmetProvider } from 'react-helmet-async';
 import { Layout } from "./pages/Layout";
 import { DarkModeProvider } from "./components/ModeToggle";
 import NotFound from "./pages/NotFound";
+import ReactGA from 'react-ga';
+
+const TRACKING_ID = "G-XX2FY53B5V"; // OUR_TRACKING_ID
+
+ReactGA.initialize(TRACKING_ID);
 
 function App() {
   return (
