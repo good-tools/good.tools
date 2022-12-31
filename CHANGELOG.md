@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/good-tools/good.tools/compare/v1.8.0...v1.8.1) (2022-12-31)
+
+
+### Bug Fixes
+
+* add GA, add LRU cache for docker-browser ([1953cd5](https://github.com/good-tools/good.tools/commit/1953cd50c5415f5a39f52b9a97ba66a5eb4b160a))
+
 # [1.8.0](https://github.com/good-tools/good.tools/compare/v1.7.4...v1.8.0) (2022-12-30)
 
 
