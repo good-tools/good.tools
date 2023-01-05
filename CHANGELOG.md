@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/good-tools/good.tools/compare/v1.8.2...v1.9.0) (2023-01-05)
+
+
+### Features
+
+* adding JSON formatter ([ad65e91](https://github.com/good-tools/good.tools/commit/ad65e911616a460d6dc60040393e527ef7ab3dac))
+
 ## [1.8.2](https://github.com/good-tools/good.tools/compare/v1.8.1...v1.8.2) (2022-12-31)
 
 
