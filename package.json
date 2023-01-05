@@ -1,6 +1,6 @@
 {
   "name": "good.tools",
-  "version": "1.8.2",
+  "version": "1.9.0",
   "private": true,
   "dependencies": {
     "@algolia/autocomplete-core": "^1.7.4",
