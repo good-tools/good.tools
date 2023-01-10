@@ -1,0 +1,171 @@
+import { useEffect, useRef, useState } from "react";
+import { Button } from "../components/Button";
+import TextArea from "../components/TextArea";
+import { Buffer } from "buffer"
+import { decode, typeDefinition, possibleValues } from "@goodtools/protobuf-decoder";
+import { Tag } from "../components/Tag";
+
+function ProtobufObject({ object, showBytes }) {
+
+  if (object.fields <= 0) {
+    return (
+      <div className="text-gray-500 font-mono text-xs">
+        No fields exist for this object
+      </div>
+    )
+  }
+
+  return (
+    <div className="my-2 flex flex-col">
+      <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+          <div className="overflow-hidden dark:bg-zinc-800 shadow dark:shadow-zinc-900 ring-1 ring-black dark:ring-zinc-900 ring-opacity-5 md:rounded-lg">
+            <table className="min-w-full divide-y divide-gray-300">
+              <thead className="bg-gray-50 dark:bg-zinc-700">
+                <tr>
+                  <th
+                    scope="col"
+                    className="py-2 pl-4 pr-3 text-left text-sm font-semibold sm:pl-6"
+                  >
+                    Field
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-2 py-2 text-left text-sm font-semibold"
+                  >
+                    Type
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-2 py-2 text-left text-sm font-semibold"
+                  >
+                    Value
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
+
+                {object.fields.map((f, i) => (
+                  <tr key={`k-${i}`}>
+                    <td className="py-2 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">
+                      {f.field}
+                    </td>
+                    <td className="px-2 py-2 text-sm">
+                      {typeDefinition(f.type).name}
+                    </td>
+                    <td className="px-2 py-2 text-sm">
+                      { f.object ? (
+                        <ProtobufObject object={f.value} showBytes={showBytes} />
+                      ) : (
+                        <table>
+                          <tbody className="break-all">
+                            {possibleValues(f).filter(p => {
+                              if (p.type === "bytes" && !showBytes)
+                                return false
+                              return true
+                            }).map((p, j) => (
+                              <tr key={`k-${i}-p-${j}`}>
+                                <td className="min-w-[100px]"><Tag>{p.type}</Tag></td>
+                                {p.type === "bytes" ? (
+                                  <td className="font-mono text-gray-600 text-xs">{p.value.toString()}</td>
+                                ) : (
+                                  <td>{p.value.toString()}</td>
+                                )}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      ) }
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              {object.unprocessed.length > 0 && (
+                <tfoot className="divide-y divide-gray-200 dark:divide-gray-500">
+                  <tr>
+                    <td className="py-2 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">
+                      Unprocessed
+                    </td>
+                    <td colSpan={2} className="px-2 py-2 text-xs">{object.unprocessed.toString('hex')}</td>
+                  </tr>
+                </tfoot>
+              )}
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ProtobufDecoder() {
+
+  const [ encoded, setEncoded ] = useState('')
+  const [ decoded, setDecoded ] = useState(null)
+  const encodedRef = useRef()
+
+  const [checked, setChecked] = useState(false);
+
+  const handleChange = () => {
+    setChecked(!checked);
+  };
+
+  const decodeProto = () => {
+    const trimmed = encoded.replace(/\s/g, "").replace(/0x/g, "").toLowerCase();
+    const buff = Buffer.from(trimmed, 'hex')
+
+    setEncoded(buff.toString('hex'))
+    setDecoded(decode(buff))
+  }
+
+  useEffect(() => {
+    encodedRef.current.focus()
+  }, [encodedRef])
+
+  return (
+    <div>
+      <TextArea
+        innerRef={encodedRef}
+        id="encoded"
+        name="encoded"
+        rows={8}
+        value={encoded}
+        onCtrlEnter={() => decodeProto()}
+        onChange={e => setEncoded(e.target.value)}
+        className="font-mono text-xs"
+        placeholder={'Paste your protobuf request as hex'}
+      />
+      <Button
+        variant="filled"
+        onClick={() => decodeProto()}
+        className="mt-3"
+      >
+        Decode
+      </Button>
+      <div className="mt-3 relative flex items-start">
+        <div className="flex h-6 items-center">
+          <input
+            id="sbytes"
+            name="sbytes"
+            type="checkbox"
+            checked={checked}
+            onChange={handleChange}
+            className="h-4 w-4 rounded border-gray-300 text-zinc-600 focus:ring-zinc-500"
+          />
+        </div>
+        <div className="ml-3 text-sm">
+          <label htmlFor="sbytes" className="text-gray-700">
+            Show string bytes
+          </label>
+        </div>
+      </div>
+      { decoded != null && (
+        <div className="mt-3">
+          <ProtobufObject object={decoded} showBytes={checked} />
+        </div>
+      ) }
+    </div>
+  )
+}
+
+export default ProtobufDecoder;

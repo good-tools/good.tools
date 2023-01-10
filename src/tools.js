@@ -29,6 +29,12 @@ export const tools = [
     component: React.lazy(() => import('./tools/CertificateDecoder')),
   },
   {
+    title: 'Protobuf Decoder',
+    href: '/protobuf-decoder',
+    tags: ['protobuf', 'decoder'],
+    component: React.lazy(() => import('./tools/ProtobufDecoder')),
+  },
+  {
     title: 'Docker Browser',
     href: '/docker-browser',
     tags: ['docker', 'image', 'browser', 'oci', 'container'],

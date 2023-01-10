@@ -31,7 +31,7 @@ function ClipboardIcon(props) {
   )
 }
 
-function CopyButton({ code }) {
+export function CopyButton({ code }) {
   let [copyCount, setCopyCount] = useState(0)
   let copied = copyCount > 0
 
