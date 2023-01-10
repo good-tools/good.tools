@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/good-tools/good.tools/compare/v1.9.0...v1.10.0) (2023-01-10)
+
+
+### Features
+
+* adding protobuf decoder + simple json object tree ([96989cf](https://github.com/good-tools/good.tools/commit/96989cffc9b1d06bfd3b0a3c6366f72f7e103ae3))
+
 # [1.9.0](https://github.com/good-tools/good.tools/compare/v1.8.2...v1.9.0) (2023-01-05)
 
 
