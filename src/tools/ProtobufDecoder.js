@@ -5,6 +5,14 @@ import { Buffer } from "buffer"
 import { decode, typeDefinition, possibleValues } from "@goodtools/protobuf-decoder";
 import { Tag } from "../components/Tag";
 
+const EXAMPLE_PROTOBUF = Buffer.from([
+  0x08, 0x8f, 0x81, 0xeb, 0xcf, 0xe0, 0x2a, 0x12, 0x08, 0x6b, 0x6f, 0x74, 0x6c,
+  0x69, 0x6e, 0x34, 0x36, 0x3a, 0x05, 0x00, 0x01, 0x03, 0x04, 0x07, 0x42, 0x00,
+  0x48, 0xfa, 0x01, 0x55, 0x00, 0x00, 0x48, 0x43, 0x72, 0x0a, 0x0a, 0x08, 0x50,
+  0x4f, 0x4b, 0x45, 0x43, 0x4f, 0x49, 0x4e, 0x72, 0x0c, 0x0a, 0x08, 0x53, 0x54,
+  0x41, 0x52, 0x44, 0x55, 0x53, 0x54, 0x10, 0x64,
+]);
+
 function ProtobufObject({ object, showBytes }) {
 
   if (object.fields <= 0) {
@@ -118,6 +126,16 @@ function ProtobufDecoder() {
     setDecoded(decode(buff))
   }
 
+  const loadExample = () => {
+    setEncoded(EXAMPLE_PROTOBUF.toString('hex'))
+    setDecoded(null)
+  }
+
+  const clear = () => {
+    setEncoded('')
+    setDecoded(null)
+  }
+
   useEffect(() => {
     encodedRef.current.focus()
   }, [encodedRef])
@@ -135,13 +153,16 @@ function ProtobufDecoder() {
         className="font-mono text-xs"
         placeholder={'Paste your protobuf request as hex'}
       />
-      <Button
-        variant="filled"
-        onClick={() => decodeProto()}
-        className="mt-3"
-      >
-        Decode
-      </Button>
+      <div className="mt-3">
+        <Button
+          variant="filled"
+          onClick={() => decodeProto()}
+        >
+          Decode
+        </Button>
+        <Button variant="text" className={"ml-5"} onClick={loadExample}>Load Example</Button>
+        <Button variant="text" className={"ml-3"} onClick={clear}>Clear</Button>
+      </div>
       <div className="mt-3 relative flex items-start">
         <div className="flex h-6 items-center">
           <input
