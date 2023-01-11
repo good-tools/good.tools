@@ -1,3 +1,10 @@
+## [1.10.1](https://github.com/good-tools/good.tools/compare/v1.10.0...v1.10.1) (2023-01-11)
+
+
+### Bug Fixes
+
+* fix code wrapping ([3b0b70f](https://github.com/good-tools/good.tools/commit/3b0b70fda252823e2b9743ceb2653f3a9d6d98ac))
+
 # [1.10.0](https://github.com/good-tools/good.tools/compare/v1.9.0...v1.10.0) (2023-01-10)
 
 
