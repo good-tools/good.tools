@@ -114,7 +114,7 @@ function CodePanel({ tag, label, code, children }) {
         label={child.props.label ?? label}
       />
       <div className="relative">
-        <pre className="overflow-x-auto p-4 text-xs text-white">{children}</pre>
+        <pre className="whitespace-normal break-all p-4 text-xs text-white">{children}</pre>
         <CopyButton code={child.props.code ?? code} />
       </div>
     </div>
