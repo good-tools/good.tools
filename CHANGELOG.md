@@ -1,3 +1,10 @@
+## [1.10.2](https://github.com/good-tools/good.tools/compare/v1.10.1...v1.10.2) (2023-01-11)
+
+
+### Bug Fixes
+
+* add example inputs ([272825b](https://github.com/good-tools/good.tools/commit/272825ba687557d7eea77643e4509f4dedf235c3))
+
 ## [1.10.1](https://github.com/good-tools/good.tools/compare/v1.10.0...v1.10.1) (2023-01-11)
 
 
