@@ -7,7 +7,6 @@ import { Tag } from "../components/Tag"
 
 import "allotment/dist/style.css";
 import TextInput from "../components/TextInput"
-import ObjectTree from "../components/ObjectTree"
 import jp from "jsonpath"
 
 const DEFAULT_JSON_OBJ = {
@@ -112,20 +111,35 @@ function JsonFormatter() {
           </div>
         </Allotment.Pane>
         <Allotment.Pane>
-          <div className="pl-2 overflow-auto">
-            <div className="pl-2 w-full inline-flex">
+          <div className="pl-2">
+            <div className="w-full mb-2">
               <TextInput
                 type="text"
                 name="query"
                 id="query"
-                className="block w-full"
+                className="w-full p-1"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="JSONPath query (example: $.message)"
               />
             </div>
-            <ObjectTree object={filtered} />
+            {/* <ObjectTree object={filtered} /> */}
+            <Editor
+                height={"64vh"}
+                value={JSON.stringify(filtered, null, 2)}
+                theme={darkMode ? "vs-dark" : "light"}
+                defaultLanguage="json"
+                options={{
+                  readOnly: true,
+                  wordWrap: true,
+                  contextmenu: false,
+                  minimap: {
+                    enabled: false
+                  }
+                }}
+              />
           </div>
+
         </Allotment.Pane>
       </Allotment>
       
