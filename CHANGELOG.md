@@ -1,3 +1,10 @@
+## [1.10.3](https://github.com/good-tools/good.tools/compare/v1.10.2...v1.10.3) (2023-01-12)
+
+
+### Bug Fixes
+
+* removing the ObjectTree from JSON Formatter ([8bb3df9](https://github.com/good-tools/good.tools/commit/8bb3df97e78aead568baf31ac2ab8135c6a8d151))
+
 ## [1.10.2](https://github.com/good-tools/good.tools/compare/v1.10.1...v1.10.2) (2023-01-11)
 
 
