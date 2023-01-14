@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@algolia/autocomplete-core": "^1.7.4",
+    "@goodtools/jdserialize": "^1.0.0",
     "@goodtools/protobuf-decoder": "^1.0.0",
     "@headlessui/react": "^1.7.7",
     "@heroicons/react": "^2.0.13",
@@ -26,6 +27,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-helmet-async": "^1.3.0",
+    "react-inspector": "^6.0.1",
     "react-router-dom": "^6.5.0",
     "react-scripts": "5.0.1",
     "tailwindcss": "^3.2.4",
