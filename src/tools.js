@@ -35,6 +35,12 @@ export const tools = [
     component: React.lazy(() => import('./tools/ProtobufDecoder')),
   },
   {
+    title: 'Java Object Deserializer',
+    href: '/java-deserialize',
+    tags: ['java', 'deserializer'],
+    component: React.lazy(() => import('./tools/JavaDeserializer')),
+  },
+  {
     title: 'Docker Browser',
     href: '/docker-browser',
     tags: ['docker', 'image', 'browser', 'oci', 'container'],

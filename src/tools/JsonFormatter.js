@@ -8,6 +8,8 @@ import { Tag } from "../components/Tag"
 import "allotment/dist/style.css";
 import TextInput from "../components/TextInput"
 import jp from "jsonpath"
+import { ObjectInspector } from "react-inspector"
+import clsx from "clsx"
 
 const DEFAULT_JSON_OBJ = {
   "message": "Hello, World!"
@@ -20,6 +22,11 @@ function JsonFormatter() {
   const [ filtered, setFiltered ] = useState(DEFAULT_JSON_OBJ)
   const [ valid, setValid ] = useState(true)
   const [ query, setQuery ] = useState("")
+  const [ tree, setTree ] = useState(false);
+
+  const handleTreeChange = () => {
+    setTree(!tree);
+  };
 
   useEffect(() => {
     if (query.length <= 0) {
@@ -111,23 +118,45 @@ function JsonFormatter() {
           </div>
         </Allotment.Pane>
         <Allotment.Pane>
-          <div className="pl-2">
-            <div className="w-full mb-2">
+          <div className={clsx("pl-2 justify-items-center", tree ? "h-full overflow-y-auto" : "")}>
+            <div className="mb-2 grid grid-cols-3 gap-2">
               <TextInput
                 type="text"
                 name="query"
                 id="query"
-                className="w-full p-1"
+                className="p-1 col-span-2"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="JSONPath query (example: $.message)"
               />
+              <div className="flex items-start">
+                <div className="flex h-6 items-center">
+                  <input
+                    id="tree"
+                    name="tree"
+                    type="checkbox"
+                    checked={tree}
+                    onChange={handleTreeChange}
+                    className="h-4 w-4 rounded border-gray-300 text-zinc-600 focus:ring-zinc-500"
+                  />
+                </div>
+                <div className="ml-3 text-sm">
+                  <label htmlFor="tree" className="text-gray-700">
+                    Tree View
+                  </label>
+                </div>
+              </div>
             </div>
-            {/* <ObjectTree object={filtered} /> */}
-            <Editor
-                height={"64vh"}
+            { tree ? (
+              <ObjectInspector
+                data={filtered}
+                theme={darkMode ? "chromeDark" : "chromeLight"}
+              />
+            ) : (
+              <Editor
                 value={JSON.stringify(filtered, null, 2)}
                 theme={darkMode ? "vs-dark" : "light"}
+                height={"64vh"}
                 defaultLanguage="json"
                 options={{
                   readOnly: true,
@@ -138,8 +167,8 @@ function JsonFormatter() {
                   }
                 }}
               />
+            )}
           </div>
-
         </Allotment.Pane>
       </Allotment>
       
