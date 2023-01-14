@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/good-tools/good.tools/compare/v1.10.3...v1.11.0) (2023-01-14)
+
+
+### Features
+
+* adding JavaDeserializer and react-inspector object trees ([a9dc3a8](https://github.com/good-tools/good.tools/commit/a9dc3a89579737072955778340cc294189c84472))
+
 ## [1.10.3](https://github.com/good-tools/good.tools/compare/v1.10.2...v1.10.3) (2023-01-12)
 
 
