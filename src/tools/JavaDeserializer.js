@@ -10,6 +10,7 @@ import "allotment/dist/style.css";
 import { Allotment } from "allotment";
 import FileButton from "../components/FileButton";
 import { ObjectInspector } from "react-inspector";
+import CheckBox from "../components/CheckBox";
 
 const EXAMPLE_OBJECT = Buffer.from(
   "aced0005737200136a6176612e7574696c2e41727261794c6973747881d21d99c7619d03000149000473697a6578700000000277040000000273720017746f6f6c732e676f6f642e6d6f64656c2e506572736f6e8fa1a2737c31b1840200044900036167654c00086368696c6472656e7400104c6a6176612f7574696c2f4c6973743b4c000667656e6465727400204c746f6f6c732f676f6f642f6d6f64656c2f506572736f6e2447656e6465723b4c00046e616d657400124c6a6176612f6c616e672f537472696e673b7870000000417371007e0000000000027704000000027371007e00020000001c7371007e000000000000770400000000787e72001e746f6f6c732e676f6f642e6d6f64656c2e506572736f6e2447656e64657200000000000000001200007872000e6a6176612e6c616e672e456e756d000000000000000012000078707400044d414c457400054f73616d617371007e00020000001e7371007e0000000000007704000000007871007e000c740008416264756c6c61687871007e000c7400064b68616c69647371007e0002000000327371007e0000000000017704000000017371007e000200000019707e71007e000a74000646454d414c4574000548617269737871007e000c740005417a66617278",
@@ -135,36 +136,17 @@ function JavaDeserializer() {
         <Button variant="text" className={"ml-3"} onClick={clear}>Clear</Button>
       </div>
       <div className="mt-3 relative flex items-start">
-        <div className="flex h-6 items-center">
-          <input
-            id="sbytes"
-            name="sbytes"
-            type="checkbox"
-            checked={connect}
-            onChange={handleChange}
-            className="h-4 w-4 rounded border-gray-300 text-zinc-600 focus:ring-zinc-500"
-          />
-        </div>
-        <div className="ml-3 text-sm">
-          <label htmlFor="sbytes" className="text-gray-700">
-            Connect Classes
-          </label>
-        </div>
-        <div className="ml-4 flex h-6 items-center">
-          <input
-            id="tree"
-            name="tree"
-            type="checkbox"
-            checked={tree}
-            onChange={handleTreeChange}
-            className="h-4 w-4 rounded border-gray-300 text-zinc-600 focus:ring-zinc-500"
-          />
-        </div>
-        <div className="ml-3 text-sm">
-          <label htmlFor="tree" className="text-gray-700">
-            Instance Tree
-          </label>
-        </div>
+        <CheckBox
+          checked={connect}
+          onChange={handleChange}
+          title="Connect Classes"
+        />
+        <CheckBox
+          className={"ml-3"}
+          checked={tree}
+          onChange={handleTreeChange}
+          title="Instance Tree"
+        />
       </div>
       {error != null && (
         <div className="rounded-md bg-red-50 p-4 mt-4">

@@ -4,6 +4,7 @@ import TextArea from "../components/TextArea";
 import { Buffer } from "buffer"
 import { decode, typeDefinition, possibleValues } from "@goodtools/protobuf-decoder";
 import { Tag } from "../components/Tag";
+import CheckBox from "../components/CheckBox";
 
 const EXAMPLE_PROTOBUF = Buffer.from([
   0x08, 0x8f, 0x81, 0xeb, 0xcf, 0xe0, 0x2a, 0x12, 0x08, 0x6b, 0x6f, 0x74, 0x6c,
@@ -163,23 +164,12 @@ function ProtobufDecoder() {
         <Button variant="text" className={"ml-5"} onClick={loadExample}>Load Example</Button>
         <Button variant="text" className={"ml-3"} onClick={clear}>Clear</Button>
       </div>
-      <div className="mt-3 relative flex items-start">
-        <div className="flex h-6 items-center">
-          <input
-            id="sbytes"
-            name="sbytes"
-            type="checkbox"
-            checked={checked}
-            onChange={handleChange}
-            className="h-4 w-4 rounded border-gray-300 text-zinc-600 focus:ring-zinc-500"
-          />
-        </div>
-        <div className="ml-3 text-sm">
-          <label htmlFor="sbytes" className="text-gray-700">
-            Show string bytes
-          </label>
-        </div>
-      </div>
+      <CheckBox
+        className={"mt-3"}
+        checked={checked}
+        onChange={handleChange}
+        title="Show string bytes"
+      />
       { decoded != null && (
         <div className="mt-3">
           <ProtobufObject object={decoded} showBytes={checked} />
