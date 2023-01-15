@@ -1,3 +1,10 @@
+# [1.12.0](https://github.com/good-tools/good.tools/compare/v1.11.0...v1.12.0) (2023-01-15)
+
+
+### Features
+
+* adding description and dependencies, hero on homepage, inline b64, online info ([9c0c62e](https://github.com/good-tools/good.tools/commit/9c0c62e45c06be76558f2150be5a12b394832a7f))
+
 # [1.11.0](https://github.com/good-tools/good.tools/compare/v1.10.3...v1.11.0) (2023-01-14)
 
 
