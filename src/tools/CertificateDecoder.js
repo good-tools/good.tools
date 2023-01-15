@@ -4,6 +4,8 @@ import moment from "moment"
 import { CodeGroup } from "../components/Code"
 import { Button } from "../components/Button"
 import TextArea from "../components/TextArea"
+import clsx from "clsx"
+import FileButton from "../components/FileButton"
 
 const EXAMPLE_CERT = `-----BEGIN CERTIFICATE-----
 MIIFzjCCBLagAwIBAgIQCAID3TIok1it+qMlOD7pcTANBgkqhkiG9w0BAQsFADA8
@@ -44,15 +46,42 @@ function CertificateDecoder() {
 
   const [ encoded, setEncoded ] = useState('')
   const [ decoded, setDecoded ] = useState(null)
+  const [ names, setNames ] = useState([])
   const encodedRef = useRef()
 
   const decode = () => {
     try {
       const data = pki.certificateFromPem(encoded)
       setDecoded(data)
+
+      const names = [];
+
+      try {
+        names.push(data.subject.getField("CN").value)
+      } catch (e) {
+      }
+
+      const san = data.extensions.find(e => e.name === "subjectAltName");
+      if (typeof san !== "undefined") {
+        san.altNames.forEach(a => {
+          names.push(a.value)
+        })
+      }
+
+      setNames(names.filter((v, i, a) => a.indexOf(v) === i))
+
     } catch (err) {
       setDecoded(null)
     }
+  }
+  const loadFile = (e) => {
+    const f = e.target.files[0];
+    const reader = new FileReader();
+    reader.addEventListener('load', (event) => {
+      setEncoded(event.target.result)
+      setDecoded(null)
+    });
+    reader.readAsText(f);
   }
 
   const loadExample = () => {
@@ -89,13 +118,14 @@ function CertificateDecoder() {
         >
           Decode
         </Button>
+        <FileButton variant="text" className={"ml-5"} onFileSelected={loadFile}>Load File</FileButton>
         <Button variant="text" className={"ml-5"} onClick={loadExample}>Load Example</Button>
         <Button variant="text" className={"ml-3"} onClick={clear}>Clear</Button>
       </div>
       {decoded !== null && (
         <div className="mt-3 overflow-hidden w-full dark:bg-zinc-800 shadow dark:shadow-zinc-900 sm:rounded-lg">
           <div className="px-4 py-5 sm:px-6">
-            <h3 className="text-lg font-medium leading-6">Certificate</h3>
+            <h3 className="text-lg font-medium leading-6">{names.join(", ")}</h3>
           </div>
           <div className="border-t border-gray-200 dark:border-zinc-700 px-4 py-5 sm:px-6">
             <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
@@ -119,14 +149,22 @@ function CertificateDecoder() {
                 <dt className="text-sm font-medium text-gray-500">Valid From</dt>
                 <dd className="mt-1 text-sm">
                   {moment(decoded.validity.notBefore).format("dddd, MMMM Do YYYY, h:mm:ss A")}
-                  <div className="text-gray-500">({moment(decoded.validity.notBefore).fromNow()})</div>
+                  <div className={clsx(
+                    moment(decoded.validity.notBefore).isBefore(moment()) ? "text-green-500" : "text-red-500",
+                  )}>
+                    ({moment(decoded.validity.notBefore).fromNow()})
+                  </div>
                 </dd>
               </div>
               <div className="sm:col-span-1">
                 <dt className="text-sm font-medium text-gray-500">Valid To</dt>
                 <dd className="mt-1 text-sm">
                   {moment(decoded.validity.notAfter).format("dddd, MMMM Do YYYY, h:mm:ss A")}
-                  <div className="text-gray-500">({moment(decoded.validity.notAfter).fromNow()})</div>
+                  <div className={clsx(
+                    moment(decoded.validity.notAfter).isAfter(moment()) ? "text-green-500" : "text-red-500",
+                  )}>
+                    ({moment(decoded.validity.notAfter).fromNow()})
+                  </div>
                 </dd>
               </div>
               <div className="sm:col-span-1">

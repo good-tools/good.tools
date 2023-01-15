@@ -239,7 +239,7 @@ export function Navigation(props) {
           />
         ))}
         <li className="sticky bottom-0 z-10 mt-6 text-xs text-zinc-600 dark:text-zinc-400 text-center">
-          v{packageJson.version}
+          v{packageJson.version} &copy; {new Date().getFullYear()}
         </li>
       </ul>
     </nav>

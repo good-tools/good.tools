@@ -17,6 +17,16 @@ function Encoder() {
     setEncoded(val)
   }
 
+  const inline = () => {
+    const val = Buffer.from(decoded, 'utf8');
+    setDecoded(val.toString('base64'))
+  }
+
+  const clear = () => {
+    setEncoded(null)
+    setDecoded('')
+  }
+
   useEffect(() => {
     decodedRef.current.focus()
   }, [ decodedRef ])
@@ -40,6 +50,14 @@ function Encoder() {
       >
         Encode
       </Button>
+      <Button
+        className="ml-2"
+        variant="secondary"
+        onClick={() => inline()}
+      >
+        Encode Inline
+      </Button>
+      <Button variant="text" className={"ml-3"} onClick={clear}>Clear</Button>
       {encoded && (
         <CodeGroup title={"Base64"}>
           <code code={encoded.toString('base64')}>{encoded.toString('base64')}</code>
@@ -57,6 +75,16 @@ function Decoder() {
   const decode = () => {
     const val = Buffer.from(encoded, 'base64');
     setDecoded(val)
+  }
+
+  const inline = () => {
+    const val = Buffer.from(encoded, 'base64');
+    setEncoded(val.toString('utf8'))
+  }
+
+  const clear = () => {
+    setDecoded(null)
+    setEncoded('')
   }
 
   useEffect(() => {
@@ -82,6 +110,14 @@ function Decoder() {
       >
         Decode
       </Button>
+      <Button
+        className="ml-2"
+        variant="secondary"
+        onClick={() => inline()}
+      >
+        Decode Inline
+      </Button>
+      <Button variant="text" className={"ml-3"} onClick={clear}>Clear</Button>
       {decoded && (
         <BufferTextArea value={decoded} />
       )}

@@ -10,6 +10,7 @@ import TextInput from "../components/TextInput"
 import jp from "jsonpath"
 import { ObjectInspector } from "react-inspector"
 import clsx from "clsx"
+import CheckBox from "../components/CheckBox"
 
 const DEFAULT_JSON_OBJ = {
   "message": "Hello, World!"
@@ -91,7 +92,7 @@ function JsonFormatter() {
                 variant="secondary"
                 onClick={() => tiny()}
               >
-                Remove Whitespace
+                Minify
               </Button>
               { !valid && (
                 <div className="inline ml-3">
@@ -129,23 +130,11 @@ function JsonFormatter() {
                 onChange={e => setQuery(e.target.value)}
                 placeholder="JSONPath query (example: $.message)"
               />
-              <div className="flex items-start">
-                <div className="flex h-6 items-center">
-                  <input
-                    id="tree"
-                    name="tree"
-                    type="checkbox"
-                    checked={tree}
-                    onChange={handleTreeChange}
-                    className="h-4 w-4 rounded border-gray-300 text-zinc-600 focus:ring-zinc-500"
-                  />
-                </div>
-                <div className="ml-3 text-sm">
-                  <label htmlFor="tree" className="text-gray-700">
-                    Tree View
-                  </label>
-                </div>
-              </div>
+              <CheckBox
+                checked={tree}
+                onChange={handleTreeChange}
+                title="Tree View"
+              />
             </div>
             { tree ? (
               <ObjectInspector
