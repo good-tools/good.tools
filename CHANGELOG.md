@@ -1,3 +1,10 @@
+# [1.13.0](https://github.com/good-tools/good.tools/compare/v1.12.2...v1.13.0) (2023-01-16)
+
+
+### Features
+
+* adding hash calculator ([2dd9a5d](https://github.com/good-tools/good.tools/commit/2dd9a5d0da87944881c38a48658d04d166625789))
+
 ## [1.12.2](https://github.com/good-tools/good.tools/compare/v1.12.1...v1.12.2) (2023-01-16)
 
 
