@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import { Buffer } from "buffer"
 import BufferTextArea from "../components/BufferTextArea"
 import { Tab } from '@headlessui/react'
@@ -6,25 +6,40 @@ import { CodeGroup } from "../components/Code"
 import TabButton from "../components/TabButton"
 import TextArea from "../components/TextArea"
 import { Button } from "../components/Button"
+import create from 'zustand'
+
+const useEncoderStore = create((set) => ({
+  encoded: null,
+  decoded: '',
+  setEncoded: (encoded) => set(() => ({ encoded: encoded })),
+  setDecoded: (decoded) => set(() => ({ decoded: decoded })),
+  reset: () => set(() => ({ decoded: '', encoded: null })),
+}))
+
+const useDecoderStore = create((set) => ({
+  encoded: '',
+  decoded: null,
+  setEncoded: (encoded) => set(() => ({ encoded: encoded })),
+  setDecoded: (decoded) => set(() => ({ decoded: decoded })),
+  reset: () => set(() => ({ decoded: null, encoded: '' })),
+}))
 
 function Encoder() {
-  const [ encoded, setEncoded ] = useState(null)
-  const [ decoded, setDecoded ] = useState('')
+  const state = useEncoderStore()
   const decodedRef = useRef();
 
   const encode = () => {
-    const val = Buffer.from(decoded, 'utf8');
-    setEncoded(val)
+    const val = Buffer.from(state.decoded, 'utf8');
+    state.setEncoded(val)
   }
 
   const inline = () => {
-    const val = Buffer.from(decoded, 'utf8');
-    setDecoded(val.toString('base64'))
+    const val = Buffer.from(state.decoded, 'utf8');
+    state.setDecoded(val.toString('base64'))
   }
 
   const clear = () => {
-    setEncoded(null)
-    setDecoded('')
+    state.reset();
   }
 
   useEffect(() => {
@@ -38,8 +53,8 @@ function Encoder() {
         id="decoded"
         name="decoded"
         rows={8}
-        value={decoded}
-        onChange={e => setDecoded(e.target.value)}
+        value={state.decoded}
+        onChange={e => state.setDecoded(e.target.value)}
         onCtrlEnter={() => encode()}
         placeholder={'Paste your data'}
       />
@@ -58,9 +73,9 @@ function Encoder() {
         Encode Inline
       </Button>
       <Button variant="text" className={"ml-3"} onClick={clear}>Clear</Button>
-      {encoded && (
+      {state.encoded && (
         <CodeGroup title={"Result"}>
-          <code code={encoded.toString('base64')}>{encoded.toString('base64')}</code>
+          <code code={state.encoded.toString('base64')}>{state.encoded.toString('base64')}</code>
         </CodeGroup>
       )}
     </div>
@@ -68,23 +83,22 @@ function Encoder() {
 }
 
 function Decoder() {
-  const [ encoded, setEncoded ] = useState('')
-  const [ decoded, setDecoded ] = useState(null)
+  const state = useDecoderStore()
   const encodedRef = useRef()
 
   const decode = () => {
-    const val = Buffer.from(encoded, 'base64');
-    setDecoded(val)
+    const val = Buffer.from(state.encoded, 'base64');
+    state.setDecoded(val)
   }
 
   const inline = () => {
-    const val = Buffer.from(encoded, 'base64');
-    setEncoded(val.toString('utf8'))
+    const val = Buffer.from(state.encoded, 'base64');
+    state.setEncoded(val.toString('utf8'))
   }
 
   const clear = () => {
-    setDecoded(null)
-    setEncoded('')
+    state.setDecoded(null)
+    state.setEncoded('')
   }
 
   useEffect(() => {
@@ -98,8 +112,8 @@ function Decoder() {
         id="encoded"
         name="encoded"
         rows={8}
-        value={encoded}
-        onChange={e => setEncoded(e.target.value)}
+        value={state.encoded}
+        onChange={e => state.setEncoded(e.target.value)}
         onCtrlEnter={() => decode()}
         placeholder={'Paste your base64 encoded data'}
       />
@@ -118,8 +132,8 @@ function Decoder() {
         Decode Inline
       </Button>
       <Button variant="text" className={"ml-3"} onClick={clear}>Clear</Button>
-      {decoded && (
-        <BufferTextArea value={decoded} />
+      {state.decoded && (
+        <BufferTextArea value={state.decoded} />
       )}
     </div>
   )
