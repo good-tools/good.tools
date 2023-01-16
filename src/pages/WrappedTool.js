@@ -8,6 +8,8 @@ function WrappedTool(props) {
     <>
       <Helmet>
         <title>good.tools · {tool.title}</title>
+        <meta name="description" content={tool.description} />
+        <meta name="keywords" content={tool.tags.join(",")} />
       </Helmet>
       <div className="mb-4 pb-2 border-b dark:border-zinc-700">
         <div className="text-xl">
