@@ -1,28 +1,44 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import { Tab } from '@headlessui/react'
 import { CodeGroup } from "../components/Code"
 import TabButton from "../components/TabButton"
 import TextArea from "../components/TextArea"
 import { Button } from "../components/Button"
+import create from 'zustand'
+
+const useEncoderStore = create((set) => ({
+  encoded: null,
+  decoded: '',
+  setEncoded: (encoded) => set(() => ({ encoded: encoded })),
+  setDecoded: (decoded) => set(() => ({ decoded: decoded })),
+  reset: () => set(() => ({ decoded: '', encoded: null })),
+}))
+
+const useDecoderStore = create((set) => ({
+  encoded: '',
+  decoded: null,
+  setEncoded: (encoded) => set(() => ({ encoded: encoded })),
+  setDecoded: (decoded) => set(() => ({ decoded: decoded })),
+  reset: () => set(() => ({ decoded: null, encoded: '' })),
+}))
 
 function Encoder() {
-  const [ encoded, setEncoded ] = useState(null)
-  const [ decoded, setDecoded ] = useState('')
+  const state = useEncoderStore()
+
   const decodedRef = useRef();
 
   const encode = () => {
-    const val = encodeURIComponent(decoded);
-    setEncoded(val)
+    const val = encodeURIComponent(state.decoded);
+    state.setEncoded(val)
   }
 
   const inline = () => {
-    const val = encodeURIComponent(decoded);
-    setDecoded(val)
+    const val = encodeURIComponent(state.decoded);
+    state.setDecoded(val)
   }
 
   const clear = () => {
-    setEncoded(null)
-    setDecoded('')
+    state.reset();
   }
 
   useEffect(() => {
@@ -36,8 +52,8 @@ function Encoder() {
         id="decoded"
         name="decoded"
         rows={8}
-        value={decoded}
-        onChange={e => setDecoded(e.target.value)}
+        value={state.decoded}
+        onChange={e => state.setDecoded(e.target.value)}
         onCtrlEnter={() => encode()}
         placeholder={'Paste your data'}
       />
@@ -56,9 +72,9 @@ function Encoder() {
         Encode Inline
       </Button>
       <Button variant="text" className={"ml-3"} onClick={clear}>Clear</Button>
-      {encoded && (
+      {state.encoded && (
         <CodeGroup title={"Result"}>
-          <code code={encoded}>{encoded}</code>
+          <code code={state.encoded}>{state.encoded}</code>
         </CodeGroup>
       )}
     </div>
@@ -66,23 +82,21 @@ function Encoder() {
 }
 
 function Decoder() {
-  const [ encoded, setEncoded ] = useState('')
-  const [ decoded, setDecoded ] = useState(null)
+  const state = useDecoderStore()
   const encodedRef = useRef()
 
   const decode = () => {
-    const val = decodeURIComponent(encoded);
-    setDecoded(val)
+    const val = decodeURIComponent(state.encoded);
+    state.setDecoded(val)
   }
 
   const inline = () => {
-    const val = decodeURIComponent(encoded);
-    setEncoded(val)
+    const val = decodeURIComponent(state.encoded);
+    state.setEncoded(val)
   }
 
   const clear = () => {
-    setDecoded(null)
-    setEncoded('')
+    state.reset();
   }
 
   useEffect(() => {
@@ -96,8 +110,8 @@ function Decoder() {
         id="encoded"
         name="encoded"
         rows={8}
-        value={encoded}
-        onChange={e => setEncoded(e.target.value)}
+        value={state.encoded}
+        onChange={e => state.setEncoded(e.target.value)}
         onCtrlEnter={() => decode()}
         placeholder={'Paste your URL encoded data'}
       />
@@ -116,9 +130,9 @@ function Decoder() {
         Decode Inline
       </Button>
       <Button variant="text" className={"ml-3"} onClick={clear}>Clear</Button>
-      {decoded && (
+      {state.decoded && (
         <CodeGroup title={"Result"}>
-          <code code={decoded}>{decoded}</code>
+          <code code={state.decoded}>{state.decoded}</code>
         </CodeGroup>
       )}
     </div>
