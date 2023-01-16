@@ -21,6 +21,14 @@ export const tools = [
     online: false,
   },
   {
+    title: 'URL Encoder/Decoder',
+    href: '/url',
+    tags: ['url', 'encoder', 'decoder'],
+    component: React.lazy(() => import('./tools/URL')),
+    description: "Encode or decode text from and to the URL encoding format",
+    online: false,
+  },
+  {
     title: 'Diff Checker',
     href: '/diff-checker',
     tags: ['diff', 'text', 'checker'],
