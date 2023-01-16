@@ -1,3 +1,10 @@
+## [1.14.2](https://github.com/good-tools/good.tools/compare/v1.14.1...v1.14.2) (2023-01-16)
+
+
+### Bug Fixes
+
+* persist state for json formatter, focus hash calculator input ([ad9fc48](https://github.com/good-tools/good.tools/commit/ad9fc4836ee1ff11f87c50815a8e711653b5e129))
+
 ## [1.14.1](https://github.com/good-tools/good.tools/compare/v1.14.0...v1.14.1) (2023-01-16)
 
 
