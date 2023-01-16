@@ -7,7 +7,6 @@ import { DarkModeContext } from "../components/ModeToggle";
 import Editor from "@monaco-editor/react";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 import "allotment/dist/style.css";
-import { Allotment } from "allotment";
 import FileButton from "../components/FileButton";
 import { ObjectInspector } from "react-inspector";
 import CheckBox from "../components/CheckBox";
@@ -161,56 +160,53 @@ function JavaDeserializer() {
         </div>
       )}
       { decoded != null && (
-        <div className="h-[60vh] w-full mt-3">
-          <Allotment>
-            <Allotment.Pane>
-              {tree ? (
-                <div className="overflow-y-auto h-full">
-                  <p className="text-xl p-3 pl-8">Object Tree</p>
-                  <ObjectInspector
-                    data={decoded.objects}
-                    theme={darkMode ? "chromeDark" : "chromeLight"}
-                  />
-                </div>
-              ) : (
-                <>
-                  <p className="text-xl p-3 pl-8">Normalized Data</p>
-                  <Editor
-                    height={"50vh"}
-                    value={data}
-                    theme={darkMode ? "vs-dark" : "light"}
-                    defaultLanguage="json"
-                    options={{
-                      readOnly: true,
-                      wordWrap: true,
-                      contextmenu: false,
-                      minimap: {
-                        enabled: false
-                      }
-                    }}
-                  />
-                </>
-              )}
-            </Allotment.Pane>
-            <Allotment.Pane>
-              <p className="text-xl p-3 pl-8">Dumped Classes</p>
-              <Editor
-                height={"50vh"}
-                value={classes}
-                theme={darkMode ? "vs-dark" : "light"}
-                defaultLanguage="java"
-                options={{
-                  readOnly: true,
-                  wordWrap: true,
-                  contextmenu: false,
-                  minimap: {
-                    enabled: false
-                  }
-                }}
-              />
-            </Allotment.Pane>
-          </Allotment>
-
+        <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div>
+            {tree ? (
+              <div className="">
+                <p className="text-xl p-3 pl-8">Object Tree</p>
+                <ObjectInspector
+                  data={decoded.objects}
+                  theme={darkMode ? "chromeDark" : "chromeLight"}
+                />
+              </div>
+            ) : (
+              <>
+                <p className="text-xl p-3 pl-8">Normalized Data</p>
+                <Editor
+                  height={"50vh"}
+                  value={data}
+                  theme={darkMode ? "vs-dark" : "light"}
+                  defaultLanguage="json"
+                  options={{
+                    readOnly: true,
+                    wordWrap: true,
+                    contextmenu: false,
+                    minimap: {
+                      enabled: false
+                    }
+                  }}
+                />
+              </>
+            )}
+          </div>
+          <div>
+            <p className="text-xl p-3 pl-8">Dumped Classes</p>
+            <Editor
+              height={"50vh"}
+              value={classes}
+              theme={darkMode ? "vs-dark" : "light"}
+              defaultLanguage="java"
+              options={{
+                readOnly: true,
+                wordWrap: true,
+                contextmenu: false,
+                minimap: {
+                  enabled: false
+                }
+              }}
+            />
+          </div>
         </div>
       ) }
     </div>

@@ -29,6 +29,7 @@ export const tools = [
     online: false,
     dependencies: [{
       name: "@monaco-editor/react",
+      url: "https://www.npmjs.com/package/@monaco-editor/react"
     }]
   },
   {
@@ -40,6 +41,7 @@ export const tools = [
     online: false,
     dependencies: [{
       name: "node-forge",
+      url: "https://www.npmjs.com/package/node-forge"
     }],
   },
   {
@@ -51,6 +53,7 @@ export const tools = [
     online: false,
     dependencies: [{
       name: "@goodtools/protobuf-decoder",
+      url: "https://www.npmjs.com/package/@goodtools/protobuf-decoder"
     }],
   },
   {
@@ -62,10 +65,13 @@ export const tools = [
     online: false,
     dependencies: [{
       name: "@goodtools/jdserialize",
+      url: "https://www.npmjs.com/package/@goodtools/jdserialize"
     }, {
       name: "@monaco-editor/react",
+      url: "https://www.npmjs.com/package/@monaco-editor/react"
     }, {
       name: "react-inspector",
+      url: "https://www.npmjs.com/package/react-inspector"
     }]
   },
   {
@@ -77,8 +83,10 @@ export const tools = [
     online: true,
     dependencies: [{
       name: "containerd",
+      url: "https://github.com/containerd/containerd"
     }, {
       name: "@monaco-editor/react",
+      url: "https://www.npmjs.com/package/@monaco-editor/react"
     }]
   },
   {
@@ -89,7 +97,8 @@ export const tools = [
     description: "Search the whois database for verified registration information",
     online: true,
     dependencies: [{
-      name: "likexian/whois"
+      name: "likexian/whois",
+      url: "https://github.com/likexian/whois"
     }]
   },
   {
@@ -100,7 +109,8 @@ export const tools = [
     description: "Lookup most common DNS record types for a domain",
     online: true,
     dependencies: [{
-      name: "miekg/dns"
+      name: "miekg/dns",
+      url: "https://github.com/miekg/dns"
     }]
   },
   {
@@ -119,11 +129,14 @@ export const tools = [
     description: "Lookup details about IP addresses including their location, ASN and more",
     online: true,
     dependencies: [{
-      name: "oschwald/geoip2-golang"
+      name: "oschwald/geoip2-golang",
+      url: "https://github.com/oschwald/geoip2-golang"
     }, {
       name: "GeoLite2-City",
+      url: "https://www.maxmind.com/en/geoip2-city"
     }, {
       name: "GeoLite2-ASN",
+      url: "https://www.maxmind.com"
     }]
   },
   {
@@ -135,10 +148,12 @@ export const tools = [
     online: false,
     dependencies: [{
       name: "@monaco-editor/react",
+      url: "https://www.npmjs.com/package/@monaco-editor/react"
     }, {
       name: "jsonpath",
     }, {
       name: "react-inspector",
+      url: "https://www.npmjs.com/package/react-inspector"
     }]
   },
 ]

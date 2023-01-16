@@ -6,7 +6,7 @@ function BufferTextArea({ value, ...props }) {
   const plain = value.toString('utf8')
   return (
     <CodeGroup {...props}>
-      <code title="Plain" code={plain}>{plain}</code>
+      <code title="UTF-8" code={plain}>{plain}</code>
       <code title="Hex" code={hex}>{hex}</code>
       <code title="Base64" code={b64}>{b64}</code>
     </CodeGroup>

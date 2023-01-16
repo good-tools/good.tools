@@ -18,10 +18,10 @@ function Home() {
             In such cases, it will be explicitly mentioned.
           </p>
           <p className='lead flex'>
-            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className="mt-0.5 h-6 w-6 mr-1 -ml-1">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m11.5 6.5 3 3.5m0 0-3 3.5m3-3.5h-9" />
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className="mt-0.4 h-6 w-6 mr-2">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18" />
             </svg>
-            Select a tool to get started!
+            Select a tool from the sidebar to get started!
           </p>
         </article>
       </div>
