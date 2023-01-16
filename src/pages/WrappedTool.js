@@ -37,8 +37,8 @@ function WrappedTool(props) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
               </svg>
               Built using
-              {tool.dependencies.map(d => (
-                <Tag color="sky" type="a" target="_blank" rel="noopener" href={d.url}>{d.name}</Tag>
+              {tool.dependencies.map((d, i) => (
+                <Tag key={`tag-${i}`} color="sky" type="a" target="_blank" rel="noopener" href={d.url}>{d.name}</Tag>
               ))}
             </div>
           </div>
