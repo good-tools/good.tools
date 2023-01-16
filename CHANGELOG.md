@@ -1,3 +1,10 @@
+## [1.12.2](https://github.com/good-tools/good.tools/compare/v1.12.1...v1.12.2) (2023-01-16)
+
+
+### Bug Fixes
+
+* div -> span, flex -> inline for dependency tags ([f1b1f68](https://github.com/good-tools/good.tools/commit/f1b1f68d981edb9664d3562a49096326213cd9fa))
+
 ## [1.12.1](https://github.com/good-tools/good.tools/compare/v1.12.0...v1.12.1) (2023-01-16)
 
 
