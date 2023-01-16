@@ -29,16 +29,16 @@ function WrappedTool(props) {
               This is an online tool, the data you submit gets processed on a remote server.
             </div>
           )}
-          <div className="flex text-xs space-x-2">
-            <div className="flex">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 mr-1">
+          <div className="text-xs">
+            <div className="inline space-x-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 mr-1 inline">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
               </svg>
               Built using
+              {tool.dependencies.map(d => (
+                <Tag color="sky" type="a" target="_blank" rel="noopener" href={d.url}>{d.name}</Tag>
+              ))}
             </div>
-            {tool.dependencies.map(d => (
-              <Tag color="sky" type="a" target="_blank" rel="noopener" href={d.url}>{d.name}</Tag>
-            ))}
           </div>
         </div>
       )}

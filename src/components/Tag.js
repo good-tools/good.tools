@@ -43,7 +43,8 @@ export function Tag({
   children,
   variant = 'medium',
   color = valueColorMap[children.toLowerCase()] ?? 'emerald',
-  type = 'div',
+  type = 'span',
+  className = '',
   ...props
 }) {
   const Component = type;
@@ -51,9 +52,10 @@ export function Tag({
   return (
     <Component
       className={clsx(
-        'inline font-mono text-[0.625rem] font-semibold leading-6',
+        'font-mono text-[0.625rem] font-semibold leading-6',
         variantStyles[variant],
-        colorStyles[color][variant]
+        colorStyles[color][variant],
+        className
       )}
       {...props}
     >
