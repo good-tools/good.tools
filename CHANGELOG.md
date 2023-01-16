@@ -1,3 +1,10 @@
+## [1.12.1](https://github.com/good-tools/good.tools/compare/v1.12.0...v1.12.1) (2023-01-16)
+
+
+### Bug Fixes
+
+* adding links to deps + cosmetics ([eccef26](https://github.com/good-tools/good.tools/commit/eccef265de8aa02c15a6f2f77c912ba60a2af80c))
+
 # [1.12.0](https://github.com/good-tools/good.tools/compare/v1.11.0...v1.12.0) (2023-01-15)
 
 
