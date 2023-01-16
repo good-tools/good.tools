@@ -1,3 +1,10 @@
+## [1.13.1](https://github.com/good-tools/good.tools/compare/v1.13.0...v1.13.1) (2023-01-16)
+
+
+### Bug Fixes
+
+* add description and keywords from meta tags ([1682537](https://github.com/good-tools/good.tools/commit/16825378a30a5e435a1ed3c7a53031482f767382))
+
 # [1.13.0](https://github.com/good-tools/good.tools/compare/v1.12.2...v1.13.0) (2023-01-16)
 
 
