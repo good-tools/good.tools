@@ -119,7 +119,7 @@ function CertificateDecoder() {
           Decode
         </Button>
         <FileButton variant="text" className={"ml-5"} onFileSelected={loadFile}>Load File</FileButton>
-        <Button variant="text" className={"ml-5"} onClick={loadExample}>Load Example</Button>
+        <Button variant="text" className={"ml-3"} onClick={loadExample}>Load Example</Button>
         <Button variant="text" className={"ml-3"} onClick={clear}>Clear</Button>
       </div>
       {decoded !== null && (

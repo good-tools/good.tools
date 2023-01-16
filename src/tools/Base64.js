@@ -59,7 +59,7 @@ function Encoder() {
       </Button>
       <Button variant="text" className={"ml-3"} onClick={clear}>Clear</Button>
       {encoded && (
-        <CodeGroup title={"Base64"}>
+        <CodeGroup title={"Result"}>
           <code code={encoded.toString('base64')}>{encoded.toString('base64')}</code>
         </CodeGroup>
       )}
