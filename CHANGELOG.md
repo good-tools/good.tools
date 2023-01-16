@@ -1,3 +1,10 @@
+## [1.14.1](https://github.com/good-tools/good.tools/compare/v1.14.0...v1.14.1) (2023-01-16)
+
+
+### Bug Fixes
+
+* persist state in URL/Base64 encoders ([391b5c9](https://github.com/good-tools/good.tools/commit/391b5c9d1b6eeb95c8eabc4ec85751e2dd7350f4))
+
 # [1.14.0](https://github.com/good-tools/good.tools/compare/v1.13.1...v1.14.0) (2023-01-16)
 
 
