@@ -114,6 +114,18 @@ export const tools = [
     }]
   },
   {
+    title: 'Hash Calculator',
+    href: '/hash',
+    tags: ['hash', 'calculator', 'digest', 'md5', 'sha256', 'sha384', 'sha512'],
+    component: React.lazy(() => import('./tools/HashCalculator')),
+    description: "Calculate hashes for popular message digest algorithms",
+    online: false,
+    dependencies: [{
+      name: "node-forge",
+      url: "https://www.npmjs.com/package/node-forge"
+    }],
+  },
+  {
     title: 'Whats My IP',
     href: '/whats-my-ip',
     tags: ['whats', 'my', 'ip', 'address'],
