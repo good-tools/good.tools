@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/good-tools/good.tools/compare/v1.13.1...v1.14.0) (2023-01-16)
+
+
+### Features
+
+* adding URL encoder/decoder ([691173e](https://github.com/good-tools/good.tools/commit/691173eb7bee12e55fa81efc2a3cdbe159f93137))
+
 ## [1.13.1](https://github.com/good-tools/good.tools/compare/v1.13.0...v1.13.1) (2023-01-16)
 
 
