@@ -1,14 +1,19 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { md } from "node-forge"
 import TextInput from "../components/TextInput"
 
 function HashCalculator() {
   const [ input, setInput ] = useState('')
+  const inputRef = useRef()
 
   const hash = (digest, input) => {
     digest.update(input);
     return digest.digest().toHex();
   }
+
+  useEffect(() => {
+    inputRef.current.focus()
+  }, [ inputRef ])
 
   return (
     <div>
@@ -16,6 +21,7 @@ function HashCalculator() {
         Input
       </div>
       <TextInput
+        innerRef={inputRef}
         type="text"
         name="value"
         id="value"
