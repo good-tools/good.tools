@@ -7,6 +7,7 @@ function Home() {
     <>
       <Helmet>
         <title>good.tools · Purpose built online tools</title>
+        <meta name="description" content={"Purpose built, online, free-to-use tools"} />
       </Helmet>
       <HeroPattern />
       <div className='py-8'>

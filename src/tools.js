@@ -15,7 +15,7 @@ export const tools = [
   {
     title: 'Base64',
     href: '/base64',
-    tags: ['base64', 'base', '64', 'encoder', 'decoder'],
+    tags: ['base64', 'encoder', 'decoder'],
     component: React.lazy(() => import('./tools/Base64')),
     description: "Encode or decode text from and to the Base64 encoding format",
     online: false,
