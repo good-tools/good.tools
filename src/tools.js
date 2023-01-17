@@ -176,4 +176,25 @@ export const tools = [
       url: "https://www.npmjs.com/package/react-inspector"
     }]
   },
+  {
+    title: 'XML Formatter',
+    href: '/xmlformatter',
+    tags: ['xml', 'formatter'],
+    component: React.lazy(() => import('./tools/XmlFormatter')),
+    description: "Beautify and format an XML document, convert it to JSON or browse your object tree",
+    online: false,
+    dependencies: [{
+      name: "@monaco-editor/react",
+      url: "https://www.npmjs.com/package/@monaco-editor/react"
+    }, {
+      name: "fast-xml-parser",
+      url: "https://www.npmjs.com/package/fast-xml-parser"
+    }, {
+      name: "pretty-data",
+      url: "https://www.npmjs.com/package/pretty-data"
+    }, {
+      name: "react-inspector",
+      url: "https://www.npmjs.com/package/react-inspector"
+    }]
+  },
 ]
