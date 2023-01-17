@@ -1,3 +1,10 @@
+# [1.15.0](https://github.com/good-tools/good.tools/compare/v1.14.2...v1.15.0) (2023-01-17)
+
+
+### Features
+
+* added XML Formatter tool ([00c551c](https://github.com/good-tools/good.tools/commit/00c551c524f67ac7f31b8ebcdfe2360f8477a6f4))
+
 ## [1.14.2](https://github.com/good-tools/good.tools/compare/v1.14.1...v1.14.2) (2023-01-16)
 
 
