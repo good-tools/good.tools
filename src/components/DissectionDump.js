@@ -46,7 +46,7 @@ function DissectionDump({ buffer, selected, select }) {
     let ascii_lines = [];
 
     for (let i = 0; i < buffer.length; i += 16) {
-      let address = i.toString(16).padStart(4, '0') // address
+      let address = i.toString(16).padStart(8, '0') // address
       let block = buffer.slice(i, i + 16) // cut buffer into blocks of 16
       let hexArray = []
       let asciiArray = []
@@ -60,12 +60,7 @@ function DissectionDump({ buffer, selected, select }) {
         hexArray.length > 8
           ? hexArray.slice(0, 8).join(' ') + '　' + hexArray.slice(8).join(' ')
           : hexArray.join(' ')
-  
-      // let asciiString =
-      //   asciiArray.length > 8
-      //     ? asciiArray.slice(0, 8).join('') + '　' + asciiArray.slice(8).join('')
-      //     : asciiArray.join('')
-      
+
       let asciiString = asciiArray.join('')
   
       addr_lines.push(address);

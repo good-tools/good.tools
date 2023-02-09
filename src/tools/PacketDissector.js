@@ -9,9 +9,12 @@ import "allotment/dist/style.css";
 import PacketVirtualTable from '../components/PacketVirtualTable';
 import { Button } from '../components/Button';
 
-import ExampleCapture from '../examples/captures/http.cap';
-
 export const NO_SELECTION = { id: "", position: [0, 0] }
+
+const EXAMPLE_CAPTURES = [
+  new URL("../examples/captures/http.cap", import.meta.url),
+  new URL("../examples/captures/bfd-raw-auth-simple.pcap", import.meta.url),
+]
 
 function PacketDissector() {
   const worker = useMemo(
@@ -43,9 +46,10 @@ function PacketDissector() {
   }, [])
 
   const loadExample = useMemo(() => async () => {
-    const name = ExampleCapture.split('/').pop();
-    console.log(name)
-    const res = await fetch(ExampleCapture)
+    const example = EXAMPLE_CAPTURES[Math.floor(Math.random()*EXAMPLE_CAPTURES.length)];
+
+    const name = example.toString().split('/').pop();
+    const res = await fetch(example)
     const body = await res.arrayBuffer();
 
     clear()
