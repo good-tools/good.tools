@@ -145,6 +145,13 @@ export const tools = [
       name: "@goodtools/wiregasm",
       url: "https://www.npmjs.com/package/@goodtools/wiregasm"
     }],
+    warning: function() {
+      return (
+        <div>
+          This tool uses a large (~60MB) WASM binary for packet dissection in your browser.
+        </div>
+      )
+    }
   },
   {
     title: 'Whats My IP',

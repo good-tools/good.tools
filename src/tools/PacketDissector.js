@@ -8,12 +8,14 @@ import { Allotment } from 'allotment';
 import "allotment/dist/style.css";
 import PacketVirtualTable from '../components/PacketVirtualTable';
 import { Button } from '../components/Button';
+import PacketSummaryModal from '../components/PacketSummaryModal';
 
 export const NO_SELECTION = { id: "", position: [0, 0] }
 
 const EXAMPLE_CAPTURES = [
   new URL("../examples/captures/http.cap", import.meta.url),
   new URL("../examples/captures/bfd-raw-auth-simple.pcap", import.meta.url),
+  new URL("../examples/captures/dns.cap", import.meta.url),
 ]
 
 function PacketDissector() {
@@ -32,6 +34,9 @@ function PacketDissector() {
   const [ preparedPositions, setPreparedPositions ] = useState({});
   const [ selectedTreeEntry, setSelectedTreeEntry ] = useState(NO_SELECTION);
   const [ finishedProcessing, setFinishedProcessing ] = useState(true);
+  const [ summary, setSummary ] = useState(null);
+  const [ summaryOpen, setSummaryOpen ] = useState(false);
+  const [ currentExampleData, setCurrentExampleData ] = useState(null);
 
   const addPacket = useMemo(() => (packet) => {
     setPackets(prev => [...prev, packet])
@@ -45,17 +50,24 @@ function PacketDissector() {
     setSelectedTreeEntry(NO_SELECTION)
   }, [])
 
+  const processData = useMemo(() => (name, data) => {
+    clear()
+    setSelectedFile(null)
+    setSummary(null)
+    setFinishedProcessing(false)
+    worker.postMessage({ type: "process-data", name: name, data: data, filter: filter })
+  }, [ clear, filter, worker ])
+
   const loadExample = useMemo(() => async () => {
     const example = EXAMPLE_CAPTURES[Math.floor(Math.random()*EXAMPLE_CAPTURES.length)];
-
     const name = example.toString().split('/').pop();
+
     const res = await fetch(example)
     const body = await res.arrayBuffer();
 
-    clear()
-    setFinishedProcessing(false)
-    worker.postMessage({ type: "process-data", name: name, data: body, filter: filter })
-  }, [ clear, filter, worker ])
+    setCurrentExampleData({ name: name, data: body })
+    processData(name, body)
+  }, [ processData ])
 
   const preparePositions = useMemo(() => (id, node) => {
     let map = {};
@@ -109,6 +121,7 @@ function PacketDissector() {
         } else if (e.data.type === "end") {
           setStatus(`Finished processing file`);
           setFinishedProcessing(true);
+          setSummary(e.data.summary);
         } else if (e.data.type === "selected") {
           setSelectedPacket(e.data.data);
           setPreparedPositions(preparePositions("root", e.data.data))
@@ -136,16 +149,27 @@ function PacketDissector() {
     worker.postMessage({ type: "process", file: f, filter: filter })
   }, [ worker, filter, clear ])
 
+  const filterFile = useMemo(() => () => {
+    if (selectedFile !== null) {
+      process(selectedFile)
+    } else if (currentExampleData !== null) {
+      processData(currentExampleData.name, currentExampleData.data)
+    }
+  }, [ selectedFile, currentExampleData, process, processData ])
+
   const loadFile = useMemo(() => (e) => {
     const f = e.target.files[0];
+    setSummary(null)
     setSelectedIndex(0)
     setSelectedPacket(null)
     setSelectedFile(f)
+    setCurrentExampleData(null)
     process(f)
   }, [ process ])
 
   return (
     <div>
+      <PacketSummaryModal open={summaryOpen} setOpen={setSummaryOpen} summary={summary} />
       <div className='flex items-center w-full'>
         <FileButton variant="text" onFileSelected={loadFile}>Load File</FileButton>
         <Button className={"ml-5"} variant="text" onClick={loadExample}>Load Example</Button>
@@ -153,6 +177,9 @@ function PacketDissector() {
           <strong>Status: </strong>
           {status}
         </div>
+        { summary != null && (
+          <Button className={"ml-5"} variant="text" onClick={() => setSummaryOpen(true)}>Summary</Button>
+        )}
         <div className="ml-auto text-sm">
           {packets.length} packets
         </div>
@@ -164,7 +191,7 @@ function PacketDissector() {
         className="py-1 mt-2 w-full"
         placeholder="display filter"
         value={filter}
-        onEnter={() => process(selectedFile)}
+        onEnter={filterFile}
         onChange={(e) => setFilter(e.target.value)}
         autoComplete={"off"}
       />
