@@ -20,7 +20,7 @@ function Home() {
           </p>
           <p className='lead flex'>
             <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className="mt-0.4 h-6 w-6 mr-2">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18" />
+              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18" />
             </svg>
             Select a tool from the sidebar to get started!
           </p>
