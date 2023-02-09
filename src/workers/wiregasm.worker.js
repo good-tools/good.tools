@@ -41,9 +41,9 @@ wg.init(loadWiregasm, {
     batchAway(packet);
   },
   handleStatus: (status) => postMessage({ type: "status", status: status }),
-  handleEnd: () => {
+  handleEnd: (summary) => {
     batchAway(null, true);
-    postMessage({ type: "end" });
+    postMessage({ type: "end", summary: summary });
   },
   handleError: (error) => postMessage({ type: "error", error: error }),
 }).then(() => {

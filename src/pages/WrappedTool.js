@@ -1,9 +1,12 @@
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { Helmet } from 'react-helmet-async';
+import { Button } from "../components/Button";
 import { Tag } from "../components/Tag";
 
 function WrappedTool(props) {
   const { tool } = props;
+  const [ proceed, setProceed ] = useState(false);
+
   return (
     <>
       <Helmet>
@@ -17,10 +20,17 @@ function WrappedTool(props) {
         </div>
         <div className="text-xs">{tool.description}</div>
       </div>
-      <Suspense fallback={<div>Loading...</div>}>
-        <tool.component />
-      </Suspense>
-
+      {tool.warning && !proceed ? (
+        <div>
+          <tool.warning />
+          <p className="mt-4">Proceed at your own risk.</p>
+          <Button onClick={() => setProceed(true)} className={"mt-4"}>Continue</Button>
+        </div>
+      ) : (
+        <Suspense fallback={<div>Loading...</div>}>
+          <tool.component />
+        </Suspense>
+      )}
       {typeof tool.dependencies !== "undefined" && (
         <div className="border-t border-zinc-900/5 mt-6 pt-3 dark:border-white/5 text-zinc-600 dark:text-zinc-400">
           {tool.online && (
