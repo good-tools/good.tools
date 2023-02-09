@@ -130,7 +130,7 @@ function NavigationGroup({ group, className }) {
         <ul className="border-l border-transparent">
           {group.links.map((link) => (
             <motion.li key={link.href} layout="position" className="relative">
-              <NavLink href={link.href} active={link.href === router.pathname}>
+              <NavLink href={link.href} active={link.href === router.pathname} tag={link.tag}>
                 {link.title}
               </NavLink>
               <AnimatePresence mode="popLayout" initial={false}>
@@ -181,7 +181,8 @@ export const navigation = [
     links: tools.map(t => {
       return {
         title: t.title,
-        href: t.href
+        href: t.href,
+        tag: t.tag
       }
     }),
   },

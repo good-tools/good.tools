@@ -134,6 +134,19 @@ export const tools = [
     }],
   },
   {
+    title: 'Packet Dissector',
+    href: '/packet-dissector',
+    tags: ['wireshark', 'pcap', 'packet', 'dissector'],
+    component: React.lazy(() => import('./tools/PacketDissector')),
+    description: "Wireshark packet dissection in your browser",
+    online: false,
+    tag: "EXPERIMENTAL",
+    dependencies: [{
+      name: "@goodtools/wiregasm",
+      url: "https://www.npmjs.com/package/@goodtools/wiregasm"
+    }],
+  },
+  {
     title: 'Whats My IP',
     href: '/whats-my-ip',
     tags: ['whats', 'my', 'ip', 'address'],
