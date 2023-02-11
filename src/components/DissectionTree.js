@@ -26,7 +26,8 @@ function DissectionSubTree({ id, node, select, selected }) {
     <div
       
       className={clsx(
-        "inline-flex items-center cursor-pointer w-full",
+        "inline-flex items-center w-full",
+        node.position ? 'cursor-pointer' : '',
         id === selected ? 'bg-gray-600 text-white' : ''
       )}
     >
@@ -43,7 +44,11 @@ function DissectionSubTree({ id, node, select, selected }) {
       )}
 
       <span
-        onClick={() => select({ id: id, position: node.position })}
+        onClick={() => {
+          if (node.position) {
+            select({ id: id, position: node.position })
+          }
+        }}
         onDoubleClick={toggle}
         className="ml-1 w-full"
       >
