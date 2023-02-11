@@ -9,8 +9,10 @@ import "allotment/dist/style.css";
 import PacketVirtualTable from '../components/PacketVirtualTable';
 import { Button } from '../components/Button';
 import PacketSummaryModal from '../components/PacketSummaryModal';
+import { Tab } from '@headlessui/react';
+import TabButton from '../components/TabButton';
 
-export const NO_SELECTION = { id: "", position: [0, 0] }
+export const NO_SELECTION = { id: "", position: [0, 0, 0] }
 
 const EXAMPLE_CAPTURES = [
   new URL("../examples/captures/http.cap", import.meta.url),
@@ -31,12 +33,13 @@ function PacketDissector() {
   const [ selectedFile, setSelectedFile ] = useState(null);
   const [ selectedIndex, setSelectedIndex ] = useState(0);
   const [ selectedPacket, setSelectedPacket ] = useState(null);
-  const [ preparedPositions, setPreparedPositions ] = useState({});
+  const [ preparedPositions, setPreparedPositions ] = useState(new Map());
   const [ selectedTreeEntry, setSelectedTreeEntry ] = useState(NO_SELECTION);
   const [ finishedProcessing, setFinishedProcessing ] = useState(true);
   const [ summary, setSummary ] = useState(null);
   const [ summaryOpen, setSummaryOpen ] = useState(false);
   const [ currentExampleData, setCurrentExampleData ] = useState(null);
+  const [ selectedDataSourceIndex, setSelectedDataSourceIndex ] = useState(0);
 
   const addPacket = useMemo(() => (packet) => {
     setPackets(prev => [...prev, packet])
@@ -48,7 +51,12 @@ function PacketDissector() {
     setSelectedPacket(null)
     setPreparedPositions({})
     setSelectedTreeEntry(NO_SELECTION)
+    setSelectedDataSourceIndex(0);
   }, [])
+
+  useEffect(() => {
+    setSelectedDataSourceIndex(selectedTreeEntry.position[0])
+  }, [ selectedTreeEntry ])
 
   const processData = useMemo(() => (name, data) => {
     clear()
@@ -70,26 +78,29 @@ function PacketDissector() {
   }, [ processData ])
 
   const preparePositions = useMemo(() => (id, node) => {
-    let map = {};
+    let map = new Map();
+
     if (node.tree && node.tree.length > 0) {
       for (let i=0; i<node.tree.length; i++) {
-        map = Object.assign(map, preparePositions(`${id}-${i}`, node.tree[i]));
+        map = new Map([...map, ...preparePositions(`${id}-${i}`, node.tree[i])])
       }
-    } else if (node.position[1] > 0) {
-      map[id] = node.position
+    } else if (node.position && node.position[2] > 0) {
+      map.set(id, node.position);
     }
 
     return map;
   }, []);
 
-  const findSelection = useMemo(() => (pos) => {
+  const findSelection = useMemo(() => (src_idx, pos) => {
     // find the smallest one
     let current = null;
 
-    for (let k in preparedPositions) {
-      const pp = preparedPositions[k];
-      if (pos >= pp[0] && pos <= pp[0] + pp[1]) {
-        if (current != null && preparedPositions[current][1] > pp[1] ) {
+    for (let [k, pp] of preparedPositions) {
+      if (pp[0] !== src_idx)
+        continue;
+
+      if (pos >= pp[1] && pos <= pp[1] + pp[2]) {
+        if (current != null && preparedPositions.get(current)[2] > pp[2] ) {
           current = k
         } else {
           current = k
@@ -98,7 +109,7 @@ function PacketDissector() {
     }
 
     if (current != null) {
-      setSelectedTreeEntry({ id: current, position: preparedPositions[current] })
+      setSelectedTreeEntry({ id: current, position: preparedPositions.get(current) })
     }
   }, [ preparedPositions ])
 
@@ -126,6 +137,7 @@ function PacketDissector() {
           setSelectedPacket(e.data.data);
           setPreparedPositions(preparePositions("root", e.data.data))
           setSelectedTreeEntry(NO_SELECTION)
+          setSelectedDataSourceIndex(0)
         } else if (e.data.type === "processed" && e.data.code !== 0) {
           setStatus(`Error: non-zero return code (${e.data.code})`);
         }
@@ -172,7 +184,7 @@ function PacketDissector() {
       <PacketSummaryModal open={summaryOpen} setOpen={setSummaryOpen} summary={summary} />
       <div className='flex items-center w-full'>
         <FileButton variant="text" onFileSelected={loadFile}>Load File</FileButton>
-        <Button className={"ml-5"} variant="text" onClick={loadExample}>Load Example</Button>
+        <Button className={"ml-5"} variant="text" onClick={loadExample}>Load Random Example</Button>
         <div className="ml-5 text-sm text-gray-500">
           <strong>Status: </strong>
           {status}
@@ -189,7 +201,7 @@ function PacketDissector() {
         name="filter"
         id="filter"
         className="py-1 mt-2 w-full"
-        placeholder="display filter"
+        placeholder="display filter, example: tcp"
         value={filter}
         onEnter={filterFile}
         onChange={(e) => setFilter(e.target.value)}
@@ -211,7 +223,23 @@ function PacketDissector() {
                 </Allotment.Pane>
                 <Allotment.Pane>
                   <div className='ml-5 pt-3 pb-3 overflow-y-auto h-full'>
-                    <DissectionDump buffer={Buffer.from(selectedPacket.bytes, "base64")} select={findSelection} selected={selectedTreeEntry.position} />
+                    <Tab.Group selectedIndex={selectedDataSourceIndex} onChange={setSelectedDataSourceIndex}>
+                      <Tab.List className="flex space-x-4">
+                        {selectedPacket.data_sources.map((ds) => (
+                          <TabButton className="px-1 py-0 text-xs" key={`tb-${ds.idx}`}>{ds.name}</TabButton>
+                        ))}
+                      </Tab.List>
+                      <Tab.Panels className="mt-2">
+                        {selectedPacket.data_sources.map((ds) => {
+                          const pos = ds.idx === selectedTreeEntry.position[0] ? [ selectedTreeEntry.position[1], selectedTreeEntry.position[2] ] : [0, 0]
+                          return (
+                            <Tab.Panel key={`tp-${ds.idx}`}>
+                              <DissectionDump buffer={Buffer.from(ds.data, "base64")} select={(pos) => findSelection(ds.idx, pos)} selected={pos} />
+                            </Tab.Panel>
+                          )
+                        })}
+                      </Tab.Panels>
+                    </Tab.Group>
                   </div>
                 </Allotment.Pane>
               </Allotment>
