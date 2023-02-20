@@ -6,28 +6,11 @@ import { Buffer } from "buffer"
 
 const wg = new Wiregasm();
 
-// hold the data here
-const MAX_BATCH_ELEMS = 1000;
-const packets = new Map();
-let batch = [];
-
-const batchAway = (packet, end = false) => {
-  if (packet != null) {
-    // only save metadata
-    batch.push({
-      bg: packet.bg,
-      fg: packet.fg,
-      number: packet.number,
-      columns: packet.columns,
-    })
+function replacer(key, value) {
+  if (value.constructor.name.startsWith("Vector")) {
+    return new Array(value.size()).fill(0).map((_, id) => value.get(id));
   }
-
-  if (end || batch.length >= MAX_BATCH_ELEMS) {
-    postMessage({ type: "packets", data: batch });
-
-    // empty the batch
-    batch = []
-  }
+  return value;
 }
 
 wg.init(loadWiregasm, {
@@ -36,15 +19,7 @@ wg.init(loadWiregasm, {
     if (path.endsWith(".wasm")) return wasmModule;
     return prefix + path;
   },
-  handlePacket: (packet) => {
-    packets.set(packet.number, packet);
-    batchAway(packet);
-  },
-  handleStatus: (status) => postMessage({ type: "status", status: status }),
-  handleEnd: (summary) => {
-    batchAway(null, true);
-    postMessage({ type: "end", summary: summary });
-  },
+  handleStatus: (type, status) => postMessage({ type: "status", code: type, status: status }),
   handleError: (error) => postMessage({ type: "error", error: error }),
 }).then(() => {
   postMessage({ type: "init" })
@@ -57,31 +32,39 @@ onmessage = (event) => {
     postMessage({ type: "columns", data: wg.columns() })
   } else if (event.data.type === "select") {
     const number = event.data.number;
-    if (packets.has(number)) {
-      postMessage({ type: "selected", data: packets.get(number) })
+    const res = wg.frame(number);
+    postMessage({ type: "selected", data: JSON.parse(JSON.stringify(res, replacer)) })
+  } else if (event.data.type === "select-frames") {
+    const skip = event.data.skip;
+    const limit = event.data.limit;
+    const filter = event.data.filter;
+    const res = wg.frames(filter, skip, limit);
+
+    // send it to the correct port
+    event.ports[0].postMessage({result: JSON.parse(JSON.stringify(res, replacer))});
+  } else if (event.data.type === "check-filter") {
+    const filter = event.data.filter;
+    const res = wg.lib.checkFilter(filter);
+
+    if (res.ok) {
+      event.ports[0].postMessage({result: true });
+    } else {
+      event.ports[0].postMessage({error: res.error });
     }
   } else if (event.data.type === "process") {
-    // clear old packets
-    packets.clear();
-
     const f = event.data.file;
-    const filter = event.data.filter;
     const reader = new FileReader();
     reader.addEventListener('load', (event) => {
       // XXX: this blocks the worker thread
-      const code = wg.process_file(f.name, Buffer.from(event.target.result), filter);
-      postMessage({ type: "processed", code: code });
+      const res = wg.load(f.name, Buffer.from(event.target.result));
+      postMessage({ type: "processed", name: f.name, data: res });
     });
     reader.readAsArrayBuffer(f);
   } else if (event.data.type === "process-data") {
-    // clear old packets
-    packets.clear();
-
     const name = event.data.name;
     const data = event.data.data;
-    const filter = event.data.filter;
-    const code = wg.process_file(name, Buffer.from(data), filter);
-    postMessage({ type: "processed", code: code });
+    const res = wg.load(name, Buffer.from(data));
+    postMessage({ type: "processed", name: name, data: res });
   }
 };
 
