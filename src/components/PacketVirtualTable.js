@@ -1,13 +1,17 @@
-import { useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   flexRender,
   getCoreRowModel,
-  getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
+import {
+  useInfiniteQuery,
+} from '@tanstack/react-query'
 import { useVirtual } from '@tanstack/react-virtual'
 
-function PacketVirtualTable({ columns, packets, selectedIndex, setSelectedIndex }) {
+const fetchSize = 200
+
+function PacketVirtualTable({ columns, fileName, filter, fetchPackets, total, selectedFrame, setSelectedFrame }) {
   const tableContainerRef = useRef(null)
   const preparedColumns = useMemo(
     () => columns.map((c, i) => {
@@ -19,11 +23,58 @@ function PacketVirtualTable({ columns, packets, selectedIndex, setSelectedIndex 
     [ columns ]
   )
 
+  const { data, fetchNextPage, isFetching } =
+    useInfiniteQuery(
+      ['packet-data', fileName, filter],
+      async ({ pageParam = 0 }) => {
+        const start = pageParam * fetchSize
+        // console.log("fetchPackets", filter, start, fetchSize);
+        const fetchedData = await fetchPackets(filter, start, fetchSize)
+        return fetchedData
+      },
+      {
+        getNextPageParam: (_lastGroup, groups) => groups.length,
+        keepPreviousData: true,
+        refetchOnWindowFocus: false,
+      }
+    )
+
+
+  const flatData = useMemo(
+    () => data?.pages?.flatMap(i => i) ?? [],
+    [data]
+  )
+
+  // console.log(flatData)
+  const totalDBRowCount = total ?? 0
+  const totalFetched = flatData.length
+
+  const fetchMoreOnBottomReached = useCallback(
+    (containerRefElement) => {
+      if (containerRefElement) {
+        const { scrollHeight, scrollTop, clientHeight } = containerRefElement
+        //once the user has scrolled within 300px of the bottom of the table, fetch more data if there is any
+        if (
+          scrollHeight - scrollTop - clientHeight < 300 &&
+          !isFetching &&
+          totalFetched < totalDBRowCount
+        ) {
+          fetchNextPage()
+        }
+      }
+    },
+    [fetchNextPage, isFetching, totalFetched, totalDBRowCount]
+  )
+
+  //a check on mount and after a fetch to see if the table is already scrolled to the bottom and immediately needs to fetch more data
+  useEffect(() => {
+    fetchMoreOnBottomReached(tableContainerRef.current)
+  }, [fetchMoreOnBottomReached])
+
   const table = useReactTable({
-    data: packets,
+    data: flatData,
     columns: preparedColumns,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
   })
 
   const { rows } = table.getRowModel()
@@ -32,6 +83,7 @@ function PacketVirtualTable({ columns, packets, selectedIndex, setSelectedIndex 
     size: rows.length,
     overscan: 10,
   })
+
   const { virtualItems: virtualRows, totalSize } = rowVirtualizer
 
   const paddingTop = virtualRows.length > 0 ? virtualRows?.[0]?.start || 0 : 0
@@ -40,11 +92,10 @@ function PacketVirtualTable({ columns, packets, selectedIndex, setSelectedIndex 
       ? totalSize - (virtualRows?.[virtualRows.length - 1]?.end || 0)
       : 0
   
-  // console.log(rows.length, virtualRows.length, totalSize, paddingTop, paddingBottom)
 
   return (
     <div className="flex flex-col font-mono h-full">
-      <div ref={tableContainerRef} className="overflow-x-hidden">
+      <div ref={tableContainerRef} onScroll={e => fetchMoreOnBottomReached(e.target)} className="overflow-x-hidden">
         <div className="inline-block min-w-full align-middle">
           <div className="dark:bg-zinc-800 shadow dark:shadow-zinc-900 ring-1 ring-black dark:ring-zinc-900 ring-opacity-5 md:rounded-lg">
             <table className="min-w-full divide-y divide-gray-300">
@@ -59,22 +110,11 @@ function PacketVirtualTable({ columns, packets, selectedIndex, setSelectedIndex 
                           className="px-2 py-1 text-left text-sm font-semibold whitespace-nowrap"
                         >
                           {header.isPlaceholder ? null : (
-                            <div
-                              {...{
-                                className: header.column.getCanSort()
-                                  ? 'cursor-pointer select-none'
-                                  : '',
-                                onClick: header.column.getToggleSortingHandler(),
-                              }}
-                            >
+                            <div>
                               {flexRender(
                                 header.column.columnDef.header,
                                 header.getContext()
                               )}
-                              {{
-                                asc: ' 🔼',
-                                desc: ' 🔽',
-                              }[header.column.getIsSorted()] ?? null}
                             </div>
                           )}
                         </th>
@@ -90,13 +130,13 @@ function PacketVirtualTable({ columns, packets, selectedIndex, setSelectedIndex 
                   </tr>
                 )}
                 {virtualRows.map(virtualRow => {
-                  const selected = virtualRow.index === selectedIndex;
                   const row = rows[virtualRow.index]
-                  const p = packets[virtualRow.index]
+                  const p = flatData[virtualRow.index]
+                  const selected = p.number === selectedFrame;
                   return (
-                    <tr key={row.id} onClick={() => setSelectedIndex(virtualRow.index)} className="cursor-pointer leading-0" style={{
-                      backgroundColor: selected ? `blue` : p.bg ? `#${p.bg}` : '',
-                      color: selected ? `white` : p.fg ? `#${p.fg}` : ''
+                    <tr key={row.id} onClick={() => setSelectedFrame(p.number)} className="cursor-pointer leading-0" style={{
+                      backgroundColor: selected ? `blue` : p.bg ? `#${p.bg.toString(16).padStart(6, '0')}` : '',
+                      color: selected ? `white` : p.fg ? `#${p.fg.toString(16).padStart(6, '0')}` : ''
                     }}>
                       {row.getVisibleCells().map(cell => {
                         return (

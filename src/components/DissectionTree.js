@@ -27,11 +27,11 @@ function DissectionSubTree({ id, node, select, selected }) {
       
       className={clsx(
         "inline-flex items-center w-full",
-        node.position ? 'cursor-pointer' : '',
+        node.length > 0 ? 'cursor-pointer' : '',
         id === selected ? 'bg-gray-600 text-white' : ''
       )}
     >
-      {node.tree ? (
+      {node.tree && node.tree.length > 0 ? (
         <>
           {open ? (
             <ChevronDownIcon onClick={toggle} className="shrink-0 w-4 h-4 text-gray-200 dark:text-gray-600 fill-gray-500" />
@@ -45,14 +45,14 @@ function DissectionSubTree({ id, node, select, selected }) {
 
       <span
         onClick={() => {
-          if (node.position) {
-            select({ id: id, position: node.position })
+          if (node.length > 0) {
+            select({ id: id, idx: node.data_source_idx, start: node.start, length: node.length })
           }
         }}
         onDoubleClick={toggle}
         className="ml-1 w-full"
       >
-      {node.name}
+      {node.label}
       </span>
     </div>
     {node.tree && node.tree.length > 0 && open && (
