@@ -1,3 +1,17 @@
+# [1.16.0](https://github.com/good-tools/good.tools/compare/v1.15.0...v1.16.0) (2023-02-20)
+
+
+### Bug Fixes
+
+* adding random packet dissection examples ([e25caa5](https://github.com/good-tools/good.tools/commit/e25caa57b37b9d98453e26e935b4b9e3c93b486f))
+* tool warnings, packet dissection summary ([39a98dc](https://github.com/good-tools/good.tools/commit/39a98dc1952d9bcbf1307b5f1d833de690ddf9c8))
+* updating wiregasm, use correct bindings ([1c322a8](https://github.com/good-tools/good.tools/commit/1c322a866bddfa1cd59b830208959be463de987b))
+
+
+### Features
+
+* adding Packet Dissector ([ef6a862](https://github.com/good-tools/good.tools/commit/ef6a862ad4759862a11763acc32918acf227ccc6))
+
 # [1.15.0](https://github.com/good-tools/good.tools/compare/v1.14.2...v1.15.0) (2023-01-17)
 
 
