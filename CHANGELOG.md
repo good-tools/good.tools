@@ -1,3 +1,10 @@
+## [1.16.1](https://github.com/good-tools/good.tools/compare/v1.16.0...v1.16.1) (2023-02-21)
+
+
+### Bug Fixes
+
+* updating wiregasm to 1.1.0 ([e32b959](https://github.com/good-tools/good.tools/commit/e32b9592cda0f79e0e6741ff17145f35a9a0aa3a))
+
 # [1.16.0](https://github.com/good-tools/good.tools/compare/v1.15.0...v1.16.0) (2023-02-20)
 
 
