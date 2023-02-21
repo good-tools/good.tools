@@ -6,7 +6,7 @@
     "@algolia/autocomplete-core": "^1.7.4",
     "@goodtools/jdserialize": "^1.0.0",
     "@goodtools/protobuf-decoder": "^1.0.0",
-    "@goodtools/wiregasm": "^1.0.0",
+    "@goodtools/wiregasm": "^1.1.0",
     "@headlessui/react": "^1.7.7",
     "@heroicons/react": "^2.0.13",
     "@monaco-editor/react": "^4.4.6",
