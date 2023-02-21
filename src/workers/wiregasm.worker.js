@@ -1,4 +1,4 @@
-import { Wiregasm } from '@goodtools/wiregasm'
+import { Wiregasm, vectorToArray } from '@goodtools/wiregasm'
 import loadWiregasm from '@goodtools/wiregasm/dist/wiregasm'
 import wasmModule from '@goodtools/wiregasm/dist/wiregasm.wasm'
 import wasmData from '@goodtools/wiregasm/dist/wiregasm.data'
@@ -8,7 +8,7 @@ const wg = new Wiregasm();
 
 function replacer(key, value) {
   if (value.constructor.name.startsWith("Vector")) {
-    return new Array(value.size()).fill(0).map((_, id) => value.get(id));
+    return vectorToArray(value);
   }
   return value;
 }
