@@ -153,12 +153,16 @@ function PacketDissector() {
   }, [ preparedPositions ])
 
   useEffect(() => {
+    if (!initialized) {
+      return;
+    }
+
     checkFilter(worker, filter).then(() => {
       setFilterError(null);
     }).catch((e) => {
       setFilterError(e);
     })
-  }, [filter, worker])
+  }, [filter, worker, initialized])
 
   useEffect(() => {
     clear()

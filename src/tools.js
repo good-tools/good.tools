@@ -148,7 +148,7 @@ export const tools = [
     warning: function() {
       return (
         <div>
-          This tool uses a large (~60MB) WASM binary for packet dissection in your browser.
+          This tool uses a large (~18 MB) WASM binary for packet dissection in your browser.
         </div>
       )
     }

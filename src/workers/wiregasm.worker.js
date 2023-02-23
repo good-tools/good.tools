@@ -1,8 +1,9 @@
 import { Wiregasm, vectorToArray } from '@goodtools/wiregasm'
 import loadWiregasm from '@goodtools/wiregasm/dist/wiregasm'
-import wasmModule from '@goodtools/wiregasm/dist/wiregasm.wasm'
-import wasmData from '@goodtools/wiregasm/dist/wiregasm.data'
+import wasmModuleCompressed from '@goodtools/wiregasm/dist/wiregasm.wasm.gz'
+import wasmDataCompressed from '@goodtools/wiregasm/dist/wiregasm.data.gz'
 import { Buffer } from "buffer"
+import pako from "pako";
 
 const wg = new Wiregasm();
 
@@ -13,16 +14,35 @@ function replacer(key, value) {
   return value;
 }
 
-wg.init(loadWiregasm, {
-  locateFile: (path, prefix) => {
-    if (path.endsWith(".data")) return wasmData;
-    if (path.endsWith(".wasm")) return wasmModule;
-    return prefix + path;
-  },
-  handleStatus: (type, status) => postMessage({ type: "status", code: type, status: status }),
-  handleError: (error) => postMessage({ type: "error", error: error }),
-}).then(() => {
-  postMessage({ type: "init" })
+const inflateRemoteBuffer = async (url) => {
+  const res = await fetch(url);
+  const buf = await res.arrayBuffer();
+  return pako.inflate(buf);
+}
+
+const fetchPackages = async () => {
+  let [ wasm, data ] = await Promise.all([
+    await inflateRemoteBuffer(wasmModuleCompressed),
+    await inflateRemoteBuffer(wasmDataCompressed),
+  ]);
+
+  return { wasm, data };
+}
+
+fetchPackages().then(({ wasm, data }) => {
+  wg.init(loadWiregasm, {
+    wasmBinary: wasm.buffer,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    getPreloadedPackage(name, size) {
+      return data.buffer;
+    },
+    handleStatus: (type, status) => postMessage({ type: "status", code: type, status: status }),
+    handleError: (error) => postMessage({ type: "error", error: error }),
+  }).then(() => {
+    postMessage({ type: "init" })
+  }).catch((e) => {
+    postMessage({ type: "error", error: e })
+  })
 }).catch((e) => {
   postMessage({ type: "error", error: e })
 })
