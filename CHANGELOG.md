@@ -1,3 +1,10 @@
+# [1.17.0](https://github.com/good-tools/good.tools/compare/v1.16.1...v1.17.0) (2023-02-23)
+
+
+### Features
+
+* updating to wiregasm 1.2.0 and using compressed wasm/data ([fd7c318](https://github.com/good-tools/good.tools/commit/fd7c3187de0b80dc83b83dfd8dd9a141130a525d))
+
 ## [1.16.1](https://github.com/good-tools/good.tools/compare/v1.16.0...v1.16.1) (2023-02-21)
 
 
