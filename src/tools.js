@@ -1,4 +1,5 @@
 import React from 'react'
+import { urls } from './urls'
 
 export const serviceBaseUrl = "https://api.good.tools"
 export const internetToolsBaseUrl = "https://internet-tools.fly.dev"
@@ -14,7 +15,7 @@ export const tools = [
   // },
   {
     title: 'Base64',
-    href: '/base64',
+    href: urls['base64-encoder-decoder'],
     tags: ['base64', 'encoder', 'decoder'],
     component: React.lazy(() => import('./tools/Base64')),
     description: "Encode or decode text from and to the Base64 encoding format",
@@ -22,7 +23,7 @@ export const tools = [
   },
   {
     title: 'URL Encoder/Decoder',
-    href: '/url',
+    href: urls['url-encoder-decoder'],
     tags: ['url', 'encoder', 'decoder'],
     component: React.lazy(() => import('./tools/URL')),
     description: "Encode or decode text from and to the URL encoding format",
@@ -30,7 +31,7 @@ export const tools = [
   },
   {
     title: 'Diff Checker',
-    href: '/diff-checker',
+    href: urls['diff-checker'],
     tags: ['diff', 'text', 'checker'],
     component: React.lazy(() => import('./tools/DiffChecker')),
     description: "Compare text to find the difference between two text files",
@@ -42,7 +43,7 @@ export const tools = [
   },
   {
     title: 'Certificate Decoder',
-    href: '/certificate-decoder',
+    href: urls['certificate-decoder'],
     tags: ['certificate', 'ssl', 'decoder'],
     component: React.lazy(() => import('./tools/CertificateDecoder')),
     description: "Decode PEM encoded X509 certificates",
@@ -54,7 +55,7 @@ export const tools = [
   },
   {
     title: 'Protobuf Decoder',
-    href: '/protobuf-decoder',
+    href: urls['protobuf-decoder'],
     tags: ['protobuf', 'decoder'],
     component: React.lazy(() => import('./tools/ProtobufDecoder')),
     description: "Read raw protobuf buffers and inspect field values",
@@ -66,7 +67,7 @@ export const tools = [
   },
   {
     title: 'Java Object Deserializer',
-    href: '/java-deserialize',
+    href: urls['java-deserializer'],
     tags: ['java', 'deserializer'],
     component: React.lazy(() => import('./tools/JavaDeserializer')),
     description: "Decode serialized Java objects and inspect their data",
@@ -84,7 +85,7 @@ export const tools = [
   },
   {
     title: 'Docker Browser',
-    href: '/docker-browser',
+    href: urls['docker-browser'],
     tags: ['docker', 'image', 'browser', 'oci', 'container'],
     component: React.lazy(() => import('./tools/ImageBrowser')),
     description: "Inspect a docker image and its file system",
@@ -99,7 +100,7 @@ export const tools = [
   },
   {
     title: 'WHOIS',
-    href: '/whois',
+    href: urls['whois'],
     tags: ['whois', 'lookup'],
     component: React.lazy(() => import('./tools/Whois')),
     description: "Search the whois database for verified registration information",
@@ -111,7 +112,7 @@ export const tools = [
   },
   {
     title: 'DNS Lookup',
-    href: '/dns',
+    href: urls['dns-lookup'],
     tags: ['dns', 'lookup'],
     component: React.lazy(() => import('./tools/DNS')),
     description: "Lookup most common DNS record types for a domain",
@@ -123,7 +124,7 @@ export const tools = [
   },
   {
     title: 'Hash Calculator',
-    href: '/hash',
+    href: urls['hash-calculator'],
     tags: ['hash', 'calculator', 'digest', 'md5', 'sha256', 'sha384', 'sha512'],
     component: React.lazy(() => import('./tools/HashCalculator')),
     description: "Calculate hashes for popular message digest algorithms",
@@ -135,7 +136,7 @@ export const tools = [
   },
   {
     title: 'Packet Dissector',
-    href: '/packet-dissector',
+    href: urls['packet-dissector'],
     tags: ['wireshark', 'pcap', 'packet', 'dissector'],
     component: React.lazy(() => import('./tools/PacketDissector')),
     description: "Wireshark packet dissection in your browser",
@@ -155,7 +156,7 @@ export const tools = [
   },
   {
     title: 'Whats My IP',
-    href: '/whats-my-ip',
+    href: urls['whats-my-ip'],
     tags: ['whats', 'my', 'ip', 'address'],
     component: React.lazy(() => import('./tools/WhatsMyIP')),
     description: "Find out your public IPv4 and IPv6 addresses",
@@ -163,7 +164,7 @@ export const tools = [
   },
   {
     title: 'IP to Location',
-    href: '/ip-location',
+    href: urls['ip-location'],
     tags: ['ip', 'address', 'location'],
     component: React.lazy(() => import('./tools/IP2Location')),
     description: "Lookup details about IP addresses including their location, ASN and more",
@@ -181,7 +182,7 @@ export const tools = [
   },
   {
     title: 'JSON Formatter',
-    href: '/json',
+    href: urls['json-formatter'],
     tags: ['json', 'formatter'],
     component: React.lazy(() => import('./tools/JsonFormatter')),
     description: "Beautify and format a JSON document, filter values using JSONPath queries and browse your object tree",
@@ -198,7 +199,7 @@ export const tools = [
   },
   {
     title: 'XML Formatter',
-    href: '/xmlformatter',
+    href: urls['xml-formatter'],
     tags: ['xml', 'formatter'],
     component: React.lazy(() => import('./tools/XmlFormatter')),
     description: "Beautify and format an XML document, convert it to JSON or browse your object tree",
