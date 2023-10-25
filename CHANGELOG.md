@@ -1,3 +1,10 @@
+## [1.17.1](https://github.com/good-tools/good.tools/compare/v1.17.0...v1.17.1) (2023-10-25)
+
+
+### Bug Fixes
+
+* add sitemap generation, update to node 21 ([467d382](https://github.com/good-tools/good.tools/commit/467d3828561d28f0e568a6fd7dc4c6b9c8e38cfc))
+
 # [1.17.0](https://github.com/good-tools/good.tools/compare/v1.16.1...v1.17.0) (2023-02-23)
 
 
