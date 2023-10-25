@@ -16,11 +16,14 @@ jobs:
     - name: Configure Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 18
+        node-version: 21.x
         cache: 'npm'
 
     - name: Load Dependencies
       run: npm ci
+    
+    - name: Build Sitemap
+      run: npm run build-sitemap
 
     - name: Release
       id: release
