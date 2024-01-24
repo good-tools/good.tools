@@ -1,3 +1,10 @@
+## [1.17.2](https://github.com/good-tools/good.tools/compare/v1.17.1...v1.17.2) (2024-01-24)
+
+
+### Bug Fixes
+
+* disable sourcemaps on prod ([5f43a96](https://github.com/good-tools/good.tools/commit/5f43a96ac1aaeee2688be694a525beca1719528d))
+
 ## [1.17.1](https://github.com/good-tools/good.tools/compare/v1.17.0...v1.17.1) (2023-10-25)
 
 
