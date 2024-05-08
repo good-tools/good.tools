@@ -4,6 +4,7 @@ module.exports = function override(config, env) {
     fs: false,
     path: false,
     crypto: false,
+    child_process: false,
   }
 
   return config;

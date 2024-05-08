@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { useId } from "react";
 
-function CheckBox({ className, title, ...props }) {
+function CheckBox({ className, title, description, ...props }) {
   const id = useId();
   className = clsx(
     'relative flex items-start',
@@ -19,7 +19,7 @@ function CheckBox({ className, title, ...props }) {
         />
       </div>
       <div className="ml-3 text-sm">
-        <label htmlFor={id} className="text-zinc-700 dark:text-zinc-300">
+        <label htmlFor={id} title={description} className="text-zinc-700 dark:text-zinc-300">
           {title}
         </label>
       </div>

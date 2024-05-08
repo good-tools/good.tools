@@ -17,6 +17,7 @@ import {
 } from '@tanstack/react-query'
 import clsx from 'clsx';
 import { Tag } from '../components/Tag';
+import WiregasmPreferencesModal from '../components/WiregasmPreferencesModal';
 
 export const NO_SELECTION = { id: "", idx: 0, start: 0, length: 0 }
 
@@ -33,7 +34,7 @@ const checkFilter = (worker, filter) => new Promise((res, rej) => {
 		channel.port1.close();
 		if (data.error) {
 			rej(data.error);
-		}else {
+		} else {
 			res(data.result);
 		}
 	};
@@ -48,12 +49,87 @@ const getFrames = (worker, filter, skip, limit) => new Promise((res, rej) => {
 		channel.port1.close();
 		if (data.error) {
 			rej(data.error);
-		}else {
+		} else {
 			res(data.result);
 		}
 	};
 
   worker.postMessage({ type: "select-frames", filter: filter, skip: skip, limit: limit }, [channel.port2]);
+});
+
+const loadModuleTreeFromWorker = (worker) => new Promise((res, rej) => {
+  const channel = new MessageChannel(); 
+
+  channel.port1.onmessage = ({data}) => {
+    channel.port1.close();
+    if (data.error) {
+      rej(data.error);
+    } else {
+      res(data.result);
+    }
+  };
+
+  worker.postMessage({ type: "module-tree" }, [channel.port2]);
+});
+
+const loadPreferencesFromWorker = (worker, name) => new Promise((res, rej) => {
+  const channel = new MessageChannel(); 
+
+  channel.port1.onmessage = ({data}) => {
+    channel.port1.close();
+    if (data.error) {
+      rej(data.error);
+    } else {
+      res(data.result);
+    }
+  };
+
+  worker.postMessage({ type: "module-prefs", name: name }, [channel.port2]);
+});
+
+const uploadFileToWorker = (worker, file) => new Promise((res, rej) => {
+  const channel = new MessageChannel(); 
+
+  channel.port1.onmessage = ({data}) => {
+    channel.port1.close();
+    if (data.error) {
+      rej(data.error);
+    } else {
+      res(data.result);
+    }
+  };
+
+  worker.postMessage({ type: "upload-file", file: file }, [channel.port2]);
+});
+
+const updatePreferenceToWorker = (worker, module, key, value) => new Promise((res, rej) => {
+  const channel = new MessageChannel(); 
+
+  channel.port1.onmessage = ({data}) => {
+    channel.port1.close();
+    if (data.error) {
+      rej(data.error);
+    } else {
+      res(data.result);
+    }
+  };
+
+  worker.postMessage({ type: "update-pref", module: module, key: key, value: value }, [channel.port2]);
+});
+
+const applyPreferencesToWorker = (worker) => new Promise((res, rej) => {
+  const channel = new MessageChannel(); 
+
+  channel.port1.onmessage = ({data}) => {
+    channel.port1.close();
+    if (data.error) {
+      rej(data.error);
+    } else {
+      res(data.result);
+    }
+  };
+
+  worker.postMessage({ type: "apply-prefs" }, [channel.port2]);
 });
 
 function PacketDissector() {
@@ -80,6 +156,7 @@ function PacketDissector() {
   const [ summaryOpen, setSummaryOpen ] = useState(false);
   const [ selectedDataSourceIndex, setSelectedDataSourceIndex ] = useState(0);
   const [ fileName, setFileName ] = useState("");
+  const [ preferencesOpen, setPreferencesOpen ] = useState(false);
 
   const clear = useMemo(() => () => {
     setSelectedFrame(1)
@@ -234,12 +311,43 @@ function PacketDissector() {
     process(f)
   }, [ process ])
 
+  const loadModuleTree = useMemo(() => async () => {
+    return await loadModuleTreeFromWorker(worker);
+  }, [ worker ])
+
+  const loadPreferences = useMemo(() => async (name) => {
+    return await loadPreferencesFromWorker(worker, name);
+  }, [worker])
+
+  const uploadFile = useMemo(() => async (file) => {
+    return await uploadFileToWorker(worker, file);
+  }, [worker])
+
+  const updatePreference = useMemo(() => async (module, key, value) => {
+    return await updatePreferenceToWorker(worker, module, key, value);
+  }, [worker])
+
+  const applyPreferences = useMemo(() => async () => {
+    return await applyPreferencesToWorker(worker);
+  }, [worker])
+
   return (
     <div>
       <PacketSummaryModal open={summaryOpen} setOpen={setSummaryOpen} summary={summary} />
+      <WiregasmPreferencesModal
+        initialized={initialized}
+        open={preferencesOpen}
+        setOpen={setPreferencesOpen}
+        loadModuleTree={loadModuleTree}
+        loadPreferences={loadPreferences}
+        uploadFile={uploadFile}
+        updatePreference={updatePreference}
+        applyPreferences={applyPreferences}
+      />
       <div className='flex items-center w-full'>
         <FileButton variant="text" onFileSelected={loadFile}>Load File</FileButton>
         <Button className={"ml-5"} variant="text" onClick={loadExample}>Load Random Example</Button>
+        <Button className={"ml-5"} variant="text" onClick={() => setPreferencesOpen(true)}>Preferences</Button>
         <div className="ml-5 text-sm text-gray-500">
           <strong>Status: </strong>
           {status}
