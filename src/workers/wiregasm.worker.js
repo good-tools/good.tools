@@ -85,6 +85,37 @@ onmessage = (event) => {
     const data = event.data.data;
     const res = wg.load(name, Buffer.from(data));
     postMessage({ type: "processed", name: name, data: res });
+  } else if (event.data.type === "module-tree") {
+    const res = wg.list_modules();
+    // send it to the correct port
+    event.ports[0].postMessage({result: JSON.parse(JSON.stringify(res, replacer))});
+  } else if (event.data.type === "module-prefs") {
+    const res = wg.list_prefs(event.data.name);
+    // send it to the correct port
+    event.ports[0].postMessage({result: JSON.parse(JSON.stringify(res, replacer))});
+  } else if (event.data.type === "upload-file") {
+    const f = event.data.file;
+    const reader = new FileReader();
+    reader.addEventListener('load', (e) => {
+      // XXX: this blocks the worker thread
+      const path = "/uploads/" + f.name;
+      wg.lib.FS.writeFile(path, Buffer.from(e.target.result));
+      event.ports[0].postMessage({result: path});
+    });
+    reader.readAsArrayBuffer(f);
+  } else if (event.data.type === "update-pref") {
+    try {
+      console.log(`set_pref(${event.data.module}, ${event.data.key}, ${event.data.value})`)
+      wg.set_pref(event.data.module, event.data.key, event.data.value);
+      event.ports[0].postMessage({result: "ok"});
+    } catch (e) {
+      console.error(`set_pref(${event.data.module}, ${event.data.key}, ${event.data.value}) failed: ${e.message}`)
+      event.ports[0].postMessage({error: e.message});
+    }
+  } else if (event.data.type === "apply-prefs") {
+    console.log(`apply_prefs()`)
+    wg.apply_prefs();
+    event.ports[0].postMessage({result: "ok"});
   }
 };
 
