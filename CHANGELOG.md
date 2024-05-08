@@ -1,3 +1,10 @@
+# [1.18.0](https://github.com/good-tools/good.tools/compare/v1.17.2...v1.18.0) (2024-05-08)
+
+
+### Features
+
+* adding preferences to packet dissector ([0ae8a2c](https://github.com/good-tools/good.tools/commit/0ae8a2ce10153da4b5a2fb0d9600c581649b7cdc))
+
 ## [1.17.2](https://github.com/good-tools/good.tools/compare/v1.17.1...v1.17.2) (2024-01-24)
 
 
