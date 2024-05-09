@@ -1,3 +1,10 @@
+# [1.19.0](https://github.com/good-tools/good.tools/compare/v1.18.0...v1.19.0) (2024-05-09)
+
+
+### Features
+
+* updating wiregasm, reloading on dissection preference change ([aae1b80](https://github.com/good-tools/good.tools/commit/aae1b806ddf03a079a11ac763c3691816e461003))
+
 # [1.18.0](https://github.com/good-tools/good.tools/compare/v1.17.2...v1.18.0) (2024-05-08)
 
 
