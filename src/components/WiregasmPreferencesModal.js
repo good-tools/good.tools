@@ -16,7 +16,7 @@ function recursiveFilter(tree, filter) {
           submodules: filteredChildren,
         });
       }
-    } else if (node.name.includes(filter) || node.title.includes(filter)) {
+    } else if (node.name.toLowerCase().includes(filter) || node.title.toLowerCase().includes(filter)) {
       filtered.push(node);
     }
   }
@@ -52,7 +52,7 @@ function WiregasmPreferencesModal({
       return;
     }
 
-    const filtered = recursiveFilter(moduleTree, filter);
+    const filtered = recursiveFilter(moduleTree, filter.toLowerCase());
 
     setFilteredTree(filtered);
   }, [moduleTree, filter]);
@@ -84,7 +84,7 @@ function WiregasmPreferencesModal({
 
   const applyPreferenceValues = () => {
     setUpdatedNonce(updatedNonce + 1);
-    applyPreferences(selectedModule.name).then(() => {
+    applyPreferences().then(() => {
       setOpen(false);
     });
   };

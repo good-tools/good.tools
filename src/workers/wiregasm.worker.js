@@ -85,6 +85,14 @@ onmessage = (event) => {
     const data = event.data.data;
     const res = wg.load(name, Buffer.from(data));
     postMessage({ type: "processed", name: name, data: res });
+  } else if (event.data.type === "reload-quick") {
+    if (wg.session) {
+      // TODO: this is a hack, we should be able to reload the session
+      const name = event.data.name;
+      const res = wg.session.load();
+
+      postMessage({ type: "processed", name: name, data: res });
+    }
   } else if (event.data.type === "module-tree") {
     const res = wg.list_modules();
     // send it to the correct port
