@@ -1,3 +1,10 @@
+## [1.19.1](https://github.com/good-tools/good.tools/compare/v1.19.0...v1.19.1) (2024-08-26)
+
+
+### Bug Fixes
+
+* reopen source maps ([0070812](https://github.com/good-tools/good.tools/commit/0070812833099e1cb6fb3a494bd4214217f79063))
+
 # [1.19.0](https://github.com/good-tools/good.tools/compare/v1.18.0...v1.19.0) (2024-05-09)
 
 
