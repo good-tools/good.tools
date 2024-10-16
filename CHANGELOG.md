@@ -1,3 +1,10 @@
+## [1.19.2](https://github.com/good-tools/good.tools/compare/v1.19.1...v1.19.2) (2024-10-16)
+
+
+### Bug Fixes
+
+* allow -12 for short reads in packet dissector ([415d373](https://github.com/good-tools/good.tools/commit/415d373245ea33bdb41c5c071affd85abe77919e))
+
 ## [1.19.1](https://github.com/good-tools/good.tools/compare/v1.19.0...v1.19.1) (2024-08-26)
 
 
