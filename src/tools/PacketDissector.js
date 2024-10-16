@@ -302,10 +302,13 @@ function PacketDissector() {
           setFinishedProcessing(true);
           setFileName(e.data.name);
 
-          if (response.code === 0) {
+          // -12 is short read
+          if (response.code === 0 || response.code === -12) {
             // in case of a reload, update the dissection nonce
             setDissectionNonce(Math.random());
-
+            if (response.code !== 0) {
+              setStatus(`Code: ${response.code}`);
+            }
             setTotalFrames(response.summary.packet_count);
             setSummary(response.summary);
           }
