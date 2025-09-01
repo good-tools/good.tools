@@ -124,6 +124,8 @@ onmessage = (event) => {
     console.log(`apply_prefs()`)
     wg.apply_prefs();
     event.ports[0].postMessage({result: "ok"});
+  } else if (event.data.type === "get-version") {
+    event.ports[0].postMessage({result: wg.lib.wiresharkVersion()});
   }
 };
 
