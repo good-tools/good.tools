@@ -61,6 +61,22 @@ const getFrames = (worker, filter, skip, limit) =>
     );
   });
 
+const getVersion = (worker) =>
+  new Promise((res, rej) => {
+    const channel = new MessageChannel();
+
+    channel.port1.onmessage = ({ data }) => {
+      channel.port1.close();
+      if (data.error) {
+        rej(data.error);
+      } else {
+        res(data.result);
+      }
+    };
+
+    worker.postMessage({ type: "get-version" }, [channel.port2]);
+  });
+
 const loadModuleTreeFromWorker = (worker) =>
   new Promise((res, rej) => {
     const channel = new MessageChannel();
@@ -151,6 +167,7 @@ function PacketDissector() {
   );
 
   const queryClient = new QueryClient();
+  const [version, setVersion] = useState(null);
   const [totalFrames, setTotalFrames] = useState(0);
   const [matchedFrames, setMatchedFrames] = useState(0);
   const [status, setStatus] = useState("Loading...");
@@ -275,6 +292,19 @@ function PacketDissector() {
         setFilterError(e);
       });
   }, [filter, worker, initialized]);
+
+  useEffect(() => {
+    if (!initialized) {
+      return;
+    }
+
+    getVersion(worker)
+      .then((version) => {
+        setVersion(version);
+      })
+      .catch((e) => {
+      });
+  }, [worker, initialized]);
 
   useEffect(() => {
     clear();
@@ -450,6 +480,11 @@ function PacketDissector() {
           >
             Summary
           </Button>
+        )}
+        {version != null && (
+          <div className="ml-auto text-sm">
+            v{version}
+          </div>
         )}
         <div className="ml-auto text-sm">
           {matchedFrames} / {totalFrames} packets
