@@ -1,3 +1,10 @@
+## [1.19.3](https://github.com/good-tools/good.tools/compare/v1.19.2...v1.19.3) (2025-09-01)
+
+
+### Bug Fixes
+
+* update wiregasm version and show version ([d5ea6f7](https://github.com/good-tools/good.tools/commit/d5ea6f75a2ac7547a03f7b1bffe85c954c06407a))
+
 ## [1.19.2](https://github.com/good-tools/good.tools/compare/v1.19.1...v1.19.2) (2024-10-16)
 
 
