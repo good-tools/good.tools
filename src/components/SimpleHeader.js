@@ -1,19 +1,27 @@
 import { Link } from 'react-router-dom';
-import { Logo } from './Logo';
+import { Wrench } from 'lucide-react';
 import { ModeToggle } from './ModeToggle';
 
 function SimpleHeader() {
   return (
-    <header className="bg-white dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4 max-w-7xl">
-        <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-            <Logo className="h-6" />
-          </Link>
-          <div className="flex items-center space-x-4">
-            <ModeToggle />
+    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        <Link 
+          to="/" 
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+        >
+          {/* Icon Box */}
+          <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center">
+            <Wrench className="h-5 w-5 text-primary-foreground" />
           </div>
-        </div>
+          
+          {/* Brand Text with Gradient */}
+          <span className="text-xl font-semibold">
+            good<span className="gradient-text">.tools</span>
+          </span>
+        </Link>
+        
+        <ModeToggle />
       </div>
     </header>
   );

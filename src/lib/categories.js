@@ -1,4 +1,15 @@
-// Auto-categorization logic based on tool tags
+import { Layers, Code, Binary, Shield, KeyRound } from 'lucide-react';
+
+// Category definitions with icons
+export const categories = [
+  { name: "All", icon: Layers },
+  { name: "Development", icon: Code },
+  { name: "Encoding", icon: Binary },
+  { name: "Security", icon: Shield },
+  { name: "General", icon: KeyRound },
+];
+
+// Legacy CATEGORIES object for backward compatibility
 export const CATEGORIES = {
   ALL: 'All',
   DEVELOPMENT: 'Development',
@@ -35,14 +46,32 @@ export function getToolsByCategory(tools, category) {
   return tools.filter(tool => getToolCategory(tool) === category);
 }
 
+// Map tools to Lucide React icon names
+export function getToolIcon(tool) {
+  const tags = tool.tags || [];
+  
+  // Check tags for specific icon mappings
+  if (tags.includes('base64')) return 'FileText';
+  if (tags.includes('json')) return 'Braces';
+  if (tags.includes('xml')) return 'Code2';
+  if (tags.includes('url')) return 'Link';
+  if (tags.includes('diff')) return 'GitCompare';
+  if (tags.includes('certificate')) return 'FileKey';
+  if (tags.includes('protobuf')) return 'Package';
+  if (tags.includes('java')) return 'Coffee';
+  if (tags.includes('docker')) return 'Container';
+  if (tags.includes('whois')) return 'Search';
+  if (tags.includes('dns')) return 'Globe';
+  if (tags.includes('hash')) return 'Hash';
+  if (tags.includes('packet') || tags.includes('wireshark')) return 'Radio';
+  if (tags.includes('ip') || tags.includes('location')) return 'MapPin';
+  
+  // Default icon
+  return 'Wrench';
+}
+
 export function getCategoryIcon(category) {
-  const icons = {
-    [CATEGORIES.ALL]: '☰',
-    [CATEGORIES.DEVELOPMENT]: '</>', 
-    [CATEGORIES.ENCODING]: '#',
-    [CATEGORIES.SECURITY]: '🔒',
-    [CATEGORIES.GENERAL]: '🔧'
-  };
-  return icons[category] || icons[CATEGORIES.ALL];
+  const categoryObj = categories.find(cat => cat.name === category);
+  return categoryObj ? categoryObj.icon : Layers;
 }
 
