@@ -1,39 +1,29 @@
-import { motion } from 'framer-motion'
+import { Outlet } from 'react-router-dom'
+import SimpleHeader from '../components/SimpleHeader'
+import packageJson from '../../package.json'
 
-import { Link, Outlet, useLocation } from 'react-router-dom'
-import { Logo } from '../components/Logo'
-import { Header } from '../components/Header'
-import { Navigation } from '../components/Navigation'
-
-import { useMobileNavigationStore } from '../components/MobileNavigation'
-import { useEffect } from "react";
+function Footer() {
+  return (
+    <footer className="border-t bg-muted/30 mt-auto">
+      <div className="container mx-auto px-4 py-8">
+        <p className="text-center text-sm text-muted-foreground">
+          v{packageJson.version} &copy; {new Date().getFullYear()}
+        </p>
+      </div>
+    </footer>
+  );
+}
 
 export function Layout() {
-  let location = useLocation();
-
-  useEffect(() => {
-    useMobileNavigationStore.getState().close()
-  }, [location])
-
   return (
-    <div className="lg:ml-72 xl:ml-80">
-      <motion.header
-        layoutScroll
-        className="fixed inset-y-0 left-0 z-40 contents w-72 overflow-y-auto border-r border-zinc-900/10 px-6 pt-4 pb-8 dark:border-white/10 lg:block xl:w-80"
-      >
-        <div className="hidden lg:flex">
-          <Link to="/" aria-label="Home">
-            <Logo className="h-6" />
-          </Link>
-        </div>
-        <Header />
-        <Navigation className="hidden lg:mt-10 lg:block" />
-      </motion.header>
-      <div className="relative px-4 pt-14 sm:px-6 lg:px-8">
-        <main className="py-4 text-zinc-900 dark:text-white">
+    <div className="min-h-screen bg-background flex flex-col">
+      <SimpleHeader />
+      <main className="container mx-auto px-4 py-8 flex-1">
+        <div className="mx-auto max-w-6xl">
           <Outlet />
-        </main>
-      </div>
+        </div>
+      </main>
+      <Footer />
     </div>
   )
 }
