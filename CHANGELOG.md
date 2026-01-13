@@ -1,3 +1,10 @@
+# [1.20.0](https://github.com/good-tools/good.tools/compare/v1.19.3...v1.20.0) (2026-01-13)
+
+
+### Features
+
+* trigger release for UI redesign deployment ([5acbf74](https://github.com/good-tools/good.tools/commit/5acbf74a0cd9cf830d995f250ae7bf629b732b2d))
+
 ## [1.19.3](https://github.com/good-tools/good.tools/compare/v1.19.2...v1.19.3) (2025-09-01)
 
 
