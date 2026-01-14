@@ -1,11 +1,17 @@
-import { Link } from 'react-router-dom';
-import * as Icons from 'lucide-react';
-import { getToolCategory, getToolIcon } from '../lib/categories';
+import { Link } from "react-router-dom";
+import * as Icons from "lucide-react";
+import { getToolCategory, getToolIcon } from "@/lib/categories";
+import type { Tool } from "@/types";
 
-function ToolCard({ tool }) {
+interface ToolCardProps {
+  tool: Tool;
+}
+
+function ToolCard({ tool }: ToolCardProps) {
   const category = getToolCategory(tool);
   const iconName = getToolIcon(tool);
-  const IconComponent = Icons[iconName] || Icons.Wrench;
+  const IconComponent =
+    (Icons as Record<string, Icons.LucideIcon>)[iconName] || Icons.Wrench;
 
   return (
     <Link to={tool.href} className="tool-card group block">
@@ -17,9 +23,13 @@ function ToolCard({ tool }) {
           {category}
         </span>
       </div>
-      <h3 className="mb-2 text-lg font-semibold text-foreground">{tool.title}</h3>
-      <p className="text-sm text-muted-foreground line-clamp-2">{tool.description}</p>
-      
+      <h3 className="mb-2 text-lg font-semibold text-foreground">
+        {tool.title}
+      </h3>
+      <p className="text-sm text-muted-foreground line-clamp-2">
+        {tool.description}
+      </p>
+
       {tool.online && (
         <div className="mt-3 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-500">
           <Icons.AlertTriangle className="h-3.5 w-3.5" />
@@ -31,4 +41,3 @@ function ToolCard({ tool }) {
 }
 
 export default ToolCard;
-

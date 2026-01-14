@@ -1,6 +1,6 @@
-import { Outlet } from 'react-router-dom'
-import SimpleHeader from '../components/SimpleHeader'
-import packageJson from '../../package.json'
+import { Outlet } from "react-router-dom";
+import SimpleHeader from "@/components/SimpleHeader";
+import packageJson from "../../package.json";
 
 function Footer() {
   return (
@@ -25,5 +25,5 @@ export function Layout() {
       </main>
       <Footer />
     </div>
-  )
+  );
 }

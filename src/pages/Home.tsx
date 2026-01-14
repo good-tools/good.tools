@@ -1,14 +1,14 @@
-import { useState, useMemo } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { Search } from 'lucide-react';
-import { tools } from '../tools';
-import ToolCard from '../components/ToolCard';
-import SearchBar from '../components/SearchBar';
-import CategoryFilter from '../components/CategoryFilter';
-import { CATEGORIES, getToolsByCategory } from '../lib/categories';
+import { useState, useMemo } from "react";
+import { Helmet } from "react-helmet-async";
+import { Search } from "lucide-react";
+import { tools } from "@/config/tools.config";
+import ToolCard from "@/components/ToolCard";
+import SearchBar from "@/components/SearchBar";
+import CategoryFilter from "@/components/CategoryFilter";
+import { CATEGORIES, getToolsByCategory } from "@/lib/categories";
 
 function Home() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState(CATEGORIES.ALL);
 
   // Filter tools based on search and category
@@ -17,10 +17,11 @@ function Home() {
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(tool => 
-        tool.title.toLowerCase().includes(query) ||
-        tool.description.toLowerCase().includes(query) ||
-        tool.tags.some(tag => tag.toLowerCase().includes(query))
+      filtered = filtered.filter(
+        (tool) =>
+          tool.title.toLowerCase().includes(query) ||
+          tool.description.toLowerCase().includes(query) ||
+          tool.tags.some((tag) => tag.toLowerCase().includes(query)),
       );
     }
 
@@ -31,33 +32,39 @@ function Home() {
     <>
       <Helmet>
         <title>good.tools · Purpose built online tools</title>
-        <meta name="description" content={"Purpose built, online, free-to-use tools"} />
+        <meta
+          name="description"
+          content={"Purpose built, online, free-to-use tools"}
+        />
       </Helmet>
 
-      {/* Hero Section */}      
-        <section className="mb-16 text-center animate-fade-in">
-          <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-            Purpose-built tools for
-            <span className="gradient-text"> developers</span>
-          </h1>
-          <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            A collection of free, fast, and privacy-focused tools that run entirely in your browser.
-            No data leaves your device.
-          </p>
-        </section>
-      
+      {/* Hero Section */}
+      <section className="mb-16 text-center animate-fade-in">
+        <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+          Purpose-built tools for
+          <span className="gradient-text"> developers</span>
+        </h1>
+        <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+          A collection of free, fast, and privacy-focused tools that run
+          entirely in your browser. No data leaves your device.
+        </p>
+      </section>
+
       {/* Search Bar */}
       <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-        <SearchBar 
+        <SearchBar
           value={searchQuery}
           onChange={setSearchQuery}
-          onClear={() => setSearchQuery('')}
+          onClear={() => setSearchQuery("")}
         />
       </div>
 
       {/* Category Filters */}
-      <div className="mb-8 flex flex-wrap gap-2 animate-slide-up" style={{ animationDelay: "0.15s" }}>
-        <CategoryFilter 
+      <div
+        className="mb-8 flex flex-wrap gap-2 animate-slide-up"
+        style={{ animationDelay: "0.15s" }}
+      >
+        <CategoryFilter
           activeCategory={activeCategory}
           onCategoryChange={setActiveCategory}
         />
@@ -77,9 +84,9 @@ function Home() {
             <p className="text-muted-foreground text-lg mb-2">
               No tools found matching your search.
             </p>
-            <button 
+            <button
               onClick={() => {
-                setSearchQuery('');
+                setSearchQuery("");
                 setActiveCategory(CATEGORIES.ALL);
               }}
               className="text-primary hover:underline"
@@ -94,4 +101,3 @@ function Home() {
 }
 
 export default Home;
-
