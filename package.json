@@ -2,6 +2,7 @@
   "name": "good.tools",
   "version": "1.19.3",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@algolia/autocomplete-core": "^1.7.4",
     "@goodtools/jdserialize": "^1.0.0",
@@ -18,12 +19,9 @@
     "@radix-ui/react-switch": "^1.2.6",
     "@tailwindcss/forms": "^0.5.3",
     "@tailwindcss/typography": "^0.5.8",
-    "@tanstack/react-query": "^4.24.6",
+    "@tanstack/react-query": "^5.62.16",
     "@tanstack/react-table": "^8.7.9",
-    "@tanstack/react-virtual": "^3.0.0-alpha.0",
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
+    "@tanstack/react-virtual": "^3.12.0",
     "allotment": "^1.17.1",
     "buffer": "^6.0.3",
     "clsx": "^1.2.1",
@@ -44,7 +42,6 @@
     "react-helmet-async": "^1.3.0",
     "react-inspector": "^6.0.1",
     "react-router-dom": "^6.5.0",
-    "react-scripts": "5.0.1",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^3.2.4",
     "tailwindcss-animate": "^1.0.7",
@@ -53,18 +50,12 @@
     "zustand": "^4.1.5"
   },
   "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit",
     "build-sitemap": "node src/sitemap.js",
-    "start": "react-app-rewired start",
-    "build": "react-app-rewired build",
-    "test": "react-app-rewired test",
-    "eject": "react-scripts eject",
-    "fix:prettier": "prettier \"src/**/*.js\" --write"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "fix:prettier": "prettier \"src/**/*.{js,ts,jsx,tsx}\" --write"
   },
   "browserslist": {
     "production": [
@@ -82,8 +73,15 @@
     "@semantic-release/changelog": "^6.0.2",
     "@semantic-release/exec": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
+    "@types/node": "^20.17.10",
+    "@types/node-forge": "^1.3.11",
+    "@types/pako": "^2.0.3",
+    "@types/react": "^18.2.79",
+    "@types/react-dom": "^18.2.25",
+    "@vitejs/plugin-react": "^4.3.4",
     "prettier": "^2.8.3",
-    "react-app-rewired": "^2.2.1",
-    "sitemap": "^7.1.1"
+    "sitemap": "^7.1.1",
+    "typescript": "^5.7.3",
+    "vite": "^5.4.18"
   }
 }
