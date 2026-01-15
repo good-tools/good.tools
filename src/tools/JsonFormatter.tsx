@@ -1,42 +1,22 @@
 import Editor from "@monaco-editor/react";
 import { Allotment } from "allotment";
-import { useContext, useEffect } from "react";
-import { Button } from "../components/Button";
-import { DarkModeContext } from "../components/ModeToggle";
-import { Tag } from "../components/Tag";
+import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { useDarkModeContext } from "@/components/ModeToggle";
+import { Tag } from "@/components/Tag";
 
 import "allotment/dist/style.css";
-import TextInput from "../components/TextInput";
+import TextInput from "@/components/TextInput";
 import jp from "jsonpath";
 import { ObjectInspector } from "react-inspector";
-import clsx from "clsx";
-import CheckBox from "../components/CheckBox";
-import create from "zustand";
-
-const DEFAULT_JSON_OBJ = {
-  message: "Hello, World!",
-};
-
-const useJSONFormatterStore = create((set) => ({
-  value: JSON.stringify(DEFAULT_JSON_OBJ, null, 2),
-  parsed: DEFAULT_JSON_OBJ,
-  filtered: DEFAULT_JSON_OBJ,
-  valid: true,
-  query: "",
-  tree: true,
-
-  setValue: (v) => set(() => ({ value: v })),
-  setParsed: (v) => set(() => ({ parsed: v })),
-  setFiltered: (v) => set(() => ({ filtered: v })),
-  setValid: (v) => set(() => ({ valid: v })),
-  setQuery: (v) => set(() => ({ query: v })),
-  setTree: (v) => set(() => ({ tree: v })),
-}));
+import { cn } from "@/lib/utils";
+import CheckBox from "@/components/CheckBox";
+import { useJSONFormatterStore } from "@/stores";
 
 function JsonFormatter() {
-  const { darkMode } = useContext(DarkModeContext);
+  const { darkMode } = useDarkModeContext();
 
-  const [
+  const {
     value,
     setValue,
     parsed,
@@ -49,20 +29,7 @@ function JsonFormatter() {
     setQuery,
     tree,
     setTree,
-  ] = useJSONFormatterStore((state) => [
-    state.value,
-    state.setValue,
-    state.parsed,
-    state.setParsed,
-    state.filtered,
-    state.setFiltered,
-    state.valid,
-    state.setValid,
-    state.query,
-    state.setQuery,
-    state.tree,
-    state.setTree,
-  ]);
+  } = useJSONFormatterStore();
 
   const handleTreeChange = () => {
     setTree(!tree);
@@ -76,10 +43,17 @@ function JsonFormatter() {
 
     try {
       setFiltered(jp.query(parsed, query));
-    } catch {}
+    } catch {
+      // Invalid JSONPath query
+    }
   }, [query, parsed, setFiltered]);
 
-  const checkValidityAndSetValue = (val) => {
+  const checkValidityAndSetValue = (val: string | undefined) => {
+    if (!val) {
+      setValue("");
+      return;
+    }
+
     setValue(val);
 
     if (val === "") {
@@ -92,7 +66,6 @@ function JsonFormatter() {
     try {
       const p = JSON.parse(val);
       setParsed(p);
-
       setValid(true);
     } catch {
       setValid(false);
@@ -112,8 +85,8 @@ function JsonFormatter() {
   };
 
   const clear = () => {
-    setValue("{}")
-  }
+    setValue("{}");
+  };
 
   return (
     <div className="h-[60vh] w-full">
@@ -121,9 +94,7 @@ function JsonFormatter() {
         <Allotment.Pane>
           <div>
             <div className="mb-3">
-              <Button variant="filled" onClick={() => format()}>
-                Format
-              </Button>
+              <Button onClick={() => format()}>Format</Button>
               <Button
                 className="ml-3"
                 variant="secondary"
@@ -131,7 +102,9 @@ function JsonFormatter() {
               >
                 Minify
               </Button>
-              <Button variant="text" className={"ml-3"} onClick={clear}>Clear</Button>
+              <Button variant="ghost" className={"ml-3"} onClick={clear}>
+                Clear
+              </Button>
               {!valid && (
                 <div className="inline ml-3">
                   <Tag color="rose">INVALID</Tag>
@@ -145,7 +118,7 @@ function JsonFormatter() {
               defaultLanguage="json"
               onChange={(v) => checkValidityAndSetValue(v)}
               options={{
-                wordWrap: true,
+                wordWrap: "on" as const,
                 contextmenu: false,
                 minimap: {
                   enabled: false,
@@ -156,9 +129,9 @@ function JsonFormatter() {
         </Allotment.Pane>
         <Allotment.Pane>
           <div
-            className={clsx(
+            className={cn(
               "pl-2 justify-items-center",
-              tree ? "h-full overflow-y-auto" : ""
+              tree ? "h-full overflow-y-auto" : "",
             )}
           >
             <div className="mb-2 grid grid-cols-3 gap-2">
@@ -190,7 +163,7 @@ function JsonFormatter() {
                 defaultLanguage="json"
                 options={{
                   readOnly: true,
-                  wordWrap: true,
+                  wordWrap: "on" as const,
                   contextmenu: false,
                   minimap: {
                     enabled: false,

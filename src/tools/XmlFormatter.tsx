@@ -1,9 +1,9 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import Editor from "@monaco-editor/react";
 import { Allotment } from "allotment";
-import { Button } from "../components/Button";
-import { DarkModeContext } from "../components/ModeToggle";
-import { Tag } from "../components/Tag";
+import { Button } from "@/components/ui/button";
+import { useDarkModeContext } from "@/components/ModeToggle";
+import { Tag } from "@/components/Tag";
 import "allotment/dist/style.css";
 import { pd } from "pretty-data";
 import { XMLParser } from "fast-xml-parser";
@@ -14,19 +14,19 @@ const DEFAULT_XML_OBJ = `<?xml version="1.0" encoding="UTF-8"?>
 
 function XmlFormatter() {
   const [value, setValue] = useState(DEFAULT_XML_OBJ);
-  const [parsed, setParsed] = useState("")
+  const [parsed, setParsed] = useState<string | unknown>("");
   const [valid, setValid] = useState(true);
-  const { darkMode } = useContext(DarkModeContext);
-  const [defaultLanguage, setDefaultLanguage] = useState("xml");
+  const { darkMode } = useDarkModeContext();
+  const [defaultLanguage, setDefaultLanguage] = useState<"xml" | "json">("xml");
   const [tree, setTree] = useState(false);
 
   const format = () => {
     if (valid) {
       setTree(false);
       try {
-        let formatted = pd.xml(value);
+        const formatted = pd.xml(value);
         setDefaultLanguage("xml");
-        setParsed(formatted)
+        setParsed(formatted);
         setValid(true);
       } catch {
         setValid(false);
@@ -34,7 +34,12 @@ function XmlFormatter() {
     }
   };
 
-  const checkValidityAndSetValue = (val) => {
+  const checkValidityAndSetValue = (val: string | undefined) => {
+    if (!val) {
+      setValue("");
+      return;
+    }
+
     setValue(val);
     if (val === "") {
       setValid(true);
@@ -52,20 +57,20 @@ function XmlFormatter() {
   const tiny = () => {
     if (valid) {
       setTree(false);
-      let mini = pd.xmlmin(value);
+      const mini = pd.xmlmin(value);
       setDefaultLanguage("xml");
-      setParsed(mini)
+      setParsed(mini);
     }
   };
 
   const tojson = () => {
     if (valid) {
       const parser = new XMLParser();
-      let jsonObj = parser.parse(value);
+      const jsonObj = parser.parse(value);
       if (jsonObj != null) {
         setDefaultLanguage("json");
         setTree(false);
-        setParsed(jsonObj)
+        setParsed(jsonObj);
       }
     }
   };
@@ -78,10 +83,10 @@ function XmlFormatter() {
   };
 
   const clear = () => {
-    setValue("")
-    setParsed("")
-    setValid(true)
-    setTree(false)
+    setValue("");
+    setParsed("");
+    setValid(true);
+    setTree(false);
   };
 
   return (
@@ -90,9 +95,7 @@ function XmlFormatter() {
         <Allotment.Pane>
           <div>
             <div className="mb-3">
-              <Button variant="filled" onClick={() => format()}>
-                Format
-              </Button>
+              <Button onClick={() => format()}>Format</Button>
               <Button
                 className="ml-2"
                 variant="secondary"
@@ -114,7 +117,9 @@ function XmlFormatter() {
               >
                 Object Tree
               </Button>
-              <Button variant="text" className={"ml-3"} onClick={clear}>Clear</Button>
+              <Button variant="ghost" className={"ml-3"} onClick={clear}>
+                Clear
+              </Button>
               {!valid && (
                 <div className="inline ml-3">
                   <Tag color="rose">INVALID</Tag>
@@ -128,7 +133,7 @@ function XmlFormatter() {
               language="xml"
               onChange={(val) => checkValidityAndSetValue(val)}
               options={{
-                wordWrap: true,
+                wordWrap: "on" as const,
                 contextmenu: false,
                 minimap: {
                   enabled: false,
@@ -139,9 +144,7 @@ function XmlFormatter() {
         </Allotment.Pane>
         <Allotment.Pane>
           <div className="pl-2">
-            <div className="w-full mb-2 text-sm ml-1">
-              Output
-            </div>
+            <div className="w-full mb-2 text-sm ml-1">Output</div>
             {tree ? (
               <ObjectInspector
                 data={parsed}
@@ -152,14 +155,14 @@ function XmlFormatter() {
                 height={"64vh"}
                 value={
                   defaultLanguage === "xml"
-                    ? parsed
+                    ? (parsed as string)
                     : JSON.stringify(parsed, null, 2)
                 }
                 theme={darkMode ? "vs-dark" : "light"}
                 language={defaultLanguage}
                 options={{
                   readOnly: true,
-                  wordWrap: true,
+                  wordWrap: "on" as const,
                   contextmenu: false,
                   minimap: {
                     enabled: false,
