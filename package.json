@@ -54,6 +54,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
+    "test": "tsc --noEmit",
     "build-sitemap": "node src/sitemap.js",
     "fix:prettier": "prettier \"src/**/*.{js,ts,jsx,tsx}\" --write"
   },
