@@ -1,22 +1,36 @@
 import { useEffect, useMemo, useState } from "react";
-import FileButton from "../components/FileButton";
-import TextInput from "../components/TextInput";
+import FileButton from "@/components/FileButton";
+import TextInput from "@/components/TextInput";
 import { Buffer } from "buffer";
-import DissectionTree from "../components/DissectionTree";
-import DissectionDump from "../components/DissectionDump";
+import DissectionTree, {
+  type DissectionNode,
+  type DissectionSelection,
+} from "@/components/DissectionTree";
+import DissectionDump from "@/components/DissectionDump";
 import { Allotment } from "allotment";
 import "allotment/dist/style.css";
-import PacketVirtualTable from "../components/PacketVirtualTable";
-import { Button } from "../components/Button";
-import PacketSummaryModal from "../components/PacketSummaryModal";
+import PacketVirtualTable, {
+  type PacketRow,
+} from "@/components/PacketVirtualTable";
+import { Button } from "@/components/Button";
+import PacketSummaryModal, {
+  type PacketSummary,
+} from "@/components/PacketSummaryModal";
 import { Tab } from "@headlessui/react";
-import TabButton from "../components/TabButton";
+import TabButton from "@/components/TabButton";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import clsx from "clsx";
-import { Tag } from "../components/Tag";
-import WiregasmPreferencesModal from "../components/WiregasmPreferencesModal";
+import { Tag } from "@/components/Tag";
+import WiregasmPreferencesModal from "@/components/WiregasmPreferencesModal";
+import type { ModuleNode } from "@/components/WiregasmPreferenceTree";
+import type { Preference } from "@/components/WiregasmModulePreferences";
 
-export const NO_SELECTION = { id: "", idx: 0, start: 0, length: 0 };
+export const NO_SELECTION: DissectionSelection = {
+  id: "",
+  idx: 0,
+  start: 0,
+  length: 0,
+};
 
 const EXAMPLE_CAPTURES = [
   new URL("../examples/captures/http.cap", import.meta.url),
@@ -24,16 +38,41 @@ const EXAMPLE_CAPTURES = [
   new URL("../examples/captures/dns.cap", import.meta.url),
 ];
 
-const checkFilter = (worker, filter) =>
+interface WorkerResponse<T> {
+  error?: string;
+  result?: T;
+}
+
+interface SelectedPacket {
+  tree: DissectionNode[];
+  data_sources: Array<{
+    name: string;
+    data: string;
+  }>;
+}
+
+interface ProcessedResponse {
+  code: number;
+  summary: PacketSummary;
+}
+
+interface GetFramesResult {
+  frames: PacketRow[];
+  matched: number;
+}
+
+const checkFilter = (worker: Worker, filter: string): Promise<boolean> =>
   new Promise((res, rej) => {
     const channel = new MessageChannel();
 
-    channel.port1.onmessage = ({ data }) => {
+    channel.port1.onmessage = ({
+      data,
+    }: MessageEvent<WorkerResponse<boolean>>) => {
       channel.port1.close();
       if (data.error) {
         rej(data.error);
       } else {
-        res(data.result);
+        res(data.result ?? false);
       }
     };
 
@@ -42,118 +81,145 @@ const checkFilter = (worker, filter) =>
     ]);
   });
 
-const getFrames = (worker, filter, skip, limit) =>
+const getFrames = (
+  worker: Worker,
+  filter: string,
+  skip: number,
+  limit: number,
+): Promise<GetFramesResult> =>
   new Promise((res, rej) => {
     const channel = new MessageChannel();
 
-    channel.port1.onmessage = ({ data }) => {
+    channel.port1.onmessage = ({
+      data,
+    }: MessageEvent<WorkerResponse<GetFramesResult>>) => {
       channel.port1.close();
       if (data.error) {
         rej(data.error);
       } else {
-        res(data.result);
+        res(data.result ?? { frames: [], matched: 0 });
       }
     };
 
     worker.postMessage(
       { type: "select-frames", filter: filter, skip: skip, limit: limit },
-      [channel.port2]
+      [channel.port2],
     );
   });
 
-const getVersion = (worker) =>
+const getVersion = (worker: Worker): Promise<string> =>
   new Promise((res, rej) => {
     const channel = new MessageChannel();
 
-    channel.port1.onmessage = ({ data }) => {
+    channel.port1.onmessage = ({
+      data,
+    }: MessageEvent<WorkerResponse<string>>) => {
       channel.port1.close();
       if (data.error) {
         rej(data.error);
       } else {
-        res(data.result);
+        res(data.result ?? "");
       }
     };
 
     worker.postMessage({ type: "get-version" }, [channel.port2]);
   });
 
-const loadModuleTreeFromWorker = (worker) =>
+const loadModuleTreeFromWorker = (worker: Worker): Promise<ModuleNode[]> =>
   new Promise((res, rej) => {
     const channel = new MessageChannel();
 
-    channel.port1.onmessage = ({ data }) => {
+    channel.port1.onmessage = ({
+      data,
+    }: MessageEvent<WorkerResponse<ModuleNode[]>>) => {
       channel.port1.close();
       if (data.error) {
         rej(data.error);
       } else {
-        res(data.result);
+        res(data.result ?? []);
       }
     };
 
     worker.postMessage({ type: "module-tree" }, [channel.port2]);
   });
 
-const loadPreferencesFromWorker = (worker, name) =>
+const loadPreferencesFromWorker = (
+  worker: Worker,
+  name: string,
+): Promise<Preference[]> =>
   new Promise((res, rej) => {
     const channel = new MessageChannel();
 
-    channel.port1.onmessage = ({ data }) => {
+    channel.port1.onmessage = ({
+      data,
+    }: MessageEvent<WorkerResponse<Preference[]>>) => {
       channel.port1.close();
       if (data.error) {
         rej(data.error);
       } else {
-        res(data.result);
+        res(data.result ?? []);
       }
     };
 
     worker.postMessage({ type: "module-prefs", name: name }, [channel.port2]);
   });
 
-const uploadFileToWorker = (worker, file) =>
+const uploadFileToWorker = (worker: Worker, file: File): Promise<string> =>
   new Promise((res, rej) => {
     const channel = new MessageChannel();
 
-    channel.port1.onmessage = ({ data }) => {
+    channel.port1.onmessage = ({
+      data,
+    }: MessageEvent<WorkerResponse<string>>) => {
       channel.port1.close();
       if (data.error) {
         rej(data.error);
       } else {
-        res(data.result);
+        res(data.result ?? "");
       }
     };
 
     worker.postMessage({ type: "upload-file", file: file }, [channel.port2]);
   });
 
-const updatePreferenceToWorker = (worker, module, key, value) =>
+const updatePreferenceToWorker = (
+  worker: Worker,
+  module: string,
+  key: string,
+  value: string,
+): Promise<void> =>
   new Promise((res, rej) => {
     const channel = new MessageChannel();
 
-    channel.port1.onmessage = ({ data }) => {
+    channel.port1.onmessage = ({
+      data,
+    }: MessageEvent<WorkerResponse<void>>) => {
       channel.port1.close();
       if (data.error) {
         rej(data.error);
       } else {
-        res(data.result);
+        res();
       }
     };
 
     worker.postMessage(
       { type: "update-pref", module: module, key: key, value: value },
-      [channel.port2]
+      [channel.port2],
     );
   });
 
-const applyPreferencesToWorker = (worker) =>
+const applyPreferencesToWorker = (worker: Worker): Promise<void> =>
   new Promise((res, rej) => {
     const channel = new MessageChannel();
 
-    channel.port1.onmessage = ({ data }) => {
+    channel.port1.onmessage = ({
+      data,
+    }: MessageEvent<WorkerResponse<void>>) => {
       channel.port1.close();
       if (data.error) {
         rej(data.error);
       } else {
-        res(data.result);
+        res();
       }
     };
 
@@ -163,25 +229,30 @@ const applyPreferencesToWorker = (worker) =>
 function PacketDissector() {
   const worker = useMemo(
     () => new Worker(new URL("../workers/wiregasm.worker.js", import.meta.url)),
-    []
+    [],
   );
 
   const queryClient = new QueryClient();
-  const [version, setVersion] = useState(null);
+  const [version, setVersion] = useState<string | null>(null);
   const [totalFrames, setTotalFrames] = useState(0);
   const [matchedFrames, setMatchedFrames] = useState(0);
   const [status, setStatus] = useState("Loading...");
-  const [columns, setColumns] = useState([]);
+  const [columns, setColumns] = useState<string[]>([]);
   const [filter, setFilter] = useState("");
-  const [filterError, setFilterError] = useState(null);
+  const [filterError, setFilterError] = useState<string | null>(null);
   const [currentFilter, setCurrentFilter] = useState("");
   const [selectedFrame, setSelectedFrame] = useState(1);
-  const [selectedPacket, setSelectedPacket] = useState(null);
-  const [preparedPositions, setPreparedPositions] = useState(new Map());
-  const [selectedTreeEntry, setSelectedTreeEntry] = useState(NO_SELECTION);
+  const [selectedPacket, setSelectedPacket] = useState<SelectedPacket | null>(
+    null,
+  );
+  const [preparedPositions, setPreparedPositions] = useState<
+    Map<string, DissectionSelection>
+  >(new Map());
+  const [selectedTreeEntry, setSelectedTreeEntry] =
+    useState<DissectionSelection>(NO_SELECTION);
   const [finishedProcessing, setFinishedProcessing] = useState(true);
   const [initialized, setInitialized] = useState(false);
-  const [summary, setSummary] = useState(null);
+  const [summary, setSummary] = useState<PacketSummary | null>(null);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [selectedDataSourceIndex, setSelectedDataSourceIndex] = useState(0);
   const [fileName, setFileName] = useState("");
@@ -192,11 +263,11 @@ function PacketDissector() {
     () => () => {
       setSelectedFrame(1);
       setSelectedPacket(null);
-      setPreparedPositions({});
+      setPreparedPositions(new Map());
       setSelectedTreeEntry(NO_SELECTION);
       setSelectedDataSourceIndex(0);
     },
-    []
+    [],
   );
 
   useEffect(() => {
@@ -204,66 +275,67 @@ function PacketDissector() {
   }, [selectedTreeEntry]);
 
   const processData = useMemo(
-    () => (name, data) => {
+    () => (name: string, data: ArrayBuffer) => {
       clear();
       setSummary(null);
       setFinishedProcessing(false);
       worker.postMessage({ type: "process-data", name: name, data: data });
     },
-    [clear, worker]
+    [clear, worker],
   );
 
   const loadExample = useMemo(
     () => async () => {
       const example =
         EXAMPLE_CAPTURES[Math.floor(Math.random() * EXAMPLE_CAPTURES.length)];
-      const name = example.toString().split("/").pop();
+      const name = example.toString().split("/").pop() ?? "example.cap";
 
       const res = await fetch(example);
       const body = await res.arrayBuffer();
 
       processData(name, body);
     },
-    [processData]
+    [processData],
   );
 
   const preparePositions = useMemo(
-    () => (id, node) => {
-      let map = new Map();
+    () =>
+      (id: string, node: DissectionNode): Map<string, DissectionSelection> => {
+        let map = new Map<string, DissectionSelection>();
 
-      if (node.tree && node.tree.length > 0) {
-        for (let i = 0; i < node.tree.length; i++) {
-          map = new Map([
-            ...map,
-            ...preparePositions(`${id}-${i}`, node.tree[i]),
-          ]);
+        if (node.tree && node.tree.length > 0) {
+          for (let i = 0; i < node.tree.length; i++) {
+            map = new Map([
+              ...map,
+              ...preparePositions(`${id}-${i}`, node.tree[i]),
+            ]);
+          }
+        } else if (node.length > 0) {
+          map.set(id, {
+            id: id,
+            idx: node.data_source_idx,
+            start: node.start,
+            length: node.length,
+          });
         }
-      } else if (node.length > 0) {
-        map.set(id, {
-          id: id,
-          idx: node.data_source_idx,
-          start: node.start,
-          length: node.length,
-        });
-      }
 
-      return map;
-    },
-    []
+        return map;
+      },
+    [],
   );
 
   const findSelection = useMemo(
-    () => (src_idx, pos) => {
+    () => (src_idx: number, pos: number) => {
       // find the smallest one
-      let current = null;
+      let current: string | null = null;
 
-      for (let [k, pp] of preparedPositions) {
+      for (const [k, pp] of preparedPositions) {
         if (pp.idx !== src_idx) continue;
 
         if (pos >= pp.start && pos <= pp.start + pp.length) {
           if (
             current != null &&
-            preparedPositions.get(current).length > pp.length
+            preparedPositions.get(current)!.length > pp.length
           ) {
             current = k;
           } else {
@@ -273,10 +345,13 @@ function PacketDissector() {
       }
 
       if (current != null) {
-        setSelectedTreeEntry(preparedPositions.get(current));
+        const selection = preparedPositions.get(current);
+        if (selection) {
+          setSelectedTreeEntry(selection);
+        }
       }
     },
-    [preparedPositions]
+    [preparedPositions],
   );
 
   useEffect(() => {
@@ -289,7 +364,7 @@ function PacketDissector() {
         setFilterError(null);
       })
       .catch((e) => {
-        setFilterError(e);
+        setFilterError(String(e));
       });
   }, [filter, worker, initialized]);
 
@@ -303,13 +378,14 @@ function PacketDissector() {
         setVersion(version);
       })
       .catch((e) => {
+        // Silent error
       });
   }, [worker, initialized]);
 
   useEffect(() => {
     clear();
     if (window.Worker) {
-      worker.onmessage = (e) => {
+      worker.onmessage = (e: MessageEvent) => {
         if (e.data.type === "init") {
           worker.postMessage({ type: "columns" });
           setInitialized(true);
@@ -325,22 +401,24 @@ function PacketDissector() {
           setSelectedTreeEntry(NO_SELECTION);
           setSelectedDataSourceIndex(0);
         } else if (e.data.type === "processed") {
-          // setStatus(`Error: non-zero return code (${e.data.code})`);
-          const response = e.data.data;
-          // console.log(response);
+          const response: {
+            code: number;
+            data: ProcessedResponse;
+            name: string;
+          } = e.data;
 
           setFinishedProcessing(true);
           setFileName(e.data.name);
 
           // -12 is short read
-          if (response.code === 0 || response.code === -12) {
+          if (response.data.code === 0 || response.data.code === -12) {
             // in case of a reload, update the dissection nonce
             setDissectionNonce(Math.random());
-            if (response.code !== 0) {
-              setStatus(`Code: ${response.code}`);
+            if (response.data.code !== 0) {
+              setStatus(`Code: ${response.data.code}`);
             }
-            setTotalFrames(response.summary.packet_count);
-            setSummary(response.summary);
+            setTotalFrames(response.data.summary.packet_count);
+            setSummary(response.data.summary);
           }
         }
       };
@@ -362,17 +440,16 @@ function PacketDissector() {
   }, [selectedFrame, totalFrames, worker, finishedProcessing, dissectionNonce]);
 
   const process = useMemo(
-    () => (f) => {
+    () => (f: File) => {
       clear();
       setFinishedProcessing(false);
       worker.postMessage({ type: "process", file: f });
     },
-    [worker, clear]
+    [worker, clear],
   );
 
   const fetchPackets = useMemo(
-    () => async (filter, skip, limit) => {
-      // console.log("fetchPackets", filter, skip, limit);
+    () => async (filter: string, skip: number, limit: number) => {
       if (initialized && finishedProcessing) {
         const res = await getFrames(worker, filter, skip, limit);
         setMatchedFrames(res.matched);
@@ -381,46 +458,48 @@ function PacketDissector() {
 
       return [];
     },
-    [worker, initialized, finishedProcessing]
+    [worker, initialized, finishedProcessing],
   );
 
   const loadFile = useMemo(
-    () => (e) => {
-      const f = e.target.files[0];
+    () => (e: React.ChangeEvent<HTMLInputElement>) => {
+      const f = e.target.files?.[0];
+      if (!f) return;
+
       setSummary(null);
       setSelectedFrame(1);
       setSelectedPacket(null);
       process(f);
     },
-    [process]
+    [process],
   );
 
   const loadModuleTree = useMemo(
     () => async () => {
       return await loadModuleTreeFromWorker(worker);
     },
-    [worker]
+    [worker],
   );
 
   const loadPreferences = useMemo(
-    () => async (name) => {
+    () => async (name: string) => {
       return await loadPreferencesFromWorker(worker, name);
     },
-    [worker]
+    [worker],
   );
 
   const uploadFile = useMemo(
-    () => async (file) => {
+    () => async (file: File) => {
       return await uploadFileToWorker(worker, file);
     },
-    [worker]
+    [worker],
   );
 
   const updatePreference = useMemo(
-    () => async (module, key, value) => {
+    () => async (module: string, key: string, value: string) => {
       return await updatePreferenceToWorker(worker, module, key, value);
     },
-    [worker]
+    [worker],
   );
 
   const applyPreferences = useMemo(
@@ -429,7 +508,7 @@ function PacketDissector() {
       worker.postMessage({ type: "reload-quick", name: fileName });
       return res;
     },
-    [worker, fileName]
+    [worker, fileName],
   );
 
   return (
@@ -453,11 +532,11 @@ function PacketDissector() {
         <FileButton variant="text" onFileSelected={loadFile}>
           Load File
         </FileButton>
-        <Button className={"ml-5"} variant="text" onClick={loadExample}>
+        <Button className="ml-5" variant="text" onClick={loadExample}>
           Load Random Example
         </Button>
         <Button
-          className={"ml-5"}
+          className="ml-5"
           variant="text"
           onClick={() => setPreferencesOpen(true)}
         >
@@ -468,24 +547,20 @@ function PacketDissector() {
           {status}
         </div>
         {currentFilter.length > 0 && (
-          <Tag className={"ml-5"} color="emerald">
+          <Tag className="ml-5" color="emerald">
             {currentFilter}
           </Tag>
         )}
         {summary != null && (
           <Button
-            className={"ml-5"}
+            className="ml-5"
             variant="text"
             onClick={() => setSummaryOpen(true)}
           >
             Summary
           </Button>
         )}
-        {version != null && (
-          <div className="ml-auto text-sm">
-            v{version}
-          </div>
-        )}
+        {version != null && <div className="ml-auto text-sm">v{version}</div>}
         <div className="ml-auto text-sm">
           {matchedFrames} / {totalFrames} packets
         </div>
@@ -498,13 +573,13 @@ function PacketDissector() {
           "py-1 mt-2 w-full",
           filterError != null
             ? "border-red-300 shadow-sm focus:border-red-500 focus:ring-red-500"
-            : ""
+            : "",
         )}
         placeholder="display filter, example: tcp"
         value={filter}
         onEnter={() => setCurrentFilter(filter)}
         onChange={(e) => setFilter(e.target.value)}
-        autoComplete={"off"}
+        autoComplete="off"
       />
       {filterError != null && (
         <div className="text-xs text-red-500">{filterError}</div>
@@ -558,7 +633,7 @@ function PacketDissector() {
                         </Tab.List>
                         <Tab.Panels className="mt-2">
                           {selectedPacket.data_sources.map((ds, idx) => {
-                            const pos =
+                            const pos: [number, number] =
                               idx === selectedTreeEntry.idx
                                 ? [
                                     selectedTreeEntry.start,
