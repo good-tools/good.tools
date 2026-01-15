@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { Button } from "../components/Button";
-import TextArea from "../components/TextArea";
-import { Buffer } from "buffer"
-import { decode, typeDefinition, possibleValues } from "@goodtools/protobuf-decoder";
-import { Tag } from "../components/Tag";
-import CheckBox from "../components/CheckBox";
+import { Button } from "@/components/ui/button";
+import TextArea from "@/components/TextArea";
+import { Buffer } from "buffer";
+import {
+  decode,
+  typeDefinition,
+  possibleValues,
+} from "@goodtools/protobuf-decoder";
+import { Tag } from "@/components/Tag";
+import CheckBox from "@/components/CheckBox";
 
 const EXAMPLE_PROTOBUF = Buffer.from([
   0x08, 0x8f, 0x81, 0xeb, 0xcf, 0xe0, 0x2a, 0x12, 0x08, 0x6b, 0x6f, 0x74, 0x6c,
@@ -14,14 +18,30 @@ const EXAMPLE_PROTOBUF = Buffer.from([
   0x41, 0x52, 0x44, 0x55, 0x53, 0x54, 0x10, 0x64,
 ]);
 
-function ProtobufObject({ object, showBytes }) {
+interface ProtobufField {
+  field: number;
+  type: number;
+  value: any;
+  object?: boolean;
+}
 
-  if (object.fields <= 0) {
+interface ProtobufObject {
+  fields: ProtobufField[];
+  unprocessed: Buffer;
+}
+
+interface ProtobufObjectProps {
+  object: ProtobufObject;
+  showBytes: boolean;
+}
+
+function ProtobufObjectComponent({ object, showBytes }: ProtobufObjectProps) {
+  if (object.fields.length <= 0) {
     return (
       <div className="text-gray-500 font-mono text-xs">
         No fields exist for this object
       </div>
-    )
+    );
   }
 
   return (
@@ -53,7 +73,6 @@ function ProtobufObject({ object, showBytes }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
-
                 {object.fields.map((f, i) => (
                   <tr key={`k-${i}`}>
                     <td className="py-2 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">
@@ -63,28 +82,37 @@ function ProtobufObject({ object, showBytes }) {
                       {typeDefinition(f.type).name}
                     </td>
                     <td className="px-2 py-2 text-sm">
-                      { f.object ? (
-                        <ProtobufObject object={f.value} showBytes={showBytes} />
+                      {f.object ? (
+                        <ProtobufObjectComponent
+                          object={f.value}
+                          showBytes={showBytes}
+                        />
                       ) : (
                         <table>
                           <tbody className="break-all">
-                            {possibleValues(f).filter(p => {
-                              if (p.type === "bytes" && !showBytes)
-                                return false
-                              return true
-                            }).map((p, j) => (
-                              <tr key={`k-${i}-p-${j}`}>
-                                <td className="min-w-[100px]"><Tag>{p.type}</Tag></td>
-                                {p.type === "bytes" ? (
-                                  <td className="font-mono text-gray-600 text-xs">{p.value.toString()}</td>
-                                ) : (
-                                  <td>{p.value.toString()}</td>
-                                )}
-                              </tr>
-                            ))}
+                            {possibleValues(f)
+                              .filter((p: any) => {
+                                if (p.type === "bytes" && !showBytes)
+                                  return false;
+                                return true;
+                              })
+                              .map((p: any, j: number) => (
+                                <tr key={`k-${i}-p-${j}`}>
+                                  <td className="min-w-[100px]">
+                                    <Tag>{p.type}</Tag>
+                                  </td>
+                                  {p.type === "bytes" ? (
+                                    <td className="font-mono text-gray-600 text-xs">
+                                      {p.value.toString()}
+                                    </td>
+                                  ) : (
+                                    <td>{p.value.toString()}</td>
+                                  )}
+                                </tr>
+                              ))}
                           </tbody>
                         </table>
-                      ) }
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -95,7 +123,9 @@ function ProtobufObject({ object, showBytes }) {
                     <td className="py-2 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">
                       Unprocessed
                     </td>
-                    <td colSpan={2} className="px-2 py-2 text-xs">{object.unprocessed.toString('hex')}</td>
+                    <td colSpan={2} className="px-2 py-2 text-xs">
+                      {object.unprocessed.toString("hex")}
+                    </td>
                   </tr>
                 </tfoot>
               )}
@@ -104,14 +134,13 @@ function ProtobufObject({ object, showBytes }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function ProtobufDecoder() {
-
-  const [ encoded, setEncoded ] = useState('')
-  const [ decoded, setDecoded ] = useState(null)
-  const encodedRef = useRef()
+  const [encoded, setEncoded] = useState("");
+  const [decoded, setDecoded] = useState<ProtobufObject | null>(null);
+  const encodedRef = useRef<HTMLTextAreaElement>(null);
 
   const [checked, setChecked] = useState(false);
 
@@ -120,49 +149,56 @@ function ProtobufDecoder() {
   };
 
   const decodeProto = () => {
-    const trimmed = encoded.replace(/\s/g, "").replace(/0x/g, "").toLowerCase();
-    const buff = Buffer.from(trimmed, 'hex')
+    try {
+      const trimmed = encoded
+        .replace(/\s/g, "")
+        .replace(/0x/g, "")
+        .toLowerCase();
+      const buff = Buffer.from(trimmed, "hex");
 
-    setEncoded(buff.toString('hex'))
-    setDecoded(decode(buff))
-  }
+      setEncoded(buff.toString("hex"));
+      setDecoded(decode(buff) as ProtobufObject);
+    } catch (error) {
+      console.error("Failed to decode protobuf:", error);
+      setDecoded(null);
+    }
+  };
 
   const loadExample = () => {
-    setEncoded(EXAMPLE_PROTOBUF.toString('hex'))
-    setDecoded(null)
-  }
+    setEncoded(EXAMPLE_PROTOBUF.toString("hex"));
+    setDecoded(null);
+  };
 
   const clear = () => {
-    setEncoded('')
-    setDecoded(null)
-  }
+    setEncoded("");
+    setDecoded(null);
+  };
 
   useEffect(() => {
-    encodedRef.current.focus()
-  }, [encodedRef])
+    encodedRef.current?.focus();
+  }, []);
 
   return (
     <div>
       <TextArea
-        innerRef={encodedRef}
+        ref={encodedRef}
         id="encoded"
         name="encoded"
         rows={8}
         value={encoded}
         onCtrlEnter={() => decodeProto()}
-        onChange={e => setEncoded(e.target.value)}
+        onChange={(e) => setEncoded(e.target.value)}
         className="font-mono text-xs"
-        placeholder={'Paste your protobuf request as hex'}
+        placeholder={"Paste your protobuf request as hex"}
       />
       <div className="mt-3">
-        <Button
-          variant="filled"
-          onClick={() => decodeProto()}
-        >
-          Decode
+        <Button onClick={() => decodeProto()}>Decode</Button>
+        <Button variant="ghost" className={"ml-5"} onClick={loadExample}>
+          Load Example
         </Button>
-        <Button variant="text" className={"ml-5"} onClick={loadExample}>Load Example</Button>
-        <Button variant="text" className={"ml-3"} onClick={clear}>Clear</Button>
+        <Button variant="ghost" className={"ml-3"} onClick={clear}>
+          Clear
+        </Button>
       </div>
       <CheckBox
         className={"mt-3"}
@@ -170,13 +206,13 @@ function ProtobufDecoder() {
         onChange={handleChange}
         title="Show string bytes"
       />
-      { decoded != null && (
+      {decoded != null && (
         <div className="mt-3">
-          <ProtobufObject object={decoded} showBytes={checked} />
+          <ProtobufObjectComponent object={decoded} showBytes={checked} />
         </div>
-      ) }
+      )}
     </div>
-  )
+  );
 }
 
 export default ProtobufDecoder;

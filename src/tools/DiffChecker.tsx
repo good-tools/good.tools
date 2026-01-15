@@ -1,16 +1,16 @@
-import { useContext, useState } from "react"
+import { useState } from "react";
 import { DiffEditor, default as Editor } from "@monaco-editor/react";
 import { Tab } from "@headlessui/react";
-import TabButton from "../components/TabButton";
-import { DarkModeContext } from "../components/ModeToggle";
+import TabButton from "@/components/TabButton";
+import { useDarkModeContext } from "@/components/ModeToggle";
 
 function DiffChecker() {
-  const { darkMode } = useContext(DarkModeContext)
-  const [ original, setOriginal ] = useState("")
-  const [ changed, setChanged ] = useState("")
+  const { darkMode } = useDarkModeContext();
+  const [original, setOriginal] = useState("");
+  const [changed, setChanged] = useState("");
 
-  function handleEditorDidMount(editor, _) {
-    editor.updateOptions({ readOnly: true })
+  function handleEditorDidMount(editor: any) {
+    editor.updateOptions({ readOnly: true });
   }
 
   return (
@@ -22,19 +22,19 @@ function DiffChecker() {
       </Tab.List>
       <Tab.Panels className="mt-2">
         <Tab.Panel>
-          <Editor 
+          <Editor
             height="65vh"
             value={original}
             theme={darkMode ? "vs-dark" : "light"}
-            onChange={(v) => setOriginal(v)}
+            onChange={(v) => setOriginal(v || "")}
           />
         </Tab.Panel>
         <Tab.Panel>
-          <Editor 
+          <Editor
             height="65vh"
             theme={darkMode ? "vs-dark" : "light"}
             value={changed}
-            onChange={(v) => setChanged(v)}
+            onChange={(v) => setChanged(v || "")}
           />
         </Tab.Panel>
         <Tab.Panel>
@@ -48,7 +48,7 @@ function DiffChecker() {
         </Tab.Panel>
       </Tab.Panels>
     </Tab.Group>
-  )
+  );
 }
 
-export default DiffChecker
+export default DiffChecker;

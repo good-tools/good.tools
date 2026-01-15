@@ -1,27 +1,25 @@
 import { useEffect, useRef, useState } from "react";
-import { md } from "node-forge"
-import TextInput from "../components/TextInput"
+import { md } from "node-forge";
+import TextInput from "@/components/TextInput";
 
 function HashCalculator() {
-  const [ input, setInput ] = useState('')
-  const inputRef = useRef()
+  const [input, setInput] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const hash = (digest, input) => {
+  const hash = (digest: any, input: string): string => {
     digest.update(input);
     return digest.digest().toHex();
-  }
+  };
 
   useEffect(() => {
-    inputRef.current.focus()
-  }, [ inputRef ])
+    inputRef.current?.focus();
+  }, []);
 
   return (
     <div>
-      <div className="py-2 font-bold">
-        Input
-      </div>
+      <div className="py-2 font-bold">Input</div>
       <TextInput
-        innerRef={inputRef}
+        ref={inputRef}
         type="text"
         name="value"
         id="value"
@@ -30,23 +28,21 @@ function HashCalculator() {
         onChange={(e) => setInput(e.target.value)}
       />
       <div className="mt-4 grid grid-cols-1 gap-x-4 gap-y-4 md:grid-cols-2">
-        {Object.keys(md.algorithms).map(a => (
+        {Object.keys(md.algorithms).map((a) => (
           <div key={a}>
-            <div className="py-2 font-bold">
-              {a.toUpperCase()}
-            </div>
+            <div className="py-2 font-bold">{a.toUpperCase()}</div>
             <TextInput
               type="text"
               name={a}
               disabled
               className={"w-full"}
-              value={hash(md.algorithms[a].create(), input)}
+              value={hash((md.algorithms as any)[a].create(), input)}
             />
           </div>
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 export default HashCalculator;
