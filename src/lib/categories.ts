@@ -61,7 +61,7 @@ export const CATEGORIES = {
   GENERAL: "General",
 } as const;
 
-type CategoryName = (typeof CATEGORIES)[keyof typeof CATEGORIES];
+export type CategoryName = (typeof CATEGORIES)[keyof typeof CATEGORIES];
 
 /**
  * Category keywords mapping
@@ -102,7 +102,7 @@ export function getToolCategory(tool: Tool): CategoryName {
     if (category === CATEGORIES.ALL) continue;
     if (
       tags.some((tag) =>
-        keywords.some((keyword) => tag.toLowerCase().includes(keyword)),
+        keywords.some((keyword) => tag.toLowerCase().includes(keyword))
       )
     ) {
       return category as CategoryName;
@@ -121,7 +121,7 @@ export function getToolCategory(tool: Tool): CategoryName {
  */
 export function getToolsByCategory(
   tools: Tool[],
-  category: CategoryName,
+  category: CategoryName
 ): Tool[] {
   if (category === CATEGORIES.ALL) {
     return tools;
@@ -176,5 +176,5 @@ export function getToolIcon(tool: Tool): string {
  */
 export function getCategoryIcon(category: string): LucideIcon {
   const categoryObj = categories.find((cat) => cat.name === category);
-  return categoryObj?.icon || Layers;
+  return (categoryObj?.icon || Layers) as LucideIcon;
 }

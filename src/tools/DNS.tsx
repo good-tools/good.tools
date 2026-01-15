@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/Button";
 import TextInput from "@/components/TextInput";
 import { useDNSQuery } from "@/hooks/useApiQuery";
+import type { DNSRecord } from "@/types";
 
 const EXAMPLE_DOMAINS = [
   "facebook.com",
@@ -28,7 +29,7 @@ function DNS() {
   const loadRandom = () => {
     const domain =
       EXAMPLE_DOMAINS[Math.floor(Math.random() * EXAMPLE_DOMAINS.length)];
-    setAddress(domain);
+    setAddress(domain ?? "");
     setShouldFetch(false);
   };
 
@@ -52,7 +53,7 @@ function DNS() {
     <div>
       <div className="mt-5">
         <TextInput
-          innerRef={addressRef}
+          ref={addressRef}
           type="text"
           name="domain"
           id="domain"
@@ -143,9 +144,10 @@ function DNS() {
                     <dt className="text-sm font-medium text-gray-500">{k}</dt>
                     <dd className="mt-1 text-sm">
                       <ul>
-                        {data[k].map((record, j) => (
-                          <li key={`rec-${i}-${j}`}>{record.content}</li>
-                        ))}
+                        {Array.isArray(data[k]) &&
+                          (data[k] as DNSRecord[]).map((record, j) => (
+                            <li key={`rec-${i}-${j}`}>{record.content}</li>
+                          ))}
                       </ul>
                     </dd>
                   </div>

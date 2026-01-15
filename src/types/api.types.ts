@@ -11,7 +11,7 @@ export interface DNSRecord {
  * Keys are record types (A, AAAA, CNAME, MX, etc.)
  */
 export interface DNSResponse {
-  [recordType: string]: DNSRecord[];
+  [recordType: string]: DNSRecord[] | string | undefined;
   message?: string;
 }
 

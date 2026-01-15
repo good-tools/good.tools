@@ -1,7 +1,7 @@
 /**
  * Custom React Query hooks for API calls
  */
-import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { API_CONFIG } from "@/config/api.config";
 import type {
   DNSResponse,
@@ -19,7 +19,9 @@ export function useDNSQuery(domain: string, enabled = false) {
     queryKey: ["dns", domain],
     queryFn: async () => {
       const response = await fetch(
-        `${API_CONFIG.internetToolsBaseUrl}/dns?${new URLSearchParams({ domain })}`,
+        `${API_CONFIG.internetToolsBaseUrl}/dns?${new URLSearchParams({
+          domain,
+        })}`
       );
       const data = await response.json();
       if (response.status >= 400 && response.status < 600) {
@@ -40,7 +42,9 @@ export function useWhoisQuery(domain: string, enabled = false) {
     queryKey: ["whois", domain],
     queryFn: async () => {
       const response = await fetch(
-        `${API_CONFIG.internetToolsBaseUrl}/whois?${new URLSearchParams({ domain })}`,
+        `${API_CONFIG.internetToolsBaseUrl}/whois?${new URLSearchParams({
+          domain,
+        })}`
       );
       const data = await response.json();
       if (response.status >= 400 && response.status < 600) {
@@ -99,7 +103,7 @@ export function useIPLocationQuery(ip: string, enabled = false) {
     queryKey: ["iplocation", ip],
     queryFn: async () => {
       const response = await fetch(
-        `${API_CONFIG.internetToolsBaseUrl}/ip?${new URLSearchParams({ ip })}`,
+        `${API_CONFIG.internetToolsBaseUrl}/ip?${new URLSearchParams({ ip })}`
       );
       const data = await response.json();
       if (response.status >= 400 && response.status < 600) {

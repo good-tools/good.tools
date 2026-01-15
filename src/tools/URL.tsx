@@ -57,7 +57,7 @@ function Encoder() {
       </Button>
       {encoderOutput && (
         <CodeGroup title={"Result"}>
-          <code code={encoderOutput}>{encoderOutput}</code>
+          <code>{encoderOutput}</code>
         </CodeGroup>
       )}
     </div>
@@ -123,7 +123,7 @@ function Decoder() {
       </Button>
       {decoderOutput && (
         <CodeGroup title={"Result"}>
-          <code code={decoderOutput}>{decoderOutput}</code>
+          <code>{decoderOutput}</code>
         </CodeGroup>
       )}
     </div>

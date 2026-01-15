@@ -1,5 +1,5 @@
 import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
-import { useState, ReactNode } from "react";
+import { useState } from "react";
 
 function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && !Array.isArray(v) && v !== null;

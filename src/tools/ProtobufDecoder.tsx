@@ -22,7 +22,7 @@ interface ProtobufField {
   field: number;
   type: number;
   value: any;
-  object?: boolean;
+  object: boolean;
 }
 
 interface ProtobufObject {

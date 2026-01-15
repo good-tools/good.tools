@@ -1,7 +1,8 @@
 import { useRef, ReactNode } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonProps } from "@/components/ui/button";
 
-interface FileButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface FileButtonProps
+  extends Omit<ButtonProps, "onClick" | "asChild"> {
   onFileSelected: (e: React.ChangeEvent<HTMLInputElement>) => void;
   children: ReactNode;
 }

@@ -24,11 +24,11 @@ export class ToolErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+  override componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     console.error(
       `ToolErrorBoundary caught an error in ${this.props.toolName || "tool"}:`,
       error,
-      errorInfo,
+      errorInfo
     );
   }
 
@@ -36,7 +36,7 @@ export class ToolErrorBoundary extends Component<Props, State> {
     this.setState({ hasError: false, error: null });
   };
 
-  render(): ReactNode {
+  override render(): ReactNode {
     if (this.state.hasError) {
       return (
         <div className="mx-auto max-w-2xl py-12">

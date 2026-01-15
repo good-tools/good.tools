@@ -54,7 +54,7 @@ function ImageBrowser() {
   const loadRandom = () => {
     const image =
       RANDOM_IMAGES[Math.floor(Math.random() * RANDOM_IMAGES.length)];
-    setRef(image);
+    setRef(image ?? "");
     setPulledRef("");
     setData(null);
     setError(null);
@@ -105,7 +105,9 @@ function ImageBrowser() {
 
       try {
         const response = await fetch(
-          `${API_CONFIG.imageBrowserUrl}/download?${new URLSearchParams(params)}`,
+          `${API_CONFIG.imageBrowserUrl}/download?${new URLSearchParams(
+            params
+          )}`
         );
         const data = await response.text();
 
@@ -117,7 +119,7 @@ function ImageBrowser() {
         //
       }
     },
-    [pulledRef],
+    [pulledRef]
   );
 
   useEffect(() => {
@@ -150,7 +152,7 @@ function ImageBrowser() {
 
       try {
         const response = await fetch(
-          `${API_CONFIG.imageBrowserUrl}/list?${new URLSearchParams(params)}`,
+          `${API_CONFIG.imageBrowserUrl}/list?${new URLSearchParams(params)}`
         );
         const data: DockerFileListItem[] = await response.json();
 
@@ -166,7 +168,7 @@ function ImageBrowser() {
             };
           })
           .sort((a, b) =>
-            a.directory && b.directory ? 0 : a.directory ? -1 : 1,
+            a.directory && b.directory ? 0 : a.directory ? -1 : 1
           );
 
         listCache.set(cacheKey, result);
@@ -177,7 +179,7 @@ function ImageBrowser() {
       }
       return [];
     },
-    [pulledRef],
+    [pulledRef]
   );
 
   const pull = useCallback(async () => {
@@ -199,7 +201,7 @@ function ImageBrowser() {
 
     try {
       const response = await fetch(
-        `${API_CONFIG.imageBrowserUrl}/image?${new URLSearchParams(params)}`,
+        `${API_CONFIG.imageBrowserUrl}/image?${new URLSearchParams(params)}`
       );
       const data = await response.json();
 
@@ -220,7 +222,7 @@ function ImageBrowser() {
     <div>
       <div className="mt-5">
         <TextInput
-          innerRef={inputRef}
+          ref={inputRef}
           type="text"
           name="image"
           id="image"
@@ -371,7 +373,7 @@ function ImageBrowser() {
                         Environment
                       </dt>
                       <dd className="mt-1 text-sm">
-                        <CodeGroup className="m-0">
+                        <CodeGroup>
                           <code>{data.image.config.Env?.join("\n")}</code>
                         </CodeGroup>
                       </dd>
@@ -411,7 +413,7 @@ function ImageBrowser() {
                                     {data.image.config.Labels?.[k]}
                                   </td>
                                 </tr>
-                              ),
+                              )
                             )}
                           </tbody>
                         </table>
@@ -426,7 +428,10 @@ function ImageBrowser() {
                 <Allotment>
                   <Allotment.Pane>
                     <div className="overflow-auto h-full pt-3">
-                      <FileTree load={list} select={select} />
+                      <FileTree
+                        load={list as (node: any) => Promise<any[]>}
+                        select={select as (node: any) => Promise<void>}
+                      />
                     </div>
                   </Allotment.Pane>
                   <Allotment.Pane preferredSize={"70%"}>
@@ -465,7 +470,12 @@ function ImageBrowser() {
                                   className="text-blue-600 dark:text-blue-500 hover:underline"
                                   target="_blank"
                                   rel="noreferrer"
-                                  href={`${API_CONFIG.imageBrowserUrl}/download?${new URLSearchParams({ ref: ref, path: selected?.id })}`}
+                                  href={`${
+                                    API_CONFIG.imageBrowserUrl
+                                  }/download?${new URLSearchParams({
+                                    ref: ref,
+                                    path: selected?.id,
+                                  })}`}
                                 >
                                   Click here
                                 </a>

@@ -65,7 +65,7 @@ interface EnumPreferenceProps {
 
 function EnumPreference({ pref, updatePreferenceValue }: EnumPreferenceProps) {
   const [value, setValue] = useState(
-    pref.enum_value?.filter((opt) => opt.selected)[0]?.name ?? "",
+    pref.enum_value?.filter((opt) => opt.selected)[0]?.name ?? ""
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -132,6 +132,7 @@ function FilePreference({
     }
 
     const f = e.target.files[0];
+    if (!f) return;
 
     uploadFile(f).then((path) => {
       updatePreferenceValue(pref.name, path)

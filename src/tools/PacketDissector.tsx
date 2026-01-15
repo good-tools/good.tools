@@ -85,7 +85,7 @@ const getFrames = (
   worker: Worker,
   filter: string,
   skip: number,
-  limit: number,
+  limit: number
 ): Promise<GetFramesResult> =>
   new Promise((res, rej) => {
     const channel = new MessageChannel();
@@ -103,7 +103,7 @@ const getFrames = (
 
     worker.postMessage(
       { type: "select-frames", filter: filter, skip: skip, limit: limit },
-      [channel.port2],
+      [channel.port2]
     );
   });
 
@@ -145,7 +145,7 @@ const loadModuleTreeFromWorker = (worker: Worker): Promise<ModuleNode[]> =>
 
 const loadPreferencesFromWorker = (
   worker: Worker,
-  name: string,
+  name: string
 ): Promise<Preference[]> =>
   new Promise((res, rej) => {
     const channel = new MessageChannel();
@@ -186,7 +186,7 @@ const updatePreferenceToWorker = (
   worker: Worker,
   module: string,
   key: string,
-  value: string,
+  value: string
 ): Promise<void> =>
   new Promise((res, rej) => {
     const channel = new MessageChannel();
@@ -204,7 +204,7 @@ const updatePreferenceToWorker = (
 
     worker.postMessage(
       { type: "update-pref", module: module, key: key, value: value },
-      [channel.port2],
+      [channel.port2]
     );
   });
 
@@ -229,7 +229,7 @@ const applyPreferencesToWorker = (worker: Worker): Promise<void> =>
 function PacketDissector() {
   const worker = useMemo(
     () => new Worker(new URL("../workers/wiregasm.worker.js", import.meta.url)),
-    [],
+    []
   );
 
   const queryClient = new QueryClient();
@@ -243,7 +243,7 @@ function PacketDissector() {
   const [currentFilter, setCurrentFilter] = useState("");
   const [selectedFrame, setSelectedFrame] = useState(1);
   const [selectedPacket, setSelectedPacket] = useState<SelectedPacket | null>(
-    null,
+    null
   );
   const [preparedPositions, setPreparedPositions] = useState<
     Map<string, DissectionSelection>
@@ -267,7 +267,7 @@ function PacketDissector() {
       setSelectedTreeEntry(NO_SELECTION);
       setSelectedDataSourceIndex(0);
     },
-    [],
+    []
   );
 
   useEffect(() => {
@@ -281,13 +281,14 @@ function PacketDissector() {
       setFinishedProcessing(false);
       worker.postMessage({ type: "process-data", name: name, data: data });
     },
-    [clear, worker],
+    [clear, worker]
   );
 
   const loadExample = useMemo(
     () => async () => {
       const example =
         EXAMPLE_CAPTURES[Math.floor(Math.random() * EXAMPLE_CAPTURES.length)];
+      if (!example) return;
       const name = example.toString().split("/").pop() ?? "example.cap";
 
       const res = await fetch(example);
@@ -295,7 +296,7 @@ function PacketDissector() {
 
       processData(name, body);
     },
-    [processData],
+    [processData]
   );
 
   const preparePositions = useMemo(
@@ -305,10 +306,13 @@ function PacketDissector() {
 
         if (node.tree && node.tree.length > 0) {
           for (let i = 0; i < node.tree.length; i++) {
-            map = new Map([
-              ...map,
-              ...preparePositions(`${id}-${i}`, node.tree[i]),
-            ]);
+            const childNode = node.tree[i];
+            if (childNode) {
+              map = new Map([
+                ...map,
+                ...preparePositions(`${id}-${i}`, childNode),
+              ]);
+            }
           }
         } else if (node.length > 0) {
           map.set(id, {
@@ -321,7 +325,7 @@ function PacketDissector() {
 
         return map;
       },
-    [],
+    []
   );
 
   const findSelection = useMemo(
@@ -351,7 +355,7 @@ function PacketDissector() {
         }
       }
     },
-    [preparedPositions],
+    [preparedPositions]
   );
 
   useEffect(() => {
@@ -377,7 +381,7 @@ function PacketDissector() {
       .then((version) => {
         setVersion(version);
       })
-      .catch((e) => {
+      .catch((_e) => {
         // Silent error
       });
   }, [worker, initialized]);
@@ -445,7 +449,7 @@ function PacketDissector() {
       setFinishedProcessing(false);
       worker.postMessage({ type: "process", file: f });
     },
-    [worker, clear],
+    [worker, clear]
   );
 
   const fetchPackets = useMemo(
@@ -458,7 +462,7 @@ function PacketDissector() {
 
       return [];
     },
-    [worker, initialized, finishedProcessing],
+    [worker, initialized, finishedProcessing]
   );
 
   const loadFile = useMemo(
@@ -471,35 +475,35 @@ function PacketDissector() {
       setSelectedPacket(null);
       process(f);
     },
-    [process],
+    [process]
   );
 
   const loadModuleTree = useMemo(
     () => async () => {
       return await loadModuleTreeFromWorker(worker);
     },
-    [worker],
+    [worker]
   );
 
   const loadPreferences = useMemo(
     () => async (name: string) => {
       return await loadPreferencesFromWorker(worker, name);
     },
-    [worker],
+    [worker]
   );
 
   const uploadFile = useMemo(
     () => async (file: File) => {
       return await uploadFileToWorker(worker, file);
     },
-    [worker],
+    [worker]
   );
 
   const updatePreference = useMemo(
     () => async (module: string, key: string, value: string) => {
       return await updatePreferenceToWorker(worker, module, key, value);
     },
-    [worker],
+    [worker]
   );
 
   const applyPreferences = useMemo(
@@ -508,7 +512,7 @@ function PacketDissector() {
       worker.postMessage({ type: "reload-quick", name: fileName });
       return res;
     },
-    [worker, fileName],
+    [worker, fileName]
   );
 
   return (
@@ -529,7 +533,7 @@ function PacketDissector() {
         applyPreferences={applyPreferences}
       />
       <div className="flex items-center w-full">
-        <FileButton variant="text" onFileSelected={loadFile}>
+        <FileButton variant="ghost" onFileSelected={loadFile}>
           Load File
         </FileButton>
         <Button className="ml-5" variant="text" onClick={loadExample}>
@@ -573,7 +577,7 @@ function PacketDissector() {
           "py-1 mt-2 w-full",
           filterError != null
             ? "border-red-300 shadow-sm focus:border-red-500 focus:ring-red-500"
-            : "",
+            : ""
         )}
         placeholder="display filter, example: tcp"
         value={filter}

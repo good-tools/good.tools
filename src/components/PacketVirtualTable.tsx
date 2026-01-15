@@ -5,7 +5,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useVirtual } from "@tanstack/react-virtual";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 const fetchSize = 200;
 
@@ -23,7 +23,7 @@ interface PacketVirtualTableProps {
   fetchPackets: (
     filter: string,
     start: number,
-    count: number,
+    count: number
   ) => Promise<PacketRow[]>;
   total: number;
   selectedFrame: number;
@@ -50,23 +50,22 @@ function PacketVirtualTable({
           accessorFn: (row: PacketRow) => row.columns[i],
         };
       }),
-    [columns],
+    [columns]
   );
 
-  const { data, fetchNextPage, isFetching } = useInfiniteQuery(
-    ["packet-data", fileName, filter, dissectionNonce],
-    async ({ pageParam = 0 }) => {
+  const { data, fetchNextPage, isFetching } = useInfiniteQuery({
+    queryKey: ["packet-data", fileName, filter, dissectionNonce],
+    queryFn: async ({ pageParam = 0 }) => {
       const start = pageParam * fetchSize;
       // console.log("fetchPackets", filter, start, fetchSize);
       const fetchedData = await fetchPackets(filter, start, fetchSize);
       return fetchedData;
     },
-    {
-      getNextPageParam: (_lastGroup, groups) => groups.length,
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
-    },
-  );
+    getNextPageParam: (_lastGroup: PacketRow[], groups: PacketRow[][]) =>
+      groups.length,
+    refetchOnWindowFocus: false,
+    initialPageParam: 0,
+  });
 
   const flatData = useMemo(() => data?.pages?.flatMap((i) => i) ?? [], [data]);
 
@@ -88,7 +87,7 @@ function PacketVirtualTable({
         }
       }
     },
-    [fetchNextPage, isFetching, totalFetched, totalDBRowCount],
+    [fetchNextPage, isFetching, totalFetched, totalDBRowCount]
   );
 
   //a check on mount and after a fetch to see if the table is already scrolled to the bottom and immediately needs to fetch more data
@@ -103,13 +102,15 @@ function PacketVirtualTable({
   });
 
   const { rows } = table.getRowModel();
-  const rowVirtualizer = useVirtual({
-    parentRef: tableContainerRef,
-    size: rows.length,
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => tableContainerRef.current,
+    estimateSize: () => 28,
     overscan: 10,
   });
 
-  const { virtualItems: virtualRows, totalSize } = rowVirtualizer;
+  const virtualRows = rowVirtualizer.getVirtualItems();
+  const totalSize = rowVirtualizer.getTotalSize();
 
   const paddingTop = virtualRows.length > 0 ? virtualRows?.[0]?.start || 0 : 0;
   const paddingBottom =
@@ -141,7 +142,7 @@ function PacketVirtualTable({
                             <div>
                               {flexRender(
                                 header.column.columnDef.header,
-                                header.getContext(),
+                                header.getContext()
                               )}
                             </div>
                           )}
@@ -160,6 +161,7 @@ function PacketVirtualTable({
                 {virtualRows.map((virtualRow) => {
                   const row = rows[virtualRow.index];
                   const p = flatData[virtualRow.index];
+                  if (!row || !p) return null;
                   const selected = p.number === selectedFrame;
                   return (
                     <tr
@@ -170,13 +172,13 @@ function PacketVirtualTable({
                         backgroundColor: selected
                           ? `blue`
                           : p.bg
-                            ? `#${p.bg.toString(16).padStart(6, "0")}`
-                            : "",
+                          ? `#${p.bg.toString(16).padStart(6, "0")}`
+                          : "",
                         color: selected
                           ? `white`
                           : p.fg
-                            ? `#${p.fg.toString(16).padStart(6, "0")}`
-                            : "",
+                          ? `#${p.fg.toString(16).padStart(6, "0")}`
+                          : "",
                       }}
                     >
                       {row.getVisibleCells().map((cell) => {
@@ -184,7 +186,7 @@ function PacketVirtualTable({
                           <td key={cell.id} className="px-2 text-sm">
                             {flexRender(
                               cell.column.columnDef.cell,
-                              cell.getContext(),
+                              cell.getContext()
                             )}
                           </td>
                         );

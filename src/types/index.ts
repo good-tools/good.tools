@@ -3,16 +3,18 @@ export type { Tool, Dependency, ToolCategory } from "./tool.types";
 
 // API types
 export type {
-  DNSRecordType,
   DNSRecord,
   DNSResponse,
   WhoisResponse,
   IPAddressInfo,
+  MyIPResponse,
   IPLocationResponse,
-  DockerImageLayer,
-  DockerImageManifest,
   DockerFileNode,
+  DockerFileListItem,
   DockerImageResponse,
+  DockerImageMetadata,
+  DockerImageConfig,
+  DockerImageDetails,
 } from "./api.types";
 
 // Store types

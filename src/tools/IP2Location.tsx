@@ -11,7 +11,7 @@ function IP2Location() {
 
   const { data, isLoading, error, refetch } = useIPLocationQuery(
     address,
-    shouldFetch,
+    shouldFetch
   );
   const { data: myIPData, isLoading: myIPLoading } = useMyIPv6Query();
 
@@ -47,7 +47,7 @@ function IP2Location() {
     <div>
       <div className="mt-5">
         <TextInput
-          innerRef={addressRef}
+          ref={addressRef}
           type="text"
           name="ip"
           id="ip"

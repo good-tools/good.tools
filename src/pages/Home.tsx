@@ -5,11 +5,17 @@ import { tools } from "@/config/tools.config";
 import ToolCard from "@/components/ToolCard";
 import SearchBar from "@/components/SearchBar";
 import CategoryFilter from "@/components/CategoryFilter";
-import { CATEGORIES, getToolsByCategory } from "@/lib/categories";
+import {
+  CATEGORIES,
+  getToolsByCategory,
+  type CategoryName,
+} from "@/lib/categories";
 
 function Home() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState(CATEGORIES.ALL);
+  const [activeCategory, setActiveCategory] = useState<CategoryName>(
+    CATEGORIES.ALL
+  );
 
   // Filter tools based on search and category
   const filteredTools = useMemo(() => {
@@ -21,7 +27,7 @@ function Home() {
         (tool) =>
           tool.title.toLowerCase().includes(query) ||
           tool.description.toLowerCase().includes(query) ||
-          tool.tags.some((tag) => tag.toLowerCase().includes(query)),
+          tool.tags.some((tag) => tag.toLowerCase().includes(query))
       );
     }
 
@@ -66,7 +72,9 @@ function Home() {
       >
         <CategoryFilter
           activeCategory={activeCategory}
-          onCategoryChange={setActiveCategory}
+          onCategoryChange={(category) =>
+            setActiveCategory(category as CategoryName)
+          }
         />
       </div>
 

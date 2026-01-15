@@ -1,4 +1,3 @@
-import React from "react";
 import ReactDOM from "react-dom/client";
 import "@/assets/styles/index.css";
 import "focus-visible";
@@ -35,5 +34,5 @@ root.render(
         </HelmetProvider>
       </DarkModeProvider>
     </QueryClientProvider>
-  </BrowserRouter>,
+  </BrowserRouter>
 );

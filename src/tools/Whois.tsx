@@ -21,7 +21,7 @@ function Whois() {
 
   const { data, isLoading, error, refetch } = useWhoisQuery(
     address,
-    shouldFetch,
+    shouldFetch
   );
 
   const clear = () => {
@@ -32,7 +32,7 @@ function Whois() {
   const loadRandom = () => {
     const domain =
       EXAMPLE_DOMAINS[Math.floor(Math.random() * EXAMPLE_DOMAINS.length)];
-    setAddress(domain);
+    setAddress(domain ?? "");
     setShouldFetch(false);
   };
 
@@ -56,7 +56,7 @@ function Whois() {
     <div>
       <div className="mt-5">
         <TextInput
-          innerRef={addressRef}
+          ref={addressRef}
           type="text"
           name="domain"
           id="domain"

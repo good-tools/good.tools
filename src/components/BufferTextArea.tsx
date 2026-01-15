@@ -11,15 +11,9 @@ function BufferTextArea({ value, ...props }: BufferTextAreaProps) {
 
   return (
     <CodeGroup {...props}>
-      <code title="UTF-8" code={plain}>
-        {plain}
-      </code>
-      <code title="Hex" code={hex}>
-        {hex}
-      </code>
-      <code title="Base64" code={b64}>
-        {b64}
-      </code>
+      <code title="UTF-8">{plain}</code>
+      <code title="Hex">{hex}</code>
+      <code title="Base64">{b64}</code>
     </CodeGroup>
   );
 }

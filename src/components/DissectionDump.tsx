@@ -18,8 +18,8 @@ function HighlightedText({
   const end = text.substring(start + size);
 
   const handleClickWithOffset = (
-    e: React.MouseEvent<HTMLSpanElement>,
-    offset: number,
+    _e: React.MouseEvent<HTMLSpanElement>,
+    offset: number
   ) => {
     const s = window.getSelection();
     if (s) {
@@ -88,7 +88,7 @@ function DissectionDump({ buffer, selected, select }: DissectionDumpProps) {
       for (const value of block) {
         hexArray.push(value.toString(16).padStart(2, "0"));
         asciiArray.push(
-          value >= 0x20 && value < 0x7f ? String.fromCharCode(value) : ".",
+          value >= 0x20 && value < 0x7f ? String.fromCharCode(value) : "."
         );
       }
 

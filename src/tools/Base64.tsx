@@ -59,9 +59,7 @@ function Encoder() {
       </Button>
       {encoderOutput && (
         <CodeGroup title={"Result"}>
-          <code code={encoderOutput.toString("base64")}>
-            {encoderOutput.toString("base64")}
-          </code>
+          <code>{encoderOutput.toString("base64")}</code>
         </CodeGroup>
       )}
     </div>
