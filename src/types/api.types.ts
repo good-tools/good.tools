@@ -1,59 +1,41 @@
 /**
- * DNS record types
- */
-export type DNSRecordType =
-  | "A"
-  | "AAAA"
-  | "CNAME"
-  | "MX"
-  | "NS"
-  | "TXT"
-  | "SOA"
-  | "SRV"
-  | "PTR";
-
-/**
  * DNS record
  */
 export interface DNSRecord {
-  type: DNSRecordType;
-  name: string;
-  value: string;
-  ttl: number;
-  priority?: number;
+  content: string;
+  ttl?: number;
 }
 
 /**
  * DNS lookup response
+ * Keys are record types (A, AAAA, CNAME, MX, etc.)
  */
 export interface DNSResponse {
-  records: DNSRecord[];
-  error?: string;
+  [recordType: string]: DNSRecord[];
+  message?: string;
 }
 
 /**
  * WHOIS response
  */
 export interface WhoisResponse {
-  raw: string;
-  parsed?: {
-    domain?: string;
-    registrar?: string;
-    createdDate?: string;
-    expiryDate?: string;
-    nameServers?: string[];
-    status?: string[];
-  };
-  error?: string;
+  data: string;
+  message?: string;
 }
 
 /**
- * IP address information
+ * IP address information from service API
  */
 export interface IPAddressInfo {
-  ipv4?: string;
-  ipv6?: string;
-  error?: string;
+  ip: string;
+  agent: string;
+}
+
+/**
+ * IP address information from internet-tools API
+ */
+export interface MyIPResponse {
+  ip: string;
 }
 
 /**
@@ -61,56 +43,100 @@ export interface IPAddressInfo {
  */
 export interface IPLocationResponse {
   ip: string;
+  continent?: string;
   country?: string;
-  countryCode?: string;
-  region?: string;
+  subdivisions: string[];
   city?: string;
-  latitude?: number;
-  longitude?: number;
-  timezone?: string;
-  asn?: number;
-  asnOrganization?: string;
-  error?: string;
+  postal_code?: string;
+  time_zone: string;
+  location: {
+    lat: number;
+    lng: number;
+    accuracy: number;
+  };
+  traits: {
+    anonymous_proxy: boolean;
+    satellite_provider: boolean;
+  };
+  asn: {
+    number: number;
+    organization: string;
+  };
+  build: {
+    city: string;
+    asn: string;
+  };
+  message?: string;
 }
 
 /**
- * Docker image layer
+ * Docker image metadata
  */
-export interface DockerImageLayer {
+export interface DockerImageMetadata {
+  name: string;
   digest: string;
   size: number;
-  mediaType: string;
 }
 
 /**
- * Docker image manifest
+ * Docker image config
  */
-export interface DockerImageManifest {
-  name: string;
-  tag: string;
-  layers: DockerImageLayer[];
-  config: {
-    digest: string;
-    size: number;
+export interface DockerImageConfig {
+  User?: string;
+  Entrypoint?: string[];
+  Cmd?: string[];
+  Env?: string[];
+  Labels?: Record<string, string>;
+}
+
+/**
+ * Docker image details
+ */
+export interface DockerImageDetails {
+  os: string;
+  architecture: string;
+  created: string;
+  config: DockerImageConfig;
+  rootfs?: {
+    diff_ids?: string[];
   };
 }
 
 /**
- * Docker file tree node
+ * Docker image response from image-browser API
  */
-export interface DockerFileNode {
-  name: string;
-  path: string;
-  type: "file" | "directory";
-  size?: number;
-  children?: DockerFileNode[];
+export interface DockerImageResponse {
+  metadata: DockerImageMetadata;
+  image: DockerImageDetails;
+  message?: string;
 }
 
 /**
- * Docker image response
+ * Docker file node for file tree
  */
-export interface DockerImageResponse {
-  manifest: DockerImageManifest;
-  fileTree: DockerFileNode;
-  error?: string;
+export interface DockerFileNode {
+  id: string;
+  name: string;
+  directory: boolean;
+  size: number;
+  mode: string;
+  uid: number;
+  gid: number;
+  mime_type?: string;
+  symlink?: string;
+}
+
+/**
+ * Docker file list item (before processing)
+ */
+export interface DockerFileListItem {
+  name: string;
+  directory: boolean;
+  size: number;
+  mode: string;
+  uid: number;
+  gid: number;
+  mime_type?: string;
+  symlink?: string;
+  message?: string;
 }

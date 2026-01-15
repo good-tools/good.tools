@@ -1,0 +1,113 @@
+/**
+ * Custom React Query hooks for API calls
+ */
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+import { API_CONFIG } from "@/config/api.config";
+import type {
+  DNSResponse,
+  WhoisResponse,
+  IPAddressInfo,
+  MyIPResponse,
+  IPLocationResponse,
+} from "@/types/api.types";
+
+/**
+ * Hook for DNS lookups
+ */
+export function useDNSQuery(domain: string, enabled = false) {
+  return useQuery<DNSResponse>({
+    queryKey: ["dns", domain],
+    queryFn: async () => {
+      const response = await fetch(
+        `${API_CONFIG.internetToolsBaseUrl}/dns?${new URLSearchParams({ domain })}`,
+      );
+      const data = await response.json();
+      if (response.status >= 400 && response.status < 600) {
+        throw new Error(data.message || "DNS lookup failed");
+      }
+      return data;
+    },
+    enabled: enabled && !!domain,
+    retry: 1,
+  });
+}
+
+/**
+ * Hook for WHOIS lookups
+ */
+export function useWhoisQuery(domain: string, enabled = false) {
+  return useQuery<WhoisResponse>({
+    queryKey: ["whois", domain],
+    queryFn: async () => {
+      const response = await fetch(
+        `${API_CONFIG.internetToolsBaseUrl}/whois?${new URLSearchParams({ domain })}`,
+      );
+      const data = await response.json();
+      if (response.status >= 400 && response.status < 600) {
+        throw new Error(data.message || "WHOIS lookup failed");
+      }
+      return data;
+    },
+    enabled: enabled && !!domain,
+    retry: 1,
+  });
+}
+
+/**
+ * Hook for getting user's IP address (v4)
+ */
+export function useMyIPQuery() {
+  return useQuery<IPAddressInfo>({
+    queryKey: ["myip", "v4"],
+    queryFn: async () => {
+      const response = await fetch(`${API_CONFIG.serviceBaseUrl}/ip`);
+      const data = await response.json();
+      if (response.status >= 400 && response.status < 600) {
+        throw new Error("Failed to fetch IP address");
+      }
+      return data;
+    },
+    retry: 1,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
+/**
+ * Hook for getting user's IP address (v6)
+ */
+export function useMyIPv6Query() {
+  return useQuery<MyIPResponse>({
+    queryKey: ["myip", "v6"],
+    queryFn: async () => {
+      const response = await fetch(`${API_CONFIG.internetToolsBaseUrl}/my-ip`);
+      const data = await response.json();
+      if (response.status >= 400 && response.status < 600) {
+        throw new Error("Failed to fetch IP address");
+      }
+      return data;
+    },
+    retry: 1,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
+/**
+ * Hook for IP location lookups
+ */
+export function useIPLocationQuery(ip: string, enabled = false) {
+  return useQuery<IPLocationResponse>({
+    queryKey: ["iplocation", ip],
+    queryFn: async () => {
+      const response = await fetch(
+        `${API_CONFIG.internetToolsBaseUrl}/ip?${new URLSearchParams({ ip })}`,
+      );
+      const data = await response.json();
+      if (response.status >= 400 && response.status < 600) {
+        throw new Error(data.message || "IP location lookup failed");
+      }
+      return data;
+    },
+    enabled: enabled && !!ip,
+    retry: 1,
+  });
+}

@@ -6,6 +6,18 @@ import App from "@/App";
 import { HelmetProvider } from "react-helmet-async";
 import { DarkModeProvider } from "@/components/ModeToggle";
 import { BrowserRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+// Create React Query client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const rootElement = document.getElementById("root");
 
@@ -16,10 +28,12 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <BrowserRouter>
-    <DarkModeProvider>
-      <HelmetProvider>
-        <App />
-      </HelmetProvider>
-    </DarkModeProvider>
+    <QueryClientProvider client={queryClient}>
+      <DarkModeProvider>
+        <HelmetProvider>
+          <App />
+        </HelmetProvider>
+      </DarkModeProvider>
+    </QueryClientProvider>
   </BrowserRouter>,
 );
