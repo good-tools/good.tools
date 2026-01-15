@@ -1,20 +1,44 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useRef } from "react";
-import { filesize } from "filesize"
-import moment from "moment"
+import { filesize } from "filesize";
+import moment from "moment";
 
-function PacketSummaryModal({ open, setOpen, summary }) {
-  const cancelButtonRef = useRef(null)
+interface PacketSummary {
+  filename: string;
+  file_type: string;
+  file_length: number;
+  file_encap_type: string;
+  packet_count: number;
+  start_time: number;
+  stop_time: number;
+  elapsed_time: number;
+}
+
+interface PacketSummaryModalProps {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  summary: PacketSummary | null;
+}
+
+function PacketSummaryModal({
+  open,
+  setOpen,
+  summary,
+}: PacketSummaryModalProps) {
+  const cancelButtonRef = useRef(null);
 
   if (summary === null) {
-    return (
-      <div />
-    )
+    return <div />;
   }
 
   return (
     <Transition.Root show={open} as={Fragment}>
-      <Dialog as="div" className="relative z-50" initialFocus={cancelButtonRef} onClose={setOpen}>
+      <Dialog
+        as="div"
+        className="relative z-50"
+        initialFocus={cancelButtonRef}
+        onClose={setOpen}
+      >
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -41,48 +65,65 @@ function PacketSummaryModal({ open, setOpen, summary }) {
               <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
                 <div>
                   <div className="text-center">
-                    <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 mb-3">
+                    <Dialog.Title
+                      as="h3"
+                      className="text-lg font-medium leading-6 text-gray-900 mb-3"
+                    >
                       {summary.filename}
                     </Dialog.Title>
                     <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-4">
                       <div className="sm:col-span-2">
-                        <dt className="text-sm font-medium text-gray-500">Type</dt>
+                        <dt className="text-sm font-medium text-gray-500">
+                          Type
+                        </dt>
+                        <dd className="mt-1 text-sm">{summary.file_type}</dd>
+                      </div>
+                      <div className="sm:col-span-1">
+                        <dt className="text-sm font-medium text-gray-500">
+                          Size
+                        </dt>
                         <dd className="mt-1 text-sm">
-                          {summary.file_type}
+                          {filesize(summary.file_length, { base: 2 })}
                         </dd>
                       </div>
                       <div className="sm:col-span-1">
-                        <dt className="text-sm font-medium text-gray-500">Size</dt>
-                        <dd className="mt-1 text-sm">
-                          {filesize(summary.file_length, {base: 2})}
-                        </dd>
-                      </div>
-                      <div className="sm:col-span-1">
-                        <dt className="text-sm font-medium text-gray-500">Encapsulation</dt>
+                        <dt className="text-sm font-medium text-gray-500">
+                          Encapsulation
+                        </dt>
                         <dd className="mt-1 text-sm">
                           {summary.file_encap_type}
                         </dd>
                       </div>
                       <div className="sm:col-span-1">
-                        <dt className="text-sm font-medium text-gray-500">Packets</dt>
+                        <dt className="text-sm font-medium text-gray-500">
+                          Packets
+                        </dt>
+                        <dd className="mt-1 text-sm">{summary.packet_count}</dd>
+                      </div>
+                      <div className="sm:col-span-1">
+                        <dt className="text-sm font-medium text-gray-500">
+                          Start Time
+                        </dt>
                         <dd className="mt-1 text-sm">
-                          {summary.packet_count}
+                          {moment
+                            .unix(summary.start_time)
+                            .format("YYYY-MM-DD HH:mm:ss")}
                         </dd>
                       </div>
                       <div className="sm:col-span-1">
-                        <dt className="text-sm font-medium text-gray-500">Start Time</dt>
+                        <dt className="text-sm font-medium text-gray-500">
+                          Stop Time
+                        </dt>
                         <dd className="mt-1 text-sm">
-                          {moment.unix(summary.start_time).format("YYYY-MM-DD HH:mm:ss")}
+                          {moment
+                            .unix(summary.stop_time)
+                            .format("YYYY-MM-DD HH:mm:ss")}
                         </dd>
                       </div>
                       <div className="sm:col-span-1">
-                        <dt className="text-sm font-medium text-gray-500">Stop Time</dt>
-                        <dd className="mt-1 text-sm">
-                          {moment.unix(summary.stop_time).format("YYYY-MM-DD HH:mm:ss")}
-                        </dd>
-                      </div>
-                      <div className="sm:col-span-1">
-                        <dt className="text-sm font-medium text-gray-500">Duration</dt>
+                        <dt className="text-sm font-medium text-gray-500">
+                          Duration
+                        </dt>
                         <dd className="mt-1 text-sm">
                           {summary.elapsed_time} s
                         </dd>
@@ -106,7 +147,8 @@ function PacketSummaryModal({ open, setOpen, summary }) {
         </div>
       </Dialog>
     </Transition.Root>
-  )
+  );
 }
 
 export default PacketSummaryModal;
+export type { PacketSummary };

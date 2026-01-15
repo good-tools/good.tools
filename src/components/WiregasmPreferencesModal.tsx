@@ -1,11 +1,15 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Allotment } from "allotment";
 import { Fragment, useEffect, useRef, useState } from "react";
-import WiregasmPreferenceTree from "./WiregasmPreferenceTree";
-import WiregasmModulePreferences from "./WiregasmModulePreferences";
+import WiregasmPreferenceTree, {
+  type ModuleNode,
+} from "@/components/WiregasmPreferenceTree";
+import WiregasmModulePreferences, {
+  type Preference,
+} from "@/components/WiregasmModulePreferences";
 
-function recursiveFilter(tree, filter) {
-  const filtered = [];
+function recursiveFilter(tree: ModuleNode[], filter: string): ModuleNode[] {
+  const filtered: ModuleNode[] = [];
 
   for (const node of tree) {
     if (node.submodules && node.submodules.length > 0) {
@@ -16,12 +20,30 @@ function recursiveFilter(tree, filter) {
           submodules: filteredChildren,
         });
       }
-    } else if (node.name.toLowerCase().includes(filter) || node.title.toLowerCase().includes(filter)) {
+    } else if (
+      node.name.toLowerCase().includes(filter) ||
+      node.title.toLowerCase().includes(filter)
+    ) {
       filtered.push(node);
     }
   }
 
   return filtered;
+}
+
+interface WiregasmPreferencesModalProps {
+  initialized: boolean;
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  loadModuleTree: () => Promise<ModuleNode[]>;
+  loadPreferences: (moduleName: string) => Promise<Preference[]>;
+  uploadFile: (file: File) => Promise<string>;
+  updatePreference: (
+    moduleName: string,
+    key: string,
+    value: string,
+  ) => Promise<void>;
+  applyPreferences: () => Promise<void>;
 }
 
 function WiregasmPreferencesModal({
@@ -33,14 +55,16 @@ function WiregasmPreferencesModal({
   uploadFile,
   updatePreference,
   applyPreferences,
-}) {
+}: WiregasmPreferencesModalProps) {
   const cancelButtonRef = useRef(null);
-  const [moduleTree, setModuleTree] = useState([]);
-  const [selectedModule, setSelectedModule] = useState(null);
-  const [modulePreferences, setModulePreferences] = useState(null);
+  const [moduleTree, setModuleTree] = useState<ModuleNode[]>([]);
+  const [selectedModule, setSelectedModule] = useState<ModuleNode | null>(null);
+  const [modulePreferences, setModulePreferences] = useState<
+    Preference[] | null
+  >(null);
   const [updatedNonce, setUpdatedNonce] = useState(0);
   const [filter, setFilter] = useState("");
-  const [filteredTree, setFilteredTree] = useState([]);
+  const [filteredTree, setFilteredTree] = useState<ModuleNode[]>([]);
 
   useEffect(() => {
     if (!moduleTree) {
@@ -78,7 +102,10 @@ function WiregasmPreferencesModal({
     });
   }, [loadPreferences, selectedModule, updatedNonce]);
 
-  const updatePreferenceValue = (key, value) => {
+  const updatePreferenceValue = (key: string, value: string) => {
+    if (!selectedModule) {
+      return Promise.reject("No module selected");
+    }
     return updatePreference(selectedModule.name, key, value);
   };
 
@@ -175,7 +202,6 @@ function WiregasmPreferencesModal({
                     type="button"
                     className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm"
                     onClick={applyPreferenceValues}
-                    ref={cancelButtonRef}
                   >
                     Apply
                   </button>

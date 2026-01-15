@@ -6,7 +6,23 @@ import {
 import clsx from "clsx";
 import { useState } from "react";
 
-function SubTree({ id, nodes, select, selected, root = false }) {
+interface ModuleNode {
+  name: string;
+  title: string;
+  description: string;
+  use_gui: boolean;
+  submodules: ModuleNode[];
+}
+
+interface SubTreeProps {
+  id: string;
+  nodes: ModuleNode[];
+  select: (node: ModuleNode) => void;
+  selected: ModuleNode | null;
+  root?: boolean;
+}
+
+function SubTree({ id, nodes, select, selected, root = false }: SubTreeProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -14,7 +30,7 @@ function SubTree({ id, nodes, select, selected, root = false }) {
       className={clsx(
         "text-sm",
         root ? "" : "border-l",
-        root ? "" : "pl-2 ml-2"
+        root ? "" : "pl-2 ml-2",
       )}
     >
       {nodes
@@ -36,7 +52,7 @@ function SubTree({ id, nodes, select, selected, root = false }) {
                       "ml-1",
                       selected && selected.name === n.name
                         ? "font-bold text-zinc-600 dark:text-zinc-300"
-                        : ""
+                        : "",
                     )}
                     onClick={() => select(n)}
                     onDoubleClick={() => setOpen(!open)}
@@ -64,7 +80,7 @@ function SubTree({ id, nodes, select, selected, root = false }) {
                     "ml-1",
                     selected && selected.name === n.name
                       ? "font-bold text-zinc-600 dark:text-zinc-300"
-                      : ""
+                      : "",
                   )}
                 >
                   {n.title}
@@ -77,10 +93,20 @@ function SubTree({ id, nodes, select, selected, root = false }) {
   );
 }
 
-function WiregasmPreferenceTree({ tree, select, selected }) {
+interface WiregasmPreferenceTreeProps {
+  tree: ModuleNode[];
+  select: (node: ModuleNode) => void;
+  selected: ModuleNode | null;
+}
+
+function WiregasmPreferenceTree({
+  tree,
+  select,
+  selected,
+}: WiregasmPreferenceTreeProps) {
   return (
     <SubTree
-      id={"root"}
+      id="root"
       nodes={tree}
       select={select}
       selected={selected}
@@ -90,3 +116,4 @@ function WiregasmPreferenceTree({ tree, select, selected }) {
 }
 
 export default WiregasmPreferenceTree;
+export type { ModuleNode };

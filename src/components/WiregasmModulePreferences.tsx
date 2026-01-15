@@ -1,7 +1,7 @@
 import { PrefType } from "@goodtools/wiregasm";
-import CheckBox from "./CheckBox";
+import CheckBox from "@/components/CheckBox";
 import { useId, useState } from "react";
-import FileButton from "./FileButton";
+import FileButton from "@/components/FileButton";
 
 const PREF_CATEGORIES = {
   boolean: [PrefType.PREF_BOOL],
@@ -12,8 +12,34 @@ const PREF_CATEGORIES = {
   range: [PrefType.PREF_RANGE, PrefType.PREF_DECODE_AS_RANGE],
 };
 
-function BooleanPreference({ pref, updatePreferenceValue }) {
-  const [checked, setChecked] = useState(pref.bool_value);
+interface EnumOption {
+  name: string;
+  description: string;
+  selected: boolean;
+}
+
+interface Preference {
+  name: string;
+  title: string;
+  description: string;
+  type: PrefType;
+  bool_value?: boolean;
+  enum_value?: EnumOption[];
+  string_value?: string;
+  uint_value?: number;
+  range_value?: string;
+}
+
+interface BooleanPreferenceProps {
+  pref: Preference;
+  updatePreferenceValue: (name: string, value: string) => Promise<void>;
+}
+
+function BooleanPreference({
+  pref,
+  updatePreferenceValue,
+}: BooleanPreferenceProps) {
+  const [checked, setChecked] = useState(pref.bool_value ?? false);
 
   const toggle = () => {
     const value = !checked;
@@ -32,12 +58,17 @@ function BooleanPreference({ pref, updatePreferenceValue }) {
   );
 }
 
-function EnumPreference({ pref, updatePreferenceValue }) {
+interface EnumPreferenceProps {
+  pref: Preference;
+  updatePreferenceValue: (name: string, value: string) => Promise<void>;
+}
+
+function EnumPreference({ pref, updatePreferenceValue }: EnumPreferenceProps) {
   const [value, setValue] = useState(
-    pref.enum_value.filter((opt) => opt.selected)[0].name
+    pref.enum_value?.filter((opt) => opt.selected)[0]?.name ?? "",
   );
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     updatePreferenceValue(pref.name, value).then(() => {
       setValue(value);
@@ -64,7 +95,7 @@ function EnumPreference({ pref, updatePreferenceValue }) {
           value={value}
           className="w-full text-sm p-0 pl-1 rounded border-gray-300 text-zinc-600 focus:ring-zinc-500"
         >
-          {pref.enum_value.map((option, idx) => (
+          {pref.enum_value?.map((option, idx) => (
             <option key={`opt-${idx}`} value={option.name}>
               {option.description}
             </option>
@@ -75,11 +106,21 @@ function EnumPreference({ pref, updatePreferenceValue }) {
   );
 }
 
-function FilePreference({ pref, uploadFile, updatePreferenceValue }) {
-  const [value, setValue] = useState(pref.string_value);
-  const [error, setError] = useState(null);
+interface FilePreferenceProps {
+  pref: Preference;
+  uploadFile: (file: File) => Promise<string>;
+  updatePreferenceValue: (name: string, value: string) => Promise<void>;
+}
 
-  const handleChange = (e) => {
+function FilePreference({
+  pref,
+  uploadFile,
+  updatePreferenceValue,
+}: FilePreferenceProps) {
+  const [value, setValue] = useState(pref.string_value ?? "");
+  const [error, setError] = useState<string | null>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
 
     if (!e.target.files) {
@@ -98,7 +139,7 @@ function FilePreference({ pref, uploadFile, updatePreferenceValue }) {
           setValue(path);
         })
         .catch((err) => {
-          setError(err);
+          setError(err instanceof Error ? err.message : String(err));
         });
     });
   };
@@ -137,11 +178,19 @@ function FilePreference({ pref, uploadFile, updatePreferenceValue }) {
   );
 }
 
-function RangePreference({ pref, updatePreferenceValue }) {
-  const [value, setValue] = useState(pref.range_value);
-  const [error, setError] = useState(null);
+interface RangePreferenceProps {
+  pref: Preference;
+  updatePreferenceValue: (name: string, value: string) => Promise<void>;
+}
 
-  const handleChange = (e) => {
+function RangePreference({
+  pref,
+  updatePreferenceValue,
+}: RangePreferenceProps) {
+  const [value, setValue] = useState(pref.range_value ?? "");
+  const [error, setError] = useState<string | null>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
     setValue(e.target.value);
   };
@@ -151,7 +200,7 @@ function RangePreference({ pref, updatePreferenceValue }) {
     updatePreferenceValue(pref.name, value)
       .then(() => {})
       .catch((err) => {
-        setError(err);
+        setError(err instanceof Error ? err.message : String(err));
       });
   };
 
@@ -183,21 +232,29 @@ function RangePreference({ pref, updatePreferenceValue }) {
   );
 }
 
-function NumberPreference({ pref, updatePreferenceValue }) {
-  const [value, setValue] = useState(pref.uint_value);
-  const [error, setError] = useState(null);
+interface NumberPreferenceProps {
+  pref: Preference;
+  updatePreferenceValue: (name: string, value: string) => Promise<void>;
+}
 
-  const handleChange = (e) => {
+function NumberPreference({
+  pref,
+  updatePreferenceValue,
+}: NumberPreferenceProps) {
+  const [value, setValue] = useState(pref.uint_value ?? 0);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
     setValue(parseInt(e.target.value, 10) || 0);
   };
 
   const applyValue = () => {
     setError(null);
-    updatePreferenceValue(pref.name, value)
+    updatePreferenceValue(pref.name, value.toString())
       .then(() => {})
       .catch((err) => {
-        setError(err);
+        setError(err instanceof Error ? err.message : String(err));
       });
   };
 
@@ -225,11 +282,19 @@ function NumberPreference({ pref, updatePreferenceValue }) {
   );
 }
 
-function StringPreference({ pref, updatePreferenceValue }) {
-  const [value, setValue] = useState(pref.string_value);
-  const [error, setError] = useState(null);
+interface StringPreferenceProps {
+  pref: Preference;
+  updatePreferenceValue: (name: string, value: string) => Promise<void>;
+}
 
-  const handleChange = (e) => {
+function StringPreference({
+  pref,
+  updatePreferenceValue,
+}: StringPreferenceProps) {
+  const [value, setValue] = useState(pref.string_value ?? "");
+  const [error, setError] = useState<string | null>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
     setValue(e.target.value);
   };
@@ -239,7 +304,7 @@ function StringPreference({ pref, updatePreferenceValue }) {
     updatePreferenceValue(pref.name, value)
       .then(() => {})
       .catch((err) => {
-        setError(err);
+        setError(err instanceof Error ? err.message : String(err));
       });
   };
 
@@ -271,7 +336,17 @@ function StringPreference({ pref, updatePreferenceValue }) {
   );
 }
 
-function PreferenceItem({ pref, uploadFile, updatePreferenceValue }) {
+interface PreferenceItemProps {
+  pref: Preference;
+  uploadFile: (file: File) => Promise<string>;
+  updatePreferenceValue: (name: string, value: string) => Promise<void>;
+}
+
+function PreferenceItem({
+  pref,
+  uploadFile,
+  updatePreferenceValue,
+}: PreferenceItemProps) {
   if (PREF_CATEGORIES["boolean"].includes(pref.type)) {
     return (
       <BooleanPreference
@@ -330,11 +405,17 @@ function PreferenceItem({ pref, uploadFile, updatePreferenceValue }) {
   return <></>;
 }
 
+interface WiregasmModulePreferencesProps {
+  preferences: Preference[] | null;
+  uploadFile: (file: File) => Promise<string>;
+  updatePreferenceValue: (name: string, value: string) => Promise<void>;
+}
+
 function WiregasmModulePreferences({
   preferences,
   uploadFile,
   updatePreferenceValue,
-}) {
+}: WiregasmModulePreferencesProps) {
   if (!preferences) {
     return <div>Loading...</div>;
   }
@@ -357,3 +438,4 @@ function WiregasmModulePreferences({
 }
 
 export default WiregasmModulePreferences;
+export type { Preference };

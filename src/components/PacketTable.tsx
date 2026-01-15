@@ -1,4 +1,22 @@
-function PacketTable({ columns, packets, selectedIndex, setSelectedIndex }) {
+interface PacketColumn {
+  columns: string[];
+  bg?: string;
+  fg?: string;
+}
+
+interface PacketTableProps {
+  columns: string[];
+  packets: PacketColumn[];
+  selectedIndex: number;
+  setSelectedIndex: (index: number) => void;
+}
+
+function PacketTable({
+  columns,
+  packets,
+  selectedIndex,
+  setSelectedIndex,
+}: PacketTableProps) {
   return (
     <div className="my-2 flex flex-col font-mono overflow-y-auto h-full">
       <div className="overflow-x-auto">
@@ -22,17 +40,26 @@ function PacketTable({ columns, packets, selectedIndex, setSelectedIndex }) {
                 {packets.map((p, i) => {
                   const selected = i === selectedIndex;
                   return (
-                    <tr key={`k-${i}`} onClick={() => setSelectedIndex(i)} className="cursor-pointer leading-0" style={{
-                        backgroundColor: selected ? `blue` : p.bg ? `#${p.bg}` : '',
-                        color: selected ? `white` : p.fg ? `#${p.fg}` : ''
-                    }}>
+                    <tr
+                      key={`k-${i}`}
+                      onClick={() => setSelectedIndex(i)}
+                      className="cursor-pointer leading-0"
+                      style={{
+                        backgroundColor: selected
+                          ? `blue`
+                          : p.bg
+                            ? `#${p.bg}`
+                            : "",
+                        color: selected ? `white` : p.fg ? `#${p.fg}` : "",
+                      }}
+                    >
                       {p.columns.map((c, j) => (
                         <td key={`p-${i}-c-${j}`} className="px-2 text-sm">
                           {c}
                         </td>
                       ))}
                     </tr>
-                  )
+                  );
                 })}
               </tbody>
             </table>
@@ -40,7 +67,7 @@ function PacketTable({ columns, packets, selectedIndex, setSelectedIndex }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default PacketTable;

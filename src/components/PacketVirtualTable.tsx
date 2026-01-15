@@ -9,6 +9,28 @@ import { useVirtual } from "@tanstack/react-virtual";
 
 const fetchSize = 200;
 
+interface PacketRow {
+  number: number;
+  columns: string[];
+  bg?: number;
+  fg?: number;
+}
+
+interface PacketVirtualTableProps {
+  columns: string[];
+  fileName: string;
+  filter: string;
+  fetchPackets: (
+    filter: string,
+    start: number,
+    count: number,
+  ) => Promise<PacketRow[]>;
+  total: number;
+  selectedFrame: number;
+  setSelectedFrame: (frame: number) => void;
+  dissectionNonce: number;
+}
+
 function PacketVirtualTable({
   columns,
   fileName,
@@ -18,17 +40,17 @@ function PacketVirtualTable({
   selectedFrame,
   setSelectedFrame,
   dissectionNonce,
-}) {
-  const tableContainerRef = useRef(null);
+}: PacketVirtualTableProps) {
+  const tableContainerRef = useRef<HTMLDivElement>(null);
   const preparedColumns = useMemo(
     () =>
       columns.map((c, i) => {
         return {
           header: c,
-          accessorFn: (row) => row.columns[i],
+          accessorFn: (row: PacketRow) => row.columns[i],
         };
       }),
-    [columns]
+    [columns],
   );
 
   const { data, fetchNextPage, isFetching } = useInfiniteQuery(
@@ -43,7 +65,7 @@ function PacketVirtualTable({
       getNextPageParam: (_lastGroup, groups) => groups.length,
       keepPreviousData: true,
       refetchOnWindowFocus: false,
-    }
+    },
   );
 
   const flatData = useMemo(() => data?.pages?.flatMap((i) => i) ?? [], [data]);
@@ -53,7 +75,7 @@ function PacketVirtualTable({
   const totalFetched = flatData.length;
 
   const fetchMoreOnBottomReached = useCallback(
-    (containerRefElement) => {
+    (containerRefElement: HTMLDivElement | null) => {
       if (containerRefElement) {
         const { scrollHeight, scrollTop, clientHeight } = containerRefElement;
         //once the user has scrolled within 300px of the bottom of the table, fetch more data if there is any
@@ -66,7 +88,7 @@ function PacketVirtualTable({
         }
       }
     },
-    [fetchNextPage, isFetching, totalFetched, totalDBRowCount]
+    [fetchNextPage, isFetching, totalFetched, totalDBRowCount],
   );
 
   //a check on mount and after a fetch to see if the table is already scrolled to the bottom and immediately needs to fetch more data
@@ -99,7 +121,7 @@ function PacketVirtualTable({
     <div className="flex flex-col font-mono h-full">
       <div
         ref={tableContainerRef}
-        onScroll={(e) => fetchMoreOnBottomReached(e.target)}
+        onScroll={(e) => fetchMoreOnBottomReached(e.target as HTMLDivElement)}
         className="overflow-x-hidden"
       >
         <div className="inline-block min-w-full align-middle">
@@ -119,7 +141,7 @@ function PacketVirtualTable({
                             <div>
                               {flexRender(
                                 header.column.columnDef.header,
-                                header.getContext()
+                                header.getContext(),
                               )}
                             </div>
                           )}
@@ -148,13 +170,13 @@ function PacketVirtualTable({
                         backgroundColor: selected
                           ? `blue`
                           : p.bg
-                          ? `#${p.bg.toString(16).padStart(6, "0")}`
-                          : "",
+                            ? `#${p.bg.toString(16).padStart(6, "0")}`
+                            : "",
                         color: selected
                           ? `white`
                           : p.fg
-                          ? `#${p.fg.toString(16).padStart(6, "0")}`
-                          : "",
+                            ? `#${p.fg.toString(16).padStart(6, "0")}`
+                            : "",
                       }}
                     >
                       {row.getVisibleCells().map((cell) => {
@@ -162,7 +184,7 @@ function PacketVirtualTable({
                           <td key={cell.id} className="px-2 text-sm">
                             {flexRender(
                               cell.column.columnDef.cell,
-                              cell.getContext()
+                              cell.getContext(),
                             )}
                           </td>
                         );
@@ -185,3 +207,4 @@ function PacketVirtualTable({
 }
 
 export default PacketVirtualTable;
+export type { PacketRow };
