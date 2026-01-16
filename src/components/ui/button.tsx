@@ -24,7 +24,8 @@ const buttonVariants = {
 export type ButtonVariant = keyof typeof buttonVariants.variant;
 export type ButtonSize = keyof typeof buttonVariants.size;
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   asChild?: boolean;
@@ -39,7 +40,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       asChild = false,
       ...props
     },
-    ref,
+    ref
   ) => {
     const Comp = asChild ? Slot : "button";
     const variantClass =
@@ -52,13 +53,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
           variantClass,
           sizeClass,
-          className,
+          className
         )}
         ref={ref}
         {...props}
       />
     );
-  },
+  }
 );
 Button.displayName = "Button";
 

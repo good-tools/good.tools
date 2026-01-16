@@ -192,13 +192,13 @@ function CertificateDecoder() {
                 </dt>
                 <dd className="mt-1 text-sm">
                   {moment(decoded.validity.notBefore).format(
-                    "dddd, MMMM Do YYYY, h:mm:ss A",
+                    "dddd, MMMM Do YYYY, h:mm:ss A"
                   )}
                   <div
                     className={cn(
                       moment(decoded.validity.notBefore).isBefore(moment())
                         ? "text-green-500"
-                        : "text-red-500",
+                        : "text-red-500"
                     )}
                   >
                     ({moment(decoded.validity.notBefore).fromNow()})
@@ -209,13 +209,13 @@ function CertificateDecoder() {
                 <dt className="text-sm font-medium text-gray-500">Valid To</dt>
                 <dd className="mt-1 text-sm">
                   {moment(decoded.validity.notAfter).format(
-                    "dddd, MMMM Do YYYY, h:mm:ss A",
+                    "dddd, MMMM Do YYYY, h:mm:ss A"
                   )}
                   <div
                     className={cn(
                       moment(decoded.validity.notAfter).isAfter(moment())
                         ? "text-green-500"
-                        : "text-red-500",
+                        : "text-red-500"
                     )}
                   >
                     ({moment(decoded.validity.notAfter).fromNow()})

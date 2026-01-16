@@ -27,7 +27,7 @@ const inflateRemoteBuffer = async (url) => {
   }
 
   return view;
-}
+};
 
 const fetchPackages = async () => {
   console.log("Fetching packages!");

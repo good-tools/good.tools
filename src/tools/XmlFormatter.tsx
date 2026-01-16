@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useDarkModeContext } from "@/components/ModeToggle";
 import { Tag } from "@/components/Tag";
 import "allotment/dist/style.css";
-import { pd } from "pretty-data";
+import xmlFormat from "xml-formatter";
 import { XMLParser } from "fast-xml-parser";
 import { ObjectInspector } from "react-inspector";
 
@@ -24,7 +24,7 @@ function XmlFormatter() {
     if (valid) {
       setTree(false);
       try {
-        const formatted = pd.xml(value);
+        const formatted = xmlFormat(value);
         setDefaultLanguage("xml");
         setParsed(formatted);
         setValid(true);
@@ -57,7 +57,7 @@ function XmlFormatter() {
   const tiny = () => {
     if (valid) {
       setTree(false);
-      const mini = pd.xmlmin(value);
+      const mini = xmlFormat.minify(value, { collapseContent: true });
       setDefaultLanguage("xml");
       setParsed(mini);
     }

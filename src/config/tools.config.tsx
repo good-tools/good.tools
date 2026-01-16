@@ -238,8 +238,8 @@ export const tools: Tool[] = [
         url: "https://www.npmjs.com/package/fast-xml-parser",
       },
       {
-        name: "pretty-data",
-        url: "https://www.npmjs.com/package/pretty-data",
+        name: "xml-formatter",
+        url: "https://www.npmjs.com/package/xml-formatter",
       },
       {
         name: "react-inspector",

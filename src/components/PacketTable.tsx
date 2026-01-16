@@ -48,8 +48,8 @@ function PacketTable({
                         backgroundColor: selected
                           ? `blue`
                           : p.bg
-                            ? `#${p.bg}`
-                            : "",
+                          ? `#${p.bg}`
+                          : "",
                         color: selected ? `white` : p.fg ? `#${p.fg}` : "",
                       }}
                     >

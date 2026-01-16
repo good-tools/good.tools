@@ -41,7 +41,7 @@ interface WiregasmPreferencesModalProps {
   updatePreference: (
     moduleName: string,
     key: string,
-    value: string,
+    value: string
   ) => Promise<void>;
   applyPreferences: () => Promise<void>;
 }

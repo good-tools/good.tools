@@ -1,3 +1,1 @@
-test('does nothing', () => {
-  
-});
+test("does nothing", () => {});

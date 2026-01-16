@@ -25,7 +25,6 @@ import WiregasmPreferencesModal from "@/components/WiregasmPreferencesModal";
 import type { ModuleNode } from "@/components/WiregasmPreferenceTree";
 import type { Preference } from "@/components/WiregasmModulePreferences";
 
-
 export const NO_SELECTION: DissectionSelection = {
   id: "",
   idx: 0,
@@ -650,9 +649,9 @@ function PacketDissector() {
                             const pos: [number, number] =
                               idx === selectedTreeEntry.idx
                                 ? [
-                                  selectedTreeEntry.start,
-                                  selectedTreeEntry.length,
-                                ]
+                                    selectedTreeEntry.start,
+                                    selectedTreeEntry.length,
+                                  ]
                                 : [0, 0];
                             return (
                               <Tab.Panel key={`tp-${idx}`}>
