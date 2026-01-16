@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import TextArea from '@/components/TextArea'
 import { Buffer } from 'buffer'
-import { decode, typeDefinition, possibleValues } from '@goodtools/protobuf-decoder'
+import { decode, typeDefinition, possibleValues, DecodingResult } from '@goodtools/protobuf-decoder'
 import { Tag } from '@/components/Tag'
 import CheckBox from '@/components/CheckBox'
 
@@ -13,20 +13,8 @@ const EXAMPLE_PROTOBUF = Buffer.from([
   0x54, 0x10, 0x64,
 ])
 
-interface ProtobufField {
-  field: number
-  type: number
-  value: unknown
-  object: boolean
-}
-
-interface ProtobufObject {
-  fields: ProtobufField[]
-  unprocessed: Buffer
-}
-
 interface ProtobufObjectProps {
-  object: ProtobufObject
+  object: DecodingResult
   showBytes: boolean
 }
 
@@ -61,7 +49,7 @@ function ProtobufObjectComponent({ object, showBytes }: ProtobufObjectProps) {
                     <td className='px-2 py-2 text-sm'>{typeDefinition(f.type).name}</td>
                     <td className='px-2 py-2 text-sm'>
                       {f.object ? (
-                        <ProtobufObjectComponent object={f.value} showBytes={showBytes} />
+                        <ProtobufObjectComponent object={f.value as DecodingResult} showBytes={showBytes} />
                       ) : (
                         <table>
                           <tbody className='break-all'>
@@ -111,7 +99,7 @@ function ProtobufObjectComponent({ object, showBytes }: ProtobufObjectProps) {
 
 function ProtobufDecoder() {
   const [encoded, setEncoded] = useState('')
-  const [decoded, setDecoded] = useState<ProtobufObject | null>(null)
+  const [decoded, setDecoded] = useState<DecodingResult | null>(null)
   const encodedRef = useRef<HTMLTextAreaElement>(null)
 
   const [checked, setChecked] = useState(false)
@@ -126,7 +114,7 @@ function ProtobufDecoder() {
       const buff = Buffer.from(trimmed, 'hex')
 
       setEncoded(buff.toString('hex'))
-      setDecoded(decode(buff) as ProtobufObject)
+      setDecoded(decode(buff))
     } catch (error) {
       console.error('Failed to decode protobuf:', error)
       setDecoded(null)

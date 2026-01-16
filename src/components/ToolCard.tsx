@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import * as Icons from 'lucide-react'
-import { getToolCategory, getToolIcon } from '@/lib/categories'
+import { getToolCategory } from '@/lib/categories'
 import type { Tool } from '@/types'
 
 interface ToolCardProps {
@@ -9,8 +9,9 @@ interface ToolCardProps {
 
 function ToolCard({ tool }: ToolCardProps) {
   const category = getToolCategory(tool)
-  const iconName = getToolIcon(tool)
-  const IconComponent = (Icons as Record<string, Icons.LucideIcon | undefined>)[iconName] || Icons.Wrench
+  // const iconName = getToolIcon(tool)
+  // const IconComponent = Icons[iconName as keyof typeof Icons] || Icons.Wrench
+  const IconComponent = Icons.Wrench
 
   return (
     <Link to={tool.href} className='tool-card group block'>

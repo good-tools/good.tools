@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useRef, useState, useCallback, forwardRef } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { createAutocomplete } from '@algolia/autocomplete-core'
+import type { AutocompleteApi, AutocompleteState, AutocompleteCollection } from '@algolia/autocomplete-core'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Search as SearchIcon, Loader2 } from 'lucide-react'
 import { tools } from '@/config/tools.config'
@@ -9,22 +10,25 @@ import clsx from 'clsx'
 
 interface SearchItem extends Tool {
   objectID: string
+  [key: string]: unknown
 }
 
 function useAutocomplete() {
   const navigate = useNavigate()
-  const [autocompleteState, setAutocompleteState] = useState({
-    collections: [] as any[],
+  const [autocompleteState, setAutocompleteState] = useState<AutocompleteState<SearchItem>>({
+    collections: [],
     isOpen: false,
     query: '',
-    activeItemId: null as string | null,
-    status: 'idle' as 'idle' | 'loading' | 'stalled' | 'error',
+    activeItemId: null,
+    status: 'idle',
+    completion: null,
+    context: {},
   })
 
   const autocomplete = useRef(
-    createAutocomplete({
+    createAutocomplete<SearchItem>({
       onStateChange({ state }) {
-        setAutocompleteState(state as any)
+        setAutocompleteState(state)
       },
       getSources() {
         return [
@@ -70,8 +74,8 @@ function SearchResult({
   resultIndex,
 }: {
   result: SearchItem
-  autocomplete: any
-  collection: any
+  autocomplete: AutocompleteApi<SearchItem>
+  collection: AutocompleteCollection<SearchItem>
   resultIndex: number
 }) {
   const navigate = useNavigate()
@@ -82,16 +86,10 @@ function SearchResult({
         'group block cursor-pointer px-4 py-3 aria-selected:bg-primary/10',
         resultIndex > 0 && 'border-t border-border',
       )}
-      aria-selected={
-        autocomplete.getItemProps({
-          item: result,
-          source: collection.source,
-        })['aria-selected']
-      }
-      {...autocomplete.getItemProps({
+      {...(autocomplete.getItemProps({
         item: result,
         source: collection.source,
-      })}
+      }) as unknown as React.LiHTMLAttributes<HTMLLIElement>)}
       onClick={() => {
         navigate(result.href)
       }}
@@ -115,7 +113,15 @@ function SearchResult({
   )
 }
 
-function SearchResults({ autocomplete, query, collection }: { autocomplete: any; query: string; collection: any }) {
+function SearchResults({
+  autocomplete,
+  query,
+  collection,
+}: {
+  autocomplete: AutocompleteApi<SearchItem>
+  query: string
+  collection: AutocompleteCollection<SearchItem>
+}) {
   if (collection.items.length === 0) {
     return (
       <div className='p-6 text-center sm:p-14'>
@@ -129,7 +135,7 @@ function SearchResults({ autocomplete, query, collection }: { autocomplete: any;
   }
 
   return (
-    <ul {...autocomplete.getListProps()}>
+    <ul {...(autocomplete.getListProps() as unknown as React.HTMLAttributes<HTMLUListElement>)}>
       {collection.items.map((result: SearchItem, resultIndex: number) => (
         <SearchResult
           key={result.objectID}
@@ -143,47 +149,54 @@ function SearchResults({ autocomplete, query, collection }: { autocomplete: any;
   )
 }
 
-const SearchInput = forwardRef<HTMLInputElement, { autocomplete: any; autocompleteState: any; onClose: () => void }>(
-  function SearchInput({ autocomplete, autocompleteState, onClose }, inputRef) {
-    const inputProps = autocomplete.getInputProps({})
+const SearchInput = forwardRef<
+  HTMLInputElement,
+  { autocomplete: AutocompleteApi<SearchItem>; autocompleteState: AutocompleteState<SearchItem>; onClose: () => void }
+>(function SearchInput({ autocomplete, autocompleteState, onClose }, inputRef) {
+  const inputProps = autocomplete.getInputProps({
+    inputElement: (inputRef as React.RefObject<HTMLInputElement>).current,
+  }) as unknown as React.InputHTMLAttributes<HTMLInputElement>
 
-    return (
-      <div className='group relative flex h-12'>
-        <SearchIcon className='pointer-events-none absolute left-3 top-0 h-full w-5 text-muted-foreground' />
-        <input
-          ref={inputRef}
-          className={clsx(
-            'flex-auto appearance-none border-none bg-transparent pl-10 text-foreground outline-none placeholder:text-muted-foreground focus:w-full focus:flex-none focus:outline-none sm:text-sm',
-            autocompleteState.status === 'stalled' ? 'pr-11' : 'pr-4',
-          )}
-          placeholder='Search tools...'
-          {...inputProps}
-          onKeyDown={(event) => {
-            if (event.key === 'Escape' && !autocompleteState.isOpen && autocompleteState.query === '') {
-              ;(document.activeElement as HTMLElement)?.blur()
-              onClose()
-            } else if (event.key === 'Tab' && autocompleteState.isOpen) {
-              // Prevent default tab behavior and simulate arrow key navigation
-              event.preventDefault()
-              const newEvent = new KeyboardEvent('keydown', {
-                key: event.shiftKey ? 'ArrowUp' : 'ArrowDown',
-                bubbles: true,
-              })
+  return (
+    <div className='group relative flex h-12'>
+      <SearchIcon className='pointer-events-none absolute left-3 top-0 h-full w-5 text-muted-foreground' />
+      <input
+        ref={inputRef}
+        className={clsx(
+          'flex-auto appearance-none border-none bg-transparent pl-10 text-foreground outline-none placeholder:text-muted-foreground focus:w-full focus:flex-none focus:outline-none sm:text-sm',
+          autocompleteState.status === 'stalled' ? 'pr-11' : 'pr-4',
+        )}
+        placeholder='Search tools...'
+        {...inputProps}
+        onKeyDown={(event) => {
+          if (event.key === 'Escape' && !autocompleteState.isOpen && autocompleteState.query === '') {
+            ;(document.activeElement as HTMLElement)?.blur()
+            onClose()
+          } else if (event.key === 'Tab' && autocompleteState.isOpen) {
+            // Prevent default tab behavior and simulate arrow key navigation
+            event.preventDefault()
+            const newEvent = new KeyboardEvent('keydown', {
+              key: event.shiftKey ? 'ArrowUp' : 'ArrowDown',
+              bubbles: true,
+            }) as unknown as React.KeyboardEvent<HTMLInputElement>
+            if (inputProps.onKeyDown) {
               inputProps.onKeyDown(newEvent)
-            } else {
+            }
+          } else {
+            if (inputProps.onKeyDown) {
               inputProps.onKeyDown(event)
             }
-          }}
-        />
-        {autocompleteState.status === 'stalled' && (
-          <div className='absolute inset-y-0 right-3 flex items-center'>
-            <Loader2 className='h-5 w-5 animate-spin text-muted-foreground' />
-          </div>
-        )}
-      </div>
-    )
-  },
-)
+          }
+        }}
+      />
+      {autocompleteState.status === 'stalled' && (
+        <div className='absolute inset-y-0 right-3 flex items-center'>
+          <Loader2 className='h-5 w-5 animate-spin text-muted-foreground' />
+        </div>
+      )}
+    </div>
+  )
+})
 
 function SearchDialog({
   open,
@@ -249,12 +262,12 @@ function SearchDialog({
             leaveTo='opacity-0 scale-95'
           >
             <Dialog.Panel className='mx-auto overflow-hidden rounded-lg bg-card shadow-xl ring-1 ring-border sm:max-w-xl'>
-              <div {...autocomplete.getRootProps({})}>
+              <div {...(autocomplete.getRootProps({}) as unknown as React.HTMLAttributes<HTMLDivElement>)}>
                 <form
                   ref={formRef}
-                  {...autocomplete.getFormProps({
+                  {...(autocomplete.getFormProps({
                     inputElement: inputRef.current,
-                  })}
+                  }) as unknown as React.FormHTMLAttributes<HTMLFormElement>)}
                 >
                   <SearchInput
                     ref={inputRef}
@@ -265,9 +278,9 @@ function SearchDialog({
                   <div
                     ref={panelRef}
                     className='border-t border-border bg-background empty:hidden max-h-[60vh] overflow-y-auto'
-                    {...autocomplete.getPanelProps({})}
+                    {...(autocomplete.getPanelProps({}) as unknown as React.HTMLAttributes<HTMLDivElement>)}
                   >
-                    {autocompleteState.isOpen && (
+                    {autocompleteState.isOpen && autocompleteState.collections[0] && (
                       <>
                         <SearchResults
                           autocomplete={autocomplete}

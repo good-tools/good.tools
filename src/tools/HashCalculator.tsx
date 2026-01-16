@@ -2,17 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { md } from 'node-forge'
 import TextInput from '@/components/TextInput'
 
+type Algorithm = keyof typeof md.algorithms
+
 function HashCalculator() {
   const [input, setInput] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const hash = (
-    digest: {
-      update: (input: string) => void
-      digest: () => { toHex: () => string }
-    },
-    input: string,
-  ): string => {
+  const hash = (digest: md.MessageDigest, input: string): string => {
     digest.update(input)
     return digest.digest().toHex()
   }
@@ -42,20 +38,7 @@ function HashCalculator() {
               name={a}
               disabled
               className={'w-full'}
-              value={hash(
-                (
-                  md.algorithms as Record<
-                    string,
-                    {
-                      create: () => {
-                        update: (input: string) => void
-                        digest: () => { toHex: () => string }
-                      }
-                    }
-                  >
-                )[a].create(),
-                input,
-              )}
+              value={hash(md.algorithms[a as Algorithm].create(), input)}
             />
           </div>
         ))}
