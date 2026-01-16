@@ -85,7 +85,7 @@ function WiregasmPreferencesModal({
     if (!initialized) {
       return;
     }
-    loadModuleTree().then((data) => {
+    void loadModuleTree().then((data) => {
       setModuleTree(data);
     });
   }, [loadModuleTree, initialized]);
@@ -97,21 +97,21 @@ function WiregasmPreferencesModal({
       return;
     }
 
-    loadPreferences(selectedModule.name).then((data) => {
+    void loadPreferences(selectedModule.name).then((data) => {
       setModulePreferences(data);
     });
   }, [loadPreferences, selectedModule, updatedNonce]);
 
   const updatePreferenceValue = (key: string, value: string) => {
     if (!selectedModule) {
-      return Promise.reject("No module selected");
+      return Promise.reject(new Error("No module selected"));
     }
     return updatePreference(selectedModule.name, key, value);
   };
 
   const applyPreferenceValues = () => {
     setUpdatedNonce(updatedNonce + 1);
-    applyPreferences().then(() => {
+    void applyPreferences().then(() => {
       setOpen(false);
     });
   };

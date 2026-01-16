@@ -44,7 +44,7 @@ function DNS() {
   // Trigger refetch when shouldFetch becomes true
   useEffect(() => {
     if (shouldFetch) {
-      refetch();
+      void refetch();
     }
   }, [shouldFetch, refetch]);
 

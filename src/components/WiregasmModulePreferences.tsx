@@ -43,7 +43,7 @@ function BooleanPreference({
 
   const toggle = () => {
     const value = !checked;
-    updatePreferenceValue(pref.name, value.toString()).then(() => {
+    void updatePreferenceValue(pref.name, value.toString()).then(() => {
       setChecked(value);
     });
   };
@@ -70,7 +70,7 @@ function EnumPreference({ pref, updatePreferenceValue }: EnumPreferenceProps) {
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    updatePreferenceValue(pref.name, value).then(() => {
+    void updatePreferenceValue(pref.name, value).then(() => {
       setValue(value);
     });
   };
@@ -134,7 +134,7 @@ function FilePreference({
     const f = e.target.files[0];
     if (!f) return;
 
-    uploadFile(f).then((path) => {
+    void uploadFile(f).then((path) => {
       updatePreferenceValue(pref.name, path)
         .then(() => {
           setValue(path);
@@ -199,7 +199,7 @@ function RangePreference({
   const applyValue = () => {
     setError(null);
     updatePreferenceValue(pref.name, value)
-      .then(() => {})
+      .then(() => { })
       .catch((err) => {
         setError(err instanceof Error ? err.message : String(err));
       });
@@ -253,7 +253,7 @@ function NumberPreference({
   const applyValue = () => {
     setError(null);
     updatePreferenceValue(pref.name, value.toString())
-      .then(() => {})
+      .then(() => { })
       .catch((err) => {
         setError(err instanceof Error ? err.message : String(err));
       });
@@ -303,7 +303,7 @@ function StringPreference({
   const applyValue = () => {
     setError(null);
     updatePreferenceValue(pref.name, value)
-      .then(() => {})
+      .then(() => { })
       .catch((err) => {
         setError(err instanceof Error ? err.message : String(err));
       });
