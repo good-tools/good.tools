@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
 import { Wrench } from "lucide-react";
 import { ModeToggle } from "./ModeToggle";
+import { Search, MobileSearch } from "./Search";
 
 function SimpleHeader() {
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+      <div className="container mx-auto flex h-16 items-center justify-between gap-4 px-4">
         <Link
           to="/"
           className="flex items-center gap-3 hover:opacity-80 transition-opacity"
@@ -21,7 +22,11 @@ function SimpleHeader() {
           </span>
         </Link>
 
-        <ModeToggle />
+        <div className="flex items-center gap-2">
+          <Search />
+          <MobileSearch />
+          <ModeToggle />
+        </div>
       </div>
     </header>
   );
