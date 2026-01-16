@@ -3,6 +3,10 @@
   "version": "1.19.3",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
   "dependencies": {
     "@algolia/autocomplete-core": "^1.7.4",
     "@goodtools/jdserialize": "^1.0.0",
@@ -51,8 +55,10 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev:remote": "vite --host 0.0.0.0",
     "build": "tsc && vite build",
     "preview": "vite preview",
+    "preview:remote": "vite --host 0.0.0.0 preview",
     "type-check": "tsc --noEmit",
     "test": "tsc --noEmit",
     "build-sitemap": "node src/sitemap.js",
@@ -84,6 +90,7 @@
     "prettier": "^2.8.3",
     "sitemap": "^7.1.1",
     "typescript": "^5.7.3",
-    "vite": "^5.4.18"
+    "vite": "^5.4.18",
+    "vite-plugin-node-polyfills": "^0.25.0"
   }
 }

@@ -24,6 +24,7 @@ import { Tag } from "@/components/Tag";
 import WiregasmPreferencesModal from "@/components/WiregasmPreferencesModal";
 import type { ModuleNode } from "@/components/WiregasmPreferenceTree";
 import type { Preference } from "@/components/WiregasmModulePreferences";
+import WiregasmWorker from "../workers/wiregasm.worker.js?worker&inline";
 
 export const NO_SELECTION: DissectionSelection = {
   id: "",
@@ -227,10 +228,14 @@ const applyPreferencesToWorker = (worker: Worker): Promise<void> =>
   });
 
 function PacketDissector() {
-  const worker = useMemo(
-    () => new Worker(new URL("../workers/wiregasm.worker.js", import.meta.url)),
-    []
-  );
+  const worker = useMemo(() => {
+    const w = new WiregasmWorker();
+    
+    // Good practice: Add an error listener immediately
+    w.onerror = (e) => console.error("Worker Load Error:", e);
+    
+    return w;
+  }, []);
 
   const queryClient = new QueryClient();
   const [version, setVersion] = useState<string | null>(null);

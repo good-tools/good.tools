@@ -45,7 +45,10 @@ function Home() {
       </Helmet>
 
       {/* Hero Section */}
-      <section className="mb-16 text-center animate-fade-in">
+      <section
+        className="mb-16 text-center animate-fade-in"
+        style={{ animationDuration: "0.3s" }}
+      >
         <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
           Purpose-built tools for
           <span className="gradient-text"> developers</span>
@@ -57,7 +60,10 @@ function Home() {
       </section>
 
       {/* Search Bar */}
-      <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
+      <div
+        className="mb-8 animate-slide-up"
+        style={{ animationDelay: "0s", animationDuration: "0.3s" }}
+      >
         <SearchBar
           value={searchQuery}
           onChange={setSearchQuery}
@@ -68,7 +74,7 @@ function Home() {
       {/* Category Filters */}
       <div
         className="mb-8 flex flex-wrap gap-2 animate-slide-up"
-        style={{ animationDelay: "0.15s" }}
+        style={{ animationDelay: "0s", animationDuration: "0.3s" }}
       >
         <CategoryFilter
           activeCategory={activeCategory}
@@ -79,7 +85,10 @@ function Home() {
       </div>
 
       {/* Tools Grid */}
-      <div className="animate-slide-up" style={{ animationDelay: "0.2s" }}>
+      <div
+        className="animate-slide-up"
+        style={{ animationDelay: "0s", animationDuration: "0.3s" }}
+      >
         {filteredTools.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 animate-in">
             {filteredTools.map((tool, idx) => (

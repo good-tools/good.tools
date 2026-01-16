@@ -86,31 +86,25 @@ function WrappedTool({ tool }: WrappedToolProps) {
                 </span>
               </div>
             )}
-            <div className="text-sm flex items-start gap-2 text-muted-foreground">
-              <Zap className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <span className="mr-2">Built using</span>
-                <div className="inline-flex flex-wrap gap-2 mt-2">
-                  {tool.dependencies.map((d, i) => (
-                    <Badge
-                      key={`tag-${i}`}
-                      variant="secondary"
-                      className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-                    >
-                      {d.url ? (
-                        <a
-                          href={d.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {d.name}
-                        </a>
-                      ) : (
-                        d.name
-                      )}
-                    </Badge>
-                  ))}
-                </div>
+            <div className="text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Zap className="w-4 h-4 flex-shrink-0" />
+                <span>Built using</span>
+                {tool.dependencies.map((d, i) => (
+                  <Badge
+                    key={`tag-${i}`}
+                    variant="secondary"
+                    className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                  >
+                    {d.url ? (
+                      <a href={d.url} target="_blank" rel="noopener noreferrer">
+                        {d.name}
+                      </a>
+                    ) : (
+                      d.name
+                    )}
+                  </Badge>
+                ))}
               </div>
             </div>
           </CardContent>

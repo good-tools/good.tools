@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode } from "react";
+import { createContext, useContext, ReactNode, useMemo } from "react";
 import { Sun, Moon } from "lucide-react";
 import { Button } from "./ui/button";
 import { useDarkMode } from "@/hooks/useDarkMode";
@@ -36,8 +36,13 @@ interface DarkModeProviderProps {
 export function DarkModeProvider({ children }: DarkModeProviderProps) {
   const [darkMode, setDarkMode] = useDarkMode(false);
 
+  const value = useMemo(
+    () => ({ darkMode, setDarkMode }),
+    [darkMode, setDarkMode]
+  );
+
   return (
-    <DarkModeContext.Provider value={{ darkMode, setDarkMode }}>
+    <DarkModeContext.Provider value={value}>
       {children}
     </DarkModeContext.Provider>
   );
@@ -60,7 +65,7 @@ export function ModeToggle() {
     disableTransitionsTemporarily();
 
     const darkModeMediaQuery = window.matchMedia(
-      "(prefers-color-scheme: dark)",
+      "(prefers-color-scheme: dark)"
     );
     const isSystemDarkMode = darkModeMediaQuery.matches;
     const isDarkMode = document.documentElement.classList.toggle("dark");
