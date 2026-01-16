@@ -3,20 +3,12 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
-const mockWsPlugin = {
-  name: 'mock-ws',
-  resolveId(id) {
-    if (id === 'virtual:ws-mock') return id;
-  },
-  load(id) {
-    if (id === 'virtual:ws-mock') return 'export default {};';
-  }
-};
+
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    mockWsPlugin,
+    // mockWsPlugin,
     nodePolyfills(),
     react()
   ],
@@ -26,7 +18,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
       // Buffer polyfill for browser
       buffer: "buffer",
-      'ws': 'virtual:ws-mock',
+      'ws': path.resolve(__dirname, "./src/ws-mock.ts"),
     },
   },
 
@@ -34,7 +26,7 @@ export default defineConfig({
   worker: {
     format: 'iife', // Forces the Webpack-style self-contained format
     plugins: () => [
-      mockWsPlugin,
+      // mockWsPlugin,
       // Add polyfills here so they are bundled into the IIFE
       nodePolyfills({ globals: { Buffer: true } })
     ]
