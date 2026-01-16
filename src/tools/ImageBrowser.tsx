@@ -229,7 +229,7 @@ function ImageBrowser() {
           value={ref}
           disabled={loading}
           onChange={(e) => setRef(e.target.value)}
-          onEnter={pull}
+          onEnter={() => void pull()}
           className="w-full"
           placeholder="docker.io/library/nginx:latest"
         />
