@@ -61,6 +61,21 @@ interface GetFramesResult {
   matched: number;
 }
 
+interface WorkerMessageData {
+  type: string;
+  data?: unknown;
+  status?: string;
+  error?: string;
+  name?: string;
+  code?: number;
+}
+
+interface ProcessedMessageData {
+  type: "processed";
+  name: string;
+  data: ProcessedResponse;
+}
+
 const checkFilter = (worker: Worker, filter: string): Promise<boolean> =>
   new Promise((res, rej) => {
     const channel = new MessageChannel();
@@ -398,40 +413,36 @@ function PacketDissector() {
   useEffect(() => {
     clear();
     if (window.Worker) {
-      worker.onmessage = (e: MessageEvent) => {
+      worker.onmessage = (e: MessageEvent<WorkerMessageData>) => {
         if (e.data.type === "init") {
           worker.postMessage({ type: "columns" });
           setInitialized(true);
         } else if (e.data.type === "columns") {
-          setColumns(e.data.data);
+          setColumns(e.data.data as string[]);
         } else if (e.data.type === "status") {
-          setStatus(e.data.status);
+          setStatus(e.data.status ?? "Unknown status");
         } else if (e.data.type === "error") {
-          setStatus(`Error: ${e.data.error}`);
+          setStatus(`Error: ${e.data.error ?? "Unknown error"}`);
         } else if (e.data.type === "selected") {
-          setSelectedPacket(e.data.data);
-          setPreparedPositions(preparePositions("root", e.data.data));
+          setSelectedPacket(e.data.data as SelectedPacket);
+          setPreparedPositions(preparePositions("root", e.data.data as DissectionNode));
           setSelectedTreeEntry(NO_SELECTION);
           setSelectedDataSourceIndex(0);
         } else if (e.data.type === "processed") {
-          const response: {
-            code: number;
-            data: ProcessedResponse;
-            name: string;
-          } = e.data;
+          const processedData = e.data as ProcessedMessageData;
 
           setFinishedProcessing(true);
-          setFileName(e.data.name);
+          setFileName(processedData.name);
 
           // -12 is short read
-          if (response.data.code === 0 || response.data.code === -12) {
+          if (processedData.data.code === 0 || processedData.data.code === -12) {
             // in case of a reload, update the dissection nonce
             setDissectionNonce(Math.random());
-            if (response.data.code !== 0) {
-              setStatus(`Code: ${response.data.code}`);
+            if (processedData.data.code !== 0) {
+              setStatus(`Code: ${processedData.data.code}`);
             }
-            setTotalFrames(response.data.summary.packet_count);
-            setSummary(response.data.summary);
+            setTotalFrames(processedData.data.summary.packet_count);
+            setSummary(processedData.data.summary);
           }
         }
       };
