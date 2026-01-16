@@ -24,7 +24,7 @@ import { Tag } from "@/components/Tag";
 import WiregasmPreferencesModal from "@/components/WiregasmPreferencesModal";
 import type { ModuleNode } from "@/components/WiregasmPreferenceTree";
 import type { Preference } from "@/components/WiregasmModulePreferences";
-import WiregasmWorker from "../workers/wiregasm.worker.js?worker&inline";
+
 
 export const NO_SELECTION: DissectionSelection = {
   id: "",
@@ -229,11 +229,16 @@ const applyPreferencesToWorker = (worker: Worker): Promise<void> =>
 
 function PacketDissector() {
   const worker = useMemo(() => {
-    const w = new WiregasmWorker();
-    
+    const w = new Worker(
+      new URL("../workers/wiregasm.worker.js", import.meta.url),
+      {
+        type: "module",
+      }
+    );
+
     // Good practice: Add an error listener immediately
     w.onerror = (e) => console.error("Worker Load Error:", e);
-    
+
     return w;
   }, []);
 
@@ -645,9 +650,9 @@ function PacketDissector() {
                             const pos: [number, number] =
                               idx === selectedTreeEntry.idx
                                 ? [
-                                    selectedTreeEntry.start,
-                                    selectedTreeEntry.length,
-                                  ]
+                                  selectedTreeEntry.start,
+                                  selectedTreeEntry.length,
+                                ]
                                 : [0, 0];
                             return (
                               <Tab.Panel key={`tp-${idx}`}>

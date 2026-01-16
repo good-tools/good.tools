@@ -1,3 +1,4 @@
+import React from "react";
 import ReactDOM from "react-dom/client";
 import "@/assets/styles/index.css";
 import "focus-visible";
@@ -26,13 +27,15 @@ if (!rootElement) {
 
 const root = ReactDOM.createRoot(rootElement);
 root.render(
-  <BrowserRouter>
-    <QueryClientProvider client={queryClient}>
-      <DarkModeProvider>
-        <HelmetProvider>
-          <App />
-        </HelmetProvider>
-      </DarkModeProvider>
-    </QueryClientProvider>
-  </BrowserRouter>
+  <React.StrictMode>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <DarkModeProvider>
+          <HelmetProvider>
+            <App />
+          </HelmetProvider>
+        </DarkModeProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
+  </React.StrictMode>
 );

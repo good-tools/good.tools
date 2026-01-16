@@ -24,7 +24,7 @@ export default defineConfig({
 
   // Web Worker configuration
   worker: {
-    format: 'iife', // Forces the Webpack-style self-contained format
+    format: 'es', // Forces the Webpack-style self-contained format
     plugins: () => [
       // mockWsPlugin,
       // Add polyfills here so they are bundled into the IIFE
