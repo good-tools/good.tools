@@ -1,27 +1,27 @@
-import { create } from "zustand";
+import { create } from 'zustand'
 
 const DEFAULT_JSON_OBJ = {
-  message: "Hello, World!",
-};
+  message: 'Hello, World!',
+}
 
 /**
  * JSON Formatter store
  */
 interface JSONFormatterStore {
-  value: string;
-  parsed: unknown;
-  filtered: unknown;
-  valid: boolean;
-  query: string;
-  tree: boolean;
+  value: string
+  parsed: unknown
+  filtered: unknown
+  valid: boolean
+  query: string
+  tree: boolean
 
-  setValue: (value: string) => void;
-  setParsed: (value: unknown) => void;
-  setFiltered: (value: unknown) => void;
-  setValid: (value: boolean) => void;
-  setQuery: (value: string) => void;
-  setTree: (value: boolean) => void;
-  reset: () => void;
+  setValue: (value: string) => void
+  setParsed: (value: unknown) => void
+  setFiltered: (value: unknown) => void
+  setValid: (value: boolean) => void
+  setQuery: (value: string) => void
+  setTree: (value: boolean) => void
+  reset: () => void
 }
 
 export const useJSONFormatterStore = create<JSONFormatterStore>((set) => ({
@@ -29,7 +29,7 @@ export const useJSONFormatterStore = create<JSONFormatterStore>((set) => ({
   parsed: DEFAULT_JSON_OBJ,
   filtered: DEFAULT_JSON_OBJ,
   valid: true,
-  query: "",
+  query: '',
   tree: true,
 
   setValue: (v) => set({ value: v }),
@@ -44,7 +44,7 @@ export const useJSONFormatterStore = create<JSONFormatterStore>((set) => ({
       parsed: DEFAULT_JSON_OBJ,
       filtered: DEFAULT_JSON_OBJ,
       valid: true,
-      query: "",
+      query: '',
       tree: true,
     }),
-}));
+}))

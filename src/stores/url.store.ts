@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create } from 'zustand'
 
 /**
  * URL encoder/decoder store
@@ -6,52 +6,52 @@ import { create } from "zustand";
  */
 interface URLStore {
   // Encoder state
-  encoderInput: string;
-  encoderOutput: string;
+  encoderInput: string
+  encoderOutput: string
 
   // Decoder state
-  decoderInput: string;
-  decoderOutput: string;
+  decoderInput: string
+  decoderOutput: string
 
   // Encoder actions
-  setEncoderInput: (value: string) => void;
-  setEncoderOutput: (value: string) => void;
-  resetEncoder: () => void;
+  setEncoderInput: (value: string) => void
+  setEncoderOutput: (value: string) => void
+  resetEncoder: () => void
 
   // Decoder actions
-  setDecoderInput: (value: string) => void;
-  setDecoderOutput: (value: string) => void;
-  resetDecoder: () => void;
+  setDecoderInput: (value: string) => void
+  setDecoderOutput: (value: string) => void
+  resetDecoder: () => void
 
   // Reset all
-  resetAll: () => void;
+  resetAll: () => void
 }
 
 export const useURLStore = create<URLStore>((set) => ({
   // Encoder initial state
-  encoderInput: "",
-  encoderOutput: "",
+  encoderInput: '',
+  encoderOutput: '',
 
   // Decoder initial state
-  decoderInput: "",
-  decoderOutput: "",
+  decoderInput: '',
+  decoderOutput: '',
 
   // Encoder actions
   setEncoderInput: (value) => set({ encoderInput: value }),
   setEncoderOutput: (value) => set({ encoderOutput: value }),
-  resetEncoder: () => set({ encoderInput: "", encoderOutput: "" }),
+  resetEncoder: () => set({ encoderInput: '', encoderOutput: '' }),
 
   // Decoder actions
   setDecoderInput: (value) => set({ decoderInput: value }),
   setDecoderOutput: (value) => set({ decoderOutput: value }),
-  resetDecoder: () => set({ decoderInput: "", decoderOutput: "" }),
+  resetDecoder: () => set({ decoderInput: '', decoderOutput: '' }),
 
   // Reset all
   resetAll: () =>
     set({
-      encoderInput: "",
-      encoderOutput: "",
-      decoderInput: "",
-      decoderOutput: "",
+      encoderInput: '',
+      encoderOutput: '',
+      decoderInput: '',
+      decoderOutput: '',
     }),
-}));
+}))

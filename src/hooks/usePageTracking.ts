@@ -1,13 +1,13 @@
-import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 
 /**
  * Google Analytics page view tracking interface
  */
 interface GtagPageView {
-  page_path: string;
-  page_search: string;
-  page_hash: string;
+  page_path: string
+  page_search: string
+  page_hash: string
 }
 
 /**
@@ -15,7 +15,7 @@ interface GtagPageView {
  */
 declare global {
   interface Window {
-    gtag?: (command: string, eventName: string, params: GtagPageView) => void;
+    gtag?: (command: string, eventName: string, params: GtagPageView) => void
   }
 }
 
@@ -24,15 +24,15 @@ declare global {
  * Automatically tracks on route changes
  */
 export function usePageTracking(): void {
-  const location = useLocation();
+  const location = useLocation()
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.gtag) {
-      window.gtag("event", "page_view", {
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'page_view', {
         page_path: location.pathname + location.search + location.hash,
         page_search: location.search,
         page_hash: location.hash,
-      });
+      })
     }
-  }, [location]);
+  }, [location])
 }

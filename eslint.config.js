@@ -57,6 +57,7 @@ export default tseslint.config(
                     varsIgnorePattern: '^_',
                 },
             ],
+            '@typescript-eslint/no-empty-object-type': 'off',
         },
         settings: {
             react: {
