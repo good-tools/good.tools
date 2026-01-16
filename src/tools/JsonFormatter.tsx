@@ -131,7 +131,7 @@ function JsonFormatter() {
           <div
             className={cn(
               "pl-2 justify-items-center",
-              tree ? "h-full overflow-y-auto" : ""
+              tree ? "h-full overflow-y-auto" : "",
             )}
           >
             <div className="mb-2 grid grid-cols-3 gap-2">

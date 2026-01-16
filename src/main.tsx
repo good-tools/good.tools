@@ -37,5 +37,5 @@ root.render(
         </DarkModeProvider>
       </QueryClientProvider>
     </BrowserRouter>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

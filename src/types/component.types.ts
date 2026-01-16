@@ -19,8 +19,7 @@ export type ButtonSize = "default" | "sm" | "lg" | "icon";
 /**
  * Common button props
  */
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   asChild?: boolean;
@@ -29,16 +28,14 @@ export interface ButtonProps
 /**
  * Text input props
  */
-export interface TextInputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   onEnter?: () => void;
 }
 
 /**
  * Text area props
  */
-export interface TextAreaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+export interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   onCtrlEnter?: () => void;
 }
 

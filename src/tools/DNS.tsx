@@ -145,7 +145,7 @@ function DNS() {
                     <dd className="mt-1 text-sm">
                       <ul>
                         {Array.isArray(data[k]) &&
-                          (data[k] as DNSRecord[]).map((record, j) => (
+                          data[k].map((record, j) => (
                             <li key={`rec-${i}-${j}`}>{record.content}</li>
                           ))}
                       </ul>

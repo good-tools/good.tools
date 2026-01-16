@@ -65,7 +65,7 @@ interface EnumPreferenceProps {
 
 function EnumPreference({ pref, updatePreferenceValue }: EnumPreferenceProps) {
   const [value, setValue] = useState(
-    pref.enum_value?.filter((opt) => opt.selected)[0]?.name ?? ""
+    pref.enum_value?.filter((opt) => opt.selected)[0]?.name ?? "",
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

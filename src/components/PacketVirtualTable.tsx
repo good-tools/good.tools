@@ -23,7 +23,7 @@ interface PacketVirtualTableProps {
   fetchPackets: (
     filter: string,
     start: number,
-    count: number
+    count: number,
   ) => Promise<PacketRow[]>;
   total: number;
   selectedFrame: number;
@@ -50,7 +50,7 @@ function PacketVirtualTable({
           accessorFn: (row: PacketRow) => row.columns[i],
         };
       }),
-    [columns]
+    [columns],
   );
 
   const { data, fetchNextPage, isFetching } = useInfiniteQuery({
@@ -87,7 +87,7 @@ function PacketVirtualTable({
         }
       }
     },
-    [fetchNextPage, isFetching, totalFetched, totalDBRowCount]
+    [fetchNextPage, isFetching, totalFetched, totalDBRowCount],
   );
 
   //a check on mount and after a fetch to see if the table is already scrolled to the bottom and immediately needs to fetch more data
@@ -142,7 +142,7 @@ function PacketVirtualTable({
                             <div>
                               {flexRender(
                                 header.column.columnDef.header,
-                                header.getContext()
+                                header.getContext(),
                               )}
                             </div>
                           )}
@@ -172,13 +172,13 @@ function PacketVirtualTable({
                         backgroundColor: selected
                           ? `blue`
                           : p.bg
-                          ? `#${p.bg.toString(16).padStart(6, "0")}`
-                          : "",
+                            ? `#${p.bg.toString(16).padStart(6, "0")}`
+                            : "",
                         color: selected
                           ? `white`
                           : p.fg
-                          ? `#${p.fg.toString(16).padStart(6, "0")}`
-                          : "",
+                            ? `#${p.fg.toString(16).padStart(6, "0")}`
+                            : "",
                       }}
                     >
                       {row.getVisibleCells().map((cell) => {
@@ -186,7 +186,7 @@ function PacketVirtualTable({
                           <td key={cell.id} className="px-2 text-sm">
                             {flexRender(
                               cell.column.columnDef.cell,
-                              cell.getContext()
+                              cell.getContext(),
                             )}
                           </td>
                         );

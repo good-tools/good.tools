@@ -21,7 +21,7 @@ const EXAMPLE_PROTOBUF = Buffer.from([
 interface ProtobufField {
   field: number;
   type: number;
-  value: any;
+  value: unknown;
   object: boolean;
 }
 
@@ -91,25 +91,30 @@ function ProtobufObjectComponent({ object, showBytes }: ProtobufObjectProps) {
                         <table>
                           <tbody className="break-all">
                             {possibleValues(f)
-                              .filter((p: any) => {
+                              .filter((p: { type: string }) => {
                                 if (p.type === "bytes" && !showBytes)
                                   return false;
                                 return true;
                               })
-                              .map((p: any, j: number) => (
-                                <tr key={`k-${i}-p-${j}`}>
-                                  <td className="min-w-[100px]">
-                                    <Tag>{p.type}</Tag>
-                                  </td>
-                                  {p.type === "bytes" ? (
-                                    <td className="font-mono text-gray-600 text-xs">
-                                      {p.value.toString()}
+                              .map(
+                                (
+                                  p: { type: string; value: unknown },
+                                  j: number,
+                                ) => (
+                                  <tr key={`k-${i}-p-${j}`}>
+                                    <td className="min-w-[100px]">
+                                      <Tag>{p.type}</Tag>
                                     </td>
-                                  ) : (
-                                    <td>{p.value.toString()}</td>
-                                  )}
-                                </tr>
-                              ))}
+                                    {p.type === "bytes" ? (
+                                      <td className="font-mono text-gray-600 text-xs">
+                                        {p.value.toString()}
+                                      </td>
+                                    ) : (
+                                      <td>{String(p.value)}</td>
+                                    )}
+                                  </tr>
+                                ),
+                              )}
                           </tbody>
                         </table>
                       )}

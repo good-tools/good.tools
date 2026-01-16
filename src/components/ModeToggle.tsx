@@ -38,7 +38,7 @@ export function DarkModeProvider({ children }: DarkModeProviderProps) {
 
   const value = useMemo(
     () => ({ darkMode, setDarkMode }),
-    [darkMode, setDarkMode]
+    [darkMode, setDarkMode],
   );
 
   return (
@@ -65,7 +65,7 @@ export function ModeToggle() {
     disableTransitionsTemporarily();
 
     const darkModeMediaQuery = window.matchMedia(
-      "(prefers-color-scheme: dark)"
+      "(prefers-color-scheme: dark)",
     );
     const isSystemDarkMode = darkModeMediaQuery.matches;
     const isDarkMode = document.documentElement.classList.toggle("dark");

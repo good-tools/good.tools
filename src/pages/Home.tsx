@@ -14,7 +14,7 @@ import {
 function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<CategoryName>(
-    CATEGORIES.ALL
+    CATEGORIES.ALL,
   );
 
   // Filter tools based on search and category
@@ -27,7 +27,7 @@ function Home() {
         (tool) =>
           tool.title.toLowerCase().includes(query) ||
           tool.description.toLowerCase().includes(query) ||
-          tool.tags.some((tag) => tag.toLowerCase().includes(query))
+          tool.tags.some((tag) => tag.toLowerCase().includes(query)),
       );
     }
 

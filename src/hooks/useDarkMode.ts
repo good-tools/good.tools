@@ -6,7 +6,7 @@ import { useState, useCallback } from "react";
  * @returns Tuple of [darkMode, setDarkMode]
  */
 export function useDarkMode(
-  initialValue = false
+  initialValue = false,
 ): [boolean, (value: boolean) => void] {
   const [dark, setDark] = useState<boolean>(() => {
     if (typeof window === "undefined") {

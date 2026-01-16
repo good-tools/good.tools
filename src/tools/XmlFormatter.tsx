@@ -14,7 +14,7 @@ const DEFAULT_XML_OBJ = `<?xml version="1.0" encoding="UTF-8"?>
 
 function XmlFormatter() {
   const [value, setValue] = useState(DEFAULT_XML_OBJ);
-  const [parsed, setParsed] = useState<string | unknown>("");
+  const [parsed, setParsed] = useState<string | Record<string, unknown>>("");
   const [valid, setValid] = useState(true);
   const { darkMode } = useDarkModeContext();
   const [defaultLanguage, setDefaultLanguage] = useState<"xml" | "json">("xml");
@@ -49,7 +49,7 @@ function XmlFormatter() {
     try {
       parser.parse(val, true);
       setValid(true);
-    } catch (err) {
+    } catch {
       setValid(false);
     }
   };
@@ -66,7 +66,7 @@ function XmlFormatter() {
   const tojson = () => {
     if (valid) {
       const parser = new XMLParser();
-      const jsonObj = parser.parse(value);
+      const jsonObj = parser.parse(value) as Record<string, unknown> | null;
       if (jsonObj != null) {
         setDefaultLanguage("json");
         setTree(false);

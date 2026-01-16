@@ -6,8 +6,10 @@ import { cn } from "@/lib/utils";
 // Old Button variants from the original good.tools Button.js
 type OldButtonVariant = "primary" | "secondary" | "filled" | "outline" | "text";
 
-export interface ButtonProps
-  extends Omit<ShadcnButtonProps, "variant" | "size"> {
+export interface ButtonProps extends Omit<
+  ShadcnButtonProps,
+  "variant" | "size"
+> {
   variant?: OldButtonVariant;
   arrow?: "left" | "right";
 }
@@ -58,7 +60,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           "mt-0.5 h-5 w-5",
           variant === "text" && "relative top-px",
           arrow === "left" && "-ml-1 rotate-180",
-          arrow === "right" && "-mr-1"
+          arrow === "right" && "-mr-1",
         )}
       />
     ) : null;
@@ -70,7 +72,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(
           "inline-flex gap-0.5 justify-center overflow-hidden text-sm font-medium transition",
           customStyles,
-          className
+          className,
         )}
         {...props}
       >
@@ -79,7 +81,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {arrow === "right" && arrowIcon}
       </ShadcnButton>
     );
-  }
+  },
 );
 
 Button.displayName = "Button";

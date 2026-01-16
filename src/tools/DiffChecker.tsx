@@ -9,7 +9,9 @@ function DiffChecker() {
   const [original, setOriginal] = useState("");
   const [changed, setChanged] = useState("");
 
-  function handleEditorDidMount(editor: any) {
+  function handleEditorDidMount(editor: {
+    updateOptions: (options: { readOnly: boolean }) => void;
+  }) {
     editor.updateOptions({ readOnly: true });
   }
 

@@ -30,7 +30,7 @@ function SubTree({ id, nodes, select, selected, root = false }: SubTreeProps) {
       className={clsx(
         "text-sm",
         root ? "" : "border-l",
-        root ? "" : "pl-2 ml-2"
+        root ? "" : "pl-2 ml-2",
       )}
     >
       {nodes
@@ -52,7 +52,7 @@ function SubTree({ id, nodes, select, selected, root = false }: SubTreeProps) {
                       "ml-1",
                       selected && selected.name === n.name
                         ? "font-bold text-zinc-600 dark:text-zinc-300"
-                        : ""
+                        : "",
                     )}
                     onClick={() => select(n)}
                     onDoubleClick={() => setOpen(!open)}
@@ -80,7 +80,7 @@ function SubTree({ id, nodes, select, selected, root = false }: SubTreeProps) {
                     "ml-1",
                     selected && selected.name === n.name
                       ? "font-bold text-zinc-600 dark:text-zinc-300"
-                      : ""
+                      : "",
                   )}
                 >
                   {n.title}

@@ -1,8 +1,10 @@
 import { useRef, ReactNode } from "react";
 import { Button, ButtonProps } from "@/components/ui/button";
 
-export interface FileButtonProps
-  extends Omit<ButtonProps, "onClick" | "asChild"> {
+export interface FileButtonProps extends Omit<
+  ButtonProps,
+  "onClick" | "asChild"
+> {
   onFileSelected: (e: React.ChangeEvent<HTMLInputElement>) => void;
   children: ReactNode;
 }

@@ -28,7 +28,7 @@ export class ToolErrorBoundary extends Component<Props, State> {
     console.error(
       `ToolErrorBoundary caught an error in ${this.props.toolName || "tool"}:`,
       error,
-      errorInfo
+      errorInfo,
     );
   }
 

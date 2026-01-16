@@ -106,8 +106,8 @@ function ImageBrowser() {
       try {
         const response = await fetch(
           `${API_CONFIG.imageBrowserUrl}/download?${new URLSearchParams(
-            params
-          )}`
+            params,
+          )}`,
         );
         const data = await response.text();
 
@@ -119,7 +119,7 @@ function ImageBrowser() {
         //
       }
     },
-    [pulledRef]
+    [pulledRef],
   );
 
   useEffect(() => {
@@ -152,7 +152,7 @@ function ImageBrowser() {
 
       try {
         const response = await fetch(
-          `${API_CONFIG.imageBrowserUrl}/list?${new URLSearchParams(params)}`
+          `${API_CONFIG.imageBrowserUrl}/list?${new URLSearchParams(params)}`,
         );
         const data: DockerFileListItem[] = await response.json();
 
@@ -168,7 +168,7 @@ function ImageBrowser() {
             };
           })
           .sort((a, b) =>
-            a.directory && b.directory ? 0 : a.directory ? -1 : 1
+            a.directory && b.directory ? 0 : a.directory ? -1 : 1,
           );
 
         listCache.set(cacheKey, result);
@@ -179,7 +179,7 @@ function ImageBrowser() {
       }
       return [];
     },
-    [pulledRef]
+    [pulledRef],
   );
 
   const pull = useCallback(async () => {
@@ -201,7 +201,7 @@ function ImageBrowser() {
 
     try {
       const response = await fetch(
-        `${API_CONFIG.imageBrowserUrl}/image?${new URLSearchParams(params)}`
+        `${API_CONFIG.imageBrowserUrl}/image?${new URLSearchParams(params)}`,
       );
       const data = await response.json();
 
@@ -413,7 +413,7 @@ function ImageBrowser() {
                                     {data.image.config.Labels?.[k]}
                                   </td>
                                 </tr>
-                              )
+                              ),
                             )}
                           </tbody>
                         </table>
@@ -429,8 +429,14 @@ function ImageBrowser() {
                   <Allotment.Pane>
                     <div className="overflow-auto h-full pt-3">
                       <FileTree
-                        load={list as (node: any) => Promise<any[]>}
-                        select={select as (node: any) => Promise<void>}
+                        load={
+                          list as (
+                            node: DockerFileNode | null,
+                          ) => Promise<DockerFileNode[]>
+                        }
+                        select={
+                          select as (node: DockerFileNode) => Promise<void>
+                        }
                       />
                     </div>
                   </Allotment.Pane>

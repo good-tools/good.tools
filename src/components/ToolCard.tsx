@@ -11,7 +11,8 @@ function ToolCard({ tool }: ToolCardProps) {
   const category = getToolCategory(tool);
   const iconName = getToolIcon(tool);
   const IconComponent =
-    ((Icons as any)[iconName] as Icons.LucideIcon | undefined) || Icons.Wrench;
+    (Icons as Record<string, Icons.LucideIcon | undefined>)[iconName] ||
+    Icons.Wrench;
 
   return (
     <Link to={tool.href} className="tool-card group block">

@@ -54,7 +54,7 @@ interface CertificateSubject {
 interface CertificateExtension {
   name: string;
   altNames?: Array<{ value: string }>;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface DecodedCertificate {
@@ -66,7 +66,7 @@ interface DecodedCertificate {
   };
   serialNumber: string;
   extensions: CertificateExtension[];
-  publicKey: any;
+  publicKey: unknown;
 }
 
 function CertificateDecoder() {
@@ -77,7 +77,7 @@ function CertificateDecoder() {
 
   const decode = () => {
     try {
-      const data = pki.certificateFromPem(encoded) as any;
+      const data = pki.certificateFromPem(encoded) as DecodedCertificate;
       setDecoded(data);
 
       const names: string[] = [];
@@ -88,9 +88,11 @@ function CertificateDecoder() {
         // CN field not found
       }
 
-      const san = data.extensions.find((e: any) => e.name === "subjectAltName");
+      const san = data.extensions.find(
+        (e: CertificateExtension) => e.name === "subjectAltName",
+      );
       if (typeof san !== "undefined") {
-        san.altNames.forEach((a: any) => {
+        san.altNames.forEach((a: { value: string }) => {
           names.push(a.value);
         });
       }
@@ -192,13 +194,13 @@ function CertificateDecoder() {
                 </dt>
                 <dd className="mt-1 text-sm">
                   {moment(decoded.validity.notBefore).format(
-                    "dddd, MMMM Do YYYY, h:mm:ss A"
+                    "dddd, MMMM Do YYYY, h:mm:ss A",
                   )}
                   <div
                     className={cn(
                       moment(decoded.validity.notBefore).isBefore(moment())
                         ? "text-green-500"
-                        : "text-red-500"
+                        : "text-red-500",
                     )}
                   >
                     ({moment(decoded.validity.notBefore).fromNow()})
@@ -209,13 +211,13 @@ function CertificateDecoder() {
                 <dt className="text-sm font-medium text-gray-500">Valid To</dt>
                 <dd className="mt-1 text-sm">
                   {moment(decoded.validity.notAfter).format(
-                    "dddd, MMMM Do YYYY, h:mm:ss A"
+                    "dddd, MMMM Do YYYY, h:mm:ss A",
                   )}
                   <div
                     className={cn(
                       moment(decoded.validity.notAfter).isAfter(moment())
                         ? "text-green-500"
-                        : "text-red-500"
+                        : "text-red-500",
                     )}
                   >
                     ({moment(decoded.validity.notAfter).fromNow()})
@@ -242,7 +244,9 @@ function CertificateDecoder() {
                               {k === "altNames" && e[k] && (
                                 <>
                                   {k} ={" "}
-                                  {e[k]!.map((o: any) => o.value).join(", ")}
+                                  {e[k]
+                                    .map((o: { value: string }) => o.value)
+                                    .join(", ")}
                                 </>
                               )}
                               {k !== "altNames" && (

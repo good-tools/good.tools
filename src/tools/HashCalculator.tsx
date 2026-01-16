@@ -6,7 +6,13 @@ function HashCalculator() {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const hash = (digest: any, input: string): string => {
+  const hash = (
+    digest: {
+      update: (input: string) => void;
+      digest: () => { toHex: () => string };
+    },
+    input: string,
+  ): string => {
     digest.update(input);
     return digest.digest().toHex();
   };
@@ -36,7 +42,20 @@ function HashCalculator() {
               name={a}
               disabled
               className={"w-full"}
-              value={hash((md.algorithms as any)[a].create(), input)}
+              value={hash(
+                (
+                  md.algorithms as Record<
+                    string,
+                    {
+                      create: () => {
+                        update: (input: string) => void;
+                        digest: () => { toHex: () => string };
+                      };
+                    }
+                  >
+                )[a].create(),
+                input,
+              )}
             />
           </div>
         ))}

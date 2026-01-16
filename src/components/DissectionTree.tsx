@@ -25,7 +25,7 @@ interface DissectionSelection {
 interface DissectionSubTreeProps {
   id: string;
   node: DissectionNode;
-  select: (selection: DissectionSelection | typeof NO_SELECTION) => void;
+  select: (selection: DissectionSelection) => void;
   selected: string;
 }
 
@@ -57,7 +57,7 @@ function DissectionSubTree({
         className={clsx(
           "inline-flex items-center w-full",
           node.length > 0 ? "cursor-pointer" : "",
-          id === selected ? "bg-gray-600 text-white" : ""
+          id === selected ? "bg-gray-600 text-white" : "",
         )}
       >
         {node.tree && node.tree.length > 0 ? (
@@ -110,7 +110,7 @@ function DissectionSubTree({
 interface DissectionTreeProps {
   id: string;
   tree: DissectionNode[];
-  select?: (selection: DissectionSelection | typeof NO_SELECTION) => void;
+  select?: (selection: DissectionSelection) => void;
   root?: boolean;
   selected?: string;
 }

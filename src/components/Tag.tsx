@@ -55,7 +55,7 @@ export function Tag({
   children,
   variant = "medium",
   color = typeof children === "string"
-    ? valueColorMap[children.toLowerCase()] ?? "emerald"
+    ? (valueColorMap[children.toLowerCase()] ?? "emerald")
     : "emerald",
   type = "span",
   className = "",
@@ -69,7 +69,7 @@ export function Tag({
         "font-mono text-[0.625rem] font-semibold leading-6",
         variantStyles[variant],
         colorStyles[color][variant],
-        className
+        className,
       )}
       {...props}
     >

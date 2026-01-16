@@ -21,7 +21,7 @@ function Whois() {
 
   const { data, isLoading, error, refetch } = useWhoisQuery(
     address,
-    shouldFetch
+    shouldFetch,
   );
 
   const clear = () => {
@@ -48,7 +48,7 @@ function Whois() {
   // Trigger refetch when shouldFetch becomes true
   useEffect(() => {
     if (shouldFetch) {
-      refetch();
+      void refetch();
     }
   }, [shouldFetch, refetch]);
 

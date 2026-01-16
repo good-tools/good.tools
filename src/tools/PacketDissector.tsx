@@ -85,7 +85,7 @@ const getFrames = (
   worker: Worker,
   filter: string,
   skip: number,
-  limit: number
+  limit: number,
 ): Promise<GetFramesResult> =>
   new Promise((res, rej) => {
     const channel = new MessageChannel();
@@ -103,7 +103,7 @@ const getFrames = (
 
     worker.postMessage(
       { type: "select-frames", filter: filter, skip: skip, limit: limit },
-      [channel.port2]
+      [channel.port2],
     );
   });
 
@@ -145,7 +145,7 @@ const loadModuleTreeFromWorker = (worker: Worker): Promise<ModuleNode[]> =>
 
 const loadPreferencesFromWorker = (
   worker: Worker,
-  name: string
+  name: string,
 ): Promise<Preference[]> =>
   new Promise((res, rej) => {
     const channel = new MessageChannel();
@@ -186,7 +186,7 @@ const updatePreferenceToWorker = (
   worker: Worker,
   module: string,
   key: string,
-  value: string
+  value: string,
 ): Promise<void> =>
   new Promise((res, rej) => {
     const channel = new MessageChannel();
@@ -204,7 +204,7 @@ const updatePreferenceToWorker = (
 
     worker.postMessage(
       { type: "update-pref", module: module, key: key, value: value },
-      [channel.port2]
+      [channel.port2],
     );
   });
 
@@ -232,7 +232,7 @@ function PacketDissector() {
       new URL("../workers/wiregasm.worker.js", import.meta.url),
       {
         type: "module",
-      }
+      },
     );
 
     // Good practice: Add an error listener immediately
@@ -252,7 +252,7 @@ function PacketDissector() {
   const [currentFilter, setCurrentFilter] = useState("");
   const [selectedFrame, setSelectedFrame] = useState(1);
   const [selectedPacket, setSelectedPacket] = useState<SelectedPacket | null>(
-    null
+    null,
   );
   const [preparedPositions, setPreparedPositions] = useState<
     Map<string, DissectionSelection>
@@ -276,7 +276,7 @@ function PacketDissector() {
       setSelectedTreeEntry(NO_SELECTION);
       setSelectedDataSourceIndex(0);
     },
-    []
+    [],
   );
 
   useEffect(() => {
@@ -290,7 +290,7 @@ function PacketDissector() {
       setFinishedProcessing(false);
       worker.postMessage({ type: "process-data", name: name, data: data });
     },
-    [clear, worker]
+    [clear, worker],
   );
 
   const loadExample = useMemo(
@@ -305,7 +305,7 @@ function PacketDissector() {
 
       processData(name, body);
     },
-    [processData]
+    [processData],
   );
 
   const preparePositions = useMemo(
@@ -334,7 +334,7 @@ function PacketDissector() {
 
         return map;
       },
-    []
+    [],
   );
 
   const findSelection = useMemo(
@@ -364,7 +364,7 @@ function PacketDissector() {
         }
       }
     },
-    [preparedPositions]
+    [preparedPositions],
   );
 
   useEffect(() => {
@@ -458,7 +458,7 @@ function PacketDissector() {
       setFinishedProcessing(false);
       worker.postMessage({ type: "process", file: f });
     },
-    [worker, clear]
+    [worker, clear],
   );
 
   const fetchPackets = useMemo(
@@ -471,7 +471,7 @@ function PacketDissector() {
 
       return [];
     },
-    [worker, initialized, finishedProcessing]
+    [worker, initialized, finishedProcessing],
   );
 
   const loadFile = useMemo(
@@ -484,35 +484,35 @@ function PacketDissector() {
       setSelectedPacket(null);
       process(f);
     },
-    [process]
+    [process],
   );
 
   const loadModuleTree = useMemo(
     () => async () => {
       return await loadModuleTreeFromWorker(worker);
     },
-    [worker]
+    [worker],
   );
 
   const loadPreferences = useMemo(
     () => async (name: string) => {
       return await loadPreferencesFromWorker(worker, name);
     },
-    [worker]
+    [worker],
   );
 
   const uploadFile = useMemo(
     () => async (file: File) => {
       return await uploadFileToWorker(worker, file);
     },
-    [worker]
+    [worker],
   );
 
   const updatePreference = useMemo(
     () => async (module: string, key: string, value: string) => {
       return await updatePreferenceToWorker(worker, module, key, value);
     },
-    [worker]
+    [worker],
   );
 
   const applyPreferences = useMemo(
@@ -521,7 +521,7 @@ function PacketDissector() {
       worker.postMessage({ type: "reload-quick", name: fileName });
       return res;
     },
-    [worker, fileName]
+    [worker, fileName],
   );
 
   return (
@@ -586,7 +586,7 @@ function PacketDissector() {
           "py-1 mt-2 w-full",
           filterError != null
             ? "border-red-300 shadow-sm focus:border-red-500 focus:ring-red-500"
-            : ""
+            : "",
         )}
         placeholder="display filter, example: tcp"
         value={filter}

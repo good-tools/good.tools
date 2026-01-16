@@ -102,7 +102,7 @@ export function getToolCategory(tool: Tool): CategoryName {
     if (category === CATEGORIES.ALL) continue;
     if (
       tags.some((tag) =>
-        keywords.some((keyword) => tag.toLowerCase().includes(keyword))
+        keywords.some((keyword) => tag.toLowerCase().includes(keyword)),
       )
     ) {
       return category as CategoryName;
@@ -121,7 +121,7 @@ export function getToolCategory(tool: Tool): CategoryName {
  */
 export function getToolsByCategory(
   tools: Tool[],
-  category: CategoryName
+  category: CategoryName,
 ): Tool[] {
   if (category === CATEGORIES.ALL) {
     return tools;
