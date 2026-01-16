@@ -30,7 +30,7 @@ function File({ node, select }: FileProps) {
   return (
     <div
       className="inline-flex items-center cursor-pointer"
-      onClick={innerSelect}
+      onClick={() => void innerSelect()}
     >
       {loading ? (
         <svg
@@ -88,7 +88,7 @@ function Directory({ id, node, load, select }: DirectoryProps) {
   return (
     <>
       <div
-        onClick={loadNodes}
+        onClick={() => void loadNodes()}
         className="inline-flex items-center cursor-pointer"
       >
         {loading ? (
@@ -155,7 +155,7 @@ function FileTree({ load, select }: FileTreeProps) {
   const [initNodes, setInitNodes] = useState<FileNode[]>([]);
 
   useEffect(() => {
-    load(null).then((r) => setInitNodes(r));
+    void load(null).then((r) => setInitNodes(r));
   }, [load]);
 
   return (

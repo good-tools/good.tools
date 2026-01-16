@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/Button";
 import TextInput from "@/components/TextInput";
 import { useDNSQuery } from "@/hooks/useApiQuery";
-import type { DNSRecord } from "@/types";
 
 const EXAMPLE_DOMAINS = [
   "facebook.com",

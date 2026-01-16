@@ -115,7 +115,7 @@ function ImageBrowser() {
         contentCache.set(cacheKey, data);
 
         setContent(data);
-      } catch (e) {
+      } catch {
         //
       }
     },
@@ -174,7 +174,7 @@ function ImageBrowser() {
         listCache.set(cacheKey, result);
 
         return result;
-      } catch (e) {
+      } catch {
         //
       }
       return [];
@@ -236,7 +236,7 @@ function ImageBrowser() {
       </div>
       <div className="mt-2">
         <Button
-          onClick={pull}
+          onClick={() => void pull()}
           disabled={loading}
           variant="filled"
           className="items-center"
@@ -476,12 +476,11 @@ function ImageBrowser() {
                                   className="text-blue-600 dark:text-blue-500 hover:underline"
                                   target="_blank"
                                   rel="noreferrer"
-                                  href={`${
-                                    API_CONFIG.imageBrowserUrl
-                                  }/download?${new URLSearchParams({
-                                    ref: ref,
-                                    path: selected?.id,
-                                  })}`}
+                                  href={`${API_CONFIG.imageBrowserUrl
+                                    }/download?${new URLSearchParams({
+                                      ref: ref,
+                                      path: selected?.id,
+                                    })}`}
                                 >
                                   Click here
                                 </a>

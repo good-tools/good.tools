@@ -70,7 +70,7 @@ const checkFilter = (worker: Worker, filter: string): Promise<boolean> =>
     }: MessageEvent<WorkerResponse<boolean>>) => {
       channel.port1.close();
       if (data.error) {
-        rej(data.error);
+        rej(new Error(data.error));
       } else {
         res(data.result ?? false);
       }
@@ -95,7 +95,7 @@ const getFrames = (
     }: MessageEvent<WorkerResponse<GetFramesResult>>) => {
       channel.port1.close();
       if (data.error) {
-        rej(data.error);
+        rej(new Error(data.error));
       } else {
         res(data.result ?? { frames: [], matched: 0 });
       }
@@ -116,7 +116,7 @@ const getVersion = (worker: Worker): Promise<string> =>
     }: MessageEvent<WorkerResponse<string>>) => {
       channel.port1.close();
       if (data.error) {
-        rej(data.error);
+        rej(new Error(data.error));
       } else {
         res(data.result ?? "");
       }
@@ -134,7 +134,7 @@ const loadModuleTreeFromWorker = (worker: Worker): Promise<ModuleNode[]> =>
     }: MessageEvent<WorkerResponse<ModuleNode[]>>) => {
       channel.port1.close();
       if (data.error) {
-        rej(data.error);
+        rej(new Error(data.error));
       } else {
         res(data.result ?? []);
       }
@@ -155,7 +155,7 @@ const loadPreferencesFromWorker = (
     }: MessageEvent<WorkerResponse<Preference[]>>) => {
       channel.port1.close();
       if (data.error) {
-        rej(data.error);
+        rej(new Error(data.error));
       } else {
         res(data.result ?? []);
       }
@@ -173,7 +173,7 @@ const uploadFileToWorker = (worker: Worker, file: File): Promise<string> =>
     }: MessageEvent<WorkerResponse<string>>) => {
       channel.port1.close();
       if (data.error) {
-        rej(data.error);
+        rej(new Error(data.error));
       } else {
         res(data.result ?? "");
       }
@@ -196,7 +196,7 @@ const updatePreferenceToWorker = (
     }: MessageEvent<WorkerResponse<void>>) => {
       channel.port1.close();
       if (data.error) {
-        rej(data.error);
+        rej(new Error(data.error));
       } else {
         res();
       }
@@ -217,7 +217,7 @@ const applyPreferencesToWorker = (worker: Worker): Promise<void> =>
     }: MessageEvent<WorkerResponse<void>>) => {
       channel.port1.close();
       if (data.error) {
-        rej(data.error);
+        rej(new Error(data.error));
       } else {
         res();
       }
@@ -545,7 +545,7 @@ function PacketDissector() {
         <FileButton variant="ghost" onFileSelected={loadFile}>
           Load File
         </FileButton>
-        <Button className="ml-5" variant="text" onClick={loadExample}>
+        <Button className="ml-5" variant="text" onClick={() => void loadExample()}>
           Load Random Example
         </Button>
         <Button
@@ -649,9 +649,9 @@ function PacketDissector() {
                             const pos: [number, number] =
                               idx === selectedTreeEntry.idx
                                 ? [
-                                    selectedTreeEntry.start,
-                                    selectedTreeEntry.length,
-                                  ]
+                                  selectedTreeEntry.start,
+                                  selectedTreeEntry.length,
+                                ]
                                 : [0, 0];
                             return (
                               <Tab.Panel key={`tp-${idx}`}>

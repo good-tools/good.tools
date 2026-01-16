@@ -63,7 +63,7 @@ export function CopyButton({ code }: { code: string }) {
           : "bg-white/5 hover:bg-white/7.5 dark:bg-white/2.5 dark:hover:bg-white/5",
       )}
       onClick={() => {
-        window.navigator.clipboard.writeText(code).then(() => {
+        void window.navigator.clipboard.writeText(code).then(() => {
           setCopyCount((count) => count + 1);
         });
       }}

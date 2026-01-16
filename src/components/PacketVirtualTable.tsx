@@ -83,7 +83,7 @@ function PacketVirtualTable({
           !isFetching &&
           totalFetched < totalDBRowCount
         ) {
-          fetchNextPage();
+          void fetchNextPage();
         }
       }
     },

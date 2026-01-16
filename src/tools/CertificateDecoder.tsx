@@ -84,7 +84,7 @@ function CertificateDecoder() {
 
       try {
         names.push(data.subject.getField("CN").value);
-      } catch (e) {
+      } catch {
         // CN field not found
       }
 
