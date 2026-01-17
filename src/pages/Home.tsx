@@ -29,34 +29,30 @@ function Home() {
   }, [searchQuery, activeCategory])
 
   return (
-    <>
+    <div className='p-4 md:p-6 max-w-6xl mx-auto'>
       <Helmet>
         <title>good.tools · Purpose built online tools</title>
         <meta name='description' content={'Purpose built, online, free-to-use tools'} />
       </Helmet>
 
       {/* Hero Section */}
-      <section className='mb-16 text-center animate-fade-in' style={{ animationDuration: '0.3s' }}>
-        <h1 className='mb-4 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl'>
+      <section className='mb-12 text-center'>
+        <h1 className='mb-3 text-3xl font-semibold tracking-tight sm:text-4xl'>
           Purpose-built tools for
           <span className='gradient-text'> developers</span>
         </h1>
-        <p className='mx-auto max-w-2xl text-lg text-muted-foreground'>
-          A collection of free, fast, and privacy-focused tools that run entirely in your browser. No data leaves your
-          device.
+        <p className='mx-auto max-w-2xl text-sm text-muted-foreground'>
+          A collection of free, fast, and privacy-focused tools that run entirely in your browser.
         </p>
       </section>
 
       {/* Search Bar */}
-      <div className='mb-8 animate-slide-up' style={{ animationDelay: '0s', animationDuration: '0.3s' }}>
+      <div className='mb-6'>
         <SearchBar value={searchQuery} onChange={setSearchQuery} onClear={() => setSearchQuery('')} />
       </div>
 
       {/* Category Filters */}
-      <div
-        className='mb-8 flex flex-wrap gap-2 animate-slide-up'
-        style={{ animationDelay: '0s', animationDuration: '0.3s' }}
-      >
+      <div className='mb-6 flex flex-wrap gap-2'>
         <CategoryFilter
           activeCategory={activeCategory}
           onCategoryChange={(category) => setActiveCategory(category as CategoryName | 'All')}
@@ -64,30 +60,30 @@ function Home() {
       </div>
 
       {/* Tools Grid */}
-      <div className='animate-slide-up' style={{ animationDelay: '0s', animationDuration: '0.3s' }}>
+      <div>
         {filteredTools.length > 0 ? (
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 animate-in'>
+          <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4'>
             {filteredTools.map((tool, idx) => (
               <ToolCard key={`tool-${idx}`} tool={tool} />
             ))}
           </div>
         ) : (
-          <div className='text-center py-16 animate-in'>
-            <Search className='w-16 h-16 mx-auto mb-4 text-muted-foreground/50' />
-            <p className='text-muted-foreground text-lg mb-2'>No tools found matching your search.</p>
+          <div className='text-center py-12'>
+            <Search className='w-12 h-12 mx-auto mb-4 text-muted-foreground/50' />
+            <p className='text-muted-foreground mb-2'>No tools found matching your search.</p>
             <button
               onClick={() => {
                 setSearchQuery('')
                 setActiveCategory('All')
               }}
-              className='text-primary hover:underline'
+              className='text-primary hover:underline text-sm'
             >
               Clear filters
             </button>
           </div>
         )}
       </div>
-    </>
+    </div>
   )
 }
 

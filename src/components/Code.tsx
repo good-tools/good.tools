@@ -48,7 +48,7 @@ export function CopyButton({ code }: { code: string }) {
     <button
       type='button'
       className={cn(
-        'group/button absolute top-3.5 right-4 overflow-hidden rounded-full py-1 pl-2 pr-3 text-2xs font-medium opacity-0 backdrop-blur transition focus:opacity-100 group-hover:opacity-100',
+        'group/button absolute top-3.5 right-4 overflow-hidden rounded py-1 pl-2 pr-3 text-2xs font-medium opacity-0 backdrop-blur transition focus:opacity-100 group-hover:opacity-100',
         copied
           ? 'bg-blue-400/10 ring-1 ring-inset ring-blue-400/20'
           : 'bg-white/5 hover:bg-white/7.5 dark:bg-white/2.5 dark:hover:bg-white/5',
@@ -235,7 +235,7 @@ export function CodeGroup({ children, title, ...props }: CodePanelProps & { chil
     <CodeGroupContext.Provider value={true}>
       <Container
         {...containerProps}
-        className='not-prose my-6 overflow-hidden rounded-2xl bg-zinc-900 shadow-md dark:ring-1 dark:ring-white/10'
+        className='not-prose my-6 overflow-hidden rounded bg-zinc-900 shadow-md dark:ring-1 dark:ring-white/10'
       >
         <CodeGroupHeader title={title} {...headerProps}>
           {children}

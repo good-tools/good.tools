@@ -38,36 +38,30 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 221 83% 53%;
 
-    --radius: 0.75rem;
+    --radius: 0.25rem;
 
     /* Custom tokens for Light Mode */
     --glow-primary: 0 0 20px hsl(221 83% 53% / 0.2);
     --glow-card: 0 4px 12px hsl(0 0% 0% / 0.05);
 
-    --gradient-subtle: linear-gradient(
-      180deg,
-      hsl(210 40% 98%) 0%,
-      hsl(210 40% 96%) 100%
-    );
-    --gradient-card: linear-gradient(
-      135deg,
-      hsl(0 0% 100%) 0%,
-      hsl(210 40% 98%) 100%
-    );
-    --gradient-accent: linear-gradient(
-      135deg,
-      hsl(221 83% 53%) 0%,
-      hsl(210 83% 60%) 100%
-    );
+    --gradient-subtle: linear-gradient(180deg,
+        hsl(210 40% 98%) 0%,
+        hsl(210 40% 96%) 100%);
+    --gradient-card: linear-gradient(135deg,
+        hsl(0 0% 100%) 0%,
+        hsl(210 40% 98%) 100%);
+    --gradient-accent: linear-gradient(135deg,
+        hsl(221 83% 53%) 0%,
+        hsl(210 83% 60%) 100%);
 
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-foreground: 220 15% 30%;
+    --sidebar-primary: 221 83% 53%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 220 15% 92%;
+    --sidebar-accent-foreground: 220 15% 20%;
+    --sidebar-border: 220 13% 88%;
+    --sidebar-ring: 221 83% 53%;
   }
 
   .dark {
@@ -81,7 +75,7 @@
     --popover-foreground: 210 20% 95%;
 
     --primary: 221 83% 53%;
-    --primary-foreground: 220 20% 6%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 220 15% 16%;
     --secondary-foreground: 210 20% 90%;
@@ -90,7 +84,7 @@
     --muted-foreground: 215 15% 55%;
 
     --accent: 221 83% 53%;
-    --accent-foreground: 220 20% 6%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 55%;
     --destructive-foreground: 210 20% 98%;
@@ -105,29 +99,23 @@
     /* Custom tokens for Dark Mode */
     --glow-primary: 0 0 40px hsl(221 83% 53% / 0.15);
     --glow-card: 0 4px 24px hsl(0 0% 0% / 0.4);
-    --gradient-subtle: linear-gradient(
-      180deg,
-      hsl(220 18% 12%) 0%,
-      hsl(220 18% 8%) 100%
-    );
-    --gradient-card: linear-gradient(
-      135deg,
-      hsl(220 18% 12%) 0%,
-      hsl(220 18% 9%) 100%
-    );
-    --gradient-accent: linear-gradient(
-      135deg,
-      hsl(221 83% 53%) 0%,
-      hsl(210 83% 60%) 100%
-    );
+    --gradient-subtle: linear-gradient(180deg,
+        hsl(220 18% 12%) 0%,
+        hsl(220 18% 8%) 100%);
+    --gradient-card: linear-gradient(135deg,
+        hsl(220 18% 12%) 0%,
+        hsl(220 18% 9%) 100%);
+    --gradient-accent: linear-gradient(135deg,
+        hsl(221 83% 53%) 0%,
+        hsl(210 83% 60%) 100%);
 
-    --sidebar-background: 220 18% 8%;
-    --sidebar-foreground: 210 20% 90%;
+    --sidebar-background: 220 18% 7%;
+    --sidebar-foreground: 210 15% 75%;
     --sidebar-primary: 221 83% 53%;
     --sidebar-primary-foreground: 220 20% 6%;
-    --sidebar-accent: 220 15% 14%;
-    --sidebar-accent-foreground: 210 20% 90%;
-    --sidebar-border: 220 15% 18%;
+    --sidebar-accent: 220 15% 12%;
+    --sidebar-accent-foreground: 210 15% 90%;
+    --sidebar-border: 220 15% 15%;
     --sidebar-ring: 221 83% 53%;
   }
 }
@@ -166,15 +154,13 @@
 
 @layer components {
   .tool-card {
-    @apply relative overflow-hidden rounded-xl border border-border bg-card p-6 transition-all duration-300;
-    background: var(--gradient-card);
-    box-shadow: var(--glow-card);
+    @apply relative overflow-hidden border border-border bg-card p-5 transition-all duration-200;
+    box-shadow: 0 1px 3px hsl(0 0% 0% / 0.05);
   }
 
   .tool-card:hover {
-    @apply border-primary/40;
-    box-shadow: var(--glow-primary), var(--glow-card);
-    transform: translateY(-2px);
+    @apply border-primary/50 bg-accent/30;
+    box-shadow: 0 2px 8px hsl(0 0% 0% / 0.08);
   }
 
   .gradient-text {
@@ -239,6 +225,7 @@
     from {
       opacity: 0;
     }
+
     to {
       opacity: 1;
     }
@@ -249,6 +236,7 @@
       opacity: 0;
       transform: translateY(20px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -259,6 +247,7 @@
     from {
       transform: rotate(0deg);
     }
+
     to {
       transform: rotate(360deg);
     }
