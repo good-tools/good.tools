@@ -1,89 +1,107 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#2563EB" />
-    <meta
-      name="description"
-      content="Purpose built, online, free-to-use tools"
-      data-rh="true"
-    />
-    <link rel="apple-touch-icon" href="/logo192.png" />
-    <link rel="manifest" href="/manifest.json" />
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#2563EB" />
+  <meta name="description" content="Purpose built, online, free-to-use tools" data-rh="true" />
+  <link rel="apple-touch-icon" href="/logo192.png" />
+  <link rel="manifest" href="/manifest.json" />
 
-    <title>good.tools</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" />
 
-    <!-- Google tag (gtag.js) -->
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-XX2FY53B5V"
-    ></script>
-    <script>
+  <title>good.tools</title>
+
+  <!-- Runtime config (injected by Docker entrypoint in production) -->
+  <script src="/config.js"></script>
+  <script>
+    // Initialize runtime config with defaults if not injected
+    // Defaults: no telemetry, online tools disabled, empty API URLs
+    window.__RUNTIME_CONFIG__ = window.__RUNTIME_CONFIG__ || {
+      ENABLE_TELEMETRY: false,
+      GA_TRACKING_ID: "",
+      DISABLE_ONLINE_TOOLS: true,
+      INTERNET_TOOLS_URL: "",
+      IMAGE_BROWSER_URL: "",
+    };
+
+    // Conditionally load Google Analytics
+    if (
+      window.__RUNTIME_CONFIG__.ENABLE_TELEMETRY &&
+      window.__RUNTIME_CONFIG__.GA_TRACKING_ID
+    ) {
+      var gaScript = document.createElement("script");
+      gaScript.async = true;
+      gaScript.src =
+        "https://www.googletagmanager.com/gtag/js?id=" +
+        window.__RUNTIME_CONFIG__.GA_TRACKING_ID;
+      document.head.appendChild(gaScript);
+
       window.dataLayer = window.dataLayer || [];
       function gtag() {
         dataLayer.push(arguments);
       }
       gtag("js", new Date());
+      gtag("config", window.__RUNTIME_CONFIG__.GA_TRACKING_ID);
+    }
+  </script>
 
-      gtag("config", "G-XX2FY53B5V");
-    </script>
 
-    <!-- Dark Mode -->
-    <script>
-      let darkModeMediaQuery = window.matchMedia(
-        "(prefers-color-scheme: dark)",
-      );
+  <!-- Dark Mode -->
+  <script>
+    let darkModeMediaQuery = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    );
 
+    updateMode();
+    darkModeMediaQuery.addEventListener(
+      "change",
+      updateModeWithoutTransitions,
+    );
+    window.addEventListener("storage", updateModeWithoutTransitions);
+
+    function updateMode() {
+      let isSystemDarkMode = darkModeMediaQuery.matches;
+      let isDarkMode =
+        window.localStorage.isDarkMode === "true" ||
+        (!("isDarkMode" in window.localStorage) && isSystemDarkMode);
+
+      if (isDarkMode) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+
+      if (isDarkMode === isSystemDarkMode) {
+        delete window.localStorage.isDarkMode;
+      }
+    }
+
+    function disableTransitionsTemporarily() {
+      document.documentElement.classList.add("[&_*]:!transition-none");
+      window.setTimeout(() => {
+        document.documentElement.classList.remove("[&_*]:!transition-none");
+      }, 0);
+    }
+
+    function updateModeWithoutTransitions() {
+      disableTransitionsTemporarily();
       updateMode();
-      darkModeMediaQuery.addEventListener(
-        "change",
-        updateModeWithoutTransitions,
-      );
-      window.addEventListener("storage", updateModeWithoutTransitions);
+    }
+  </script>
+</head>
 
-      function updateMode() {
-        let isSystemDarkMode = darkModeMediaQuery.matches;
-        let isDarkMode =
-          window.localStorage.isDarkMode === "true" ||
-          (!("isDarkMode" in window.localStorage) && isSystemDarkMode);
+<body class="bg-white antialiased dark:bg-zinc-900">
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
 
-        if (isDarkMode) {
-          document.documentElement.classList.add("dark");
-        } else {
-          document.documentElement.classList.remove("dark");
-        }
-
-        if (isDarkMode === isSystemDarkMode) {
-          delete window.localStorage.isDarkMode;
-        }
-      }
-
-      function disableTransitionsTemporarily() {
-        document.documentElement.classList.add("[&_*]:!transition-none");
-        window.setTimeout(() => {
-          document.documentElement.classList.remove("[&_*]:!transition-none");
-        }, 0);
-      }
-
-      function updateModeWithoutTransitions() {
-        disableTransitionsTemporarily();
-        updateMode();
-      }
-    </script>
-  </head>
-  <body class="bg-white antialiased dark:bg-zinc-900">
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
 </html>

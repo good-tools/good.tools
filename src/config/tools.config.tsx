@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { ROUTES } from './routes.config'
 import { CATEGORIES, type Tool } from '@/types/tool.types'
+import { runtimeConfig } from '@/config/runtime.config'
 
 export const tools: Tool[] = [
   {
@@ -285,3 +286,9 @@ export const tools: Tool[] = [
     ],
   },
 ]
+
+/**
+ * Filtered tools list based on DISABLE_ONLINE_TOOLS runtime config
+ * When DISABLE_ONLINE_TOOLS is true, online tools are completely hidden
+ */
+export const filteredTools = runtimeConfig.DISABLE_ONLINE_TOOLS ? tools.filter((t) => !t.online) : tools

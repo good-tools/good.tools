@@ -4,7 +4,7 @@ import { createAutocomplete } from '@algolia/autocomplete-core'
 import type { AutocompleteApi, AutocompleteState, AutocompleteCollection } from '@algolia/autocomplete-core'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Search as SearchIcon, Loader2 } from 'lucide-react'
-import { tools } from '@/config/tools.config'
+import { filteredTools } from '@/config/tools.config'
 import type { Tool } from '@/types'
 import clsx from 'clsx'
 
@@ -36,14 +36,14 @@ function useAutocomplete() {
             sourceId: 'tools',
             getItems({ query }: { query: string }) {
               if (!query) {
-                return tools.map((tool, idx) => ({
+                return filteredTools.map((tool, idx) => ({
                   ...tool,
                   objectID: `tool-${idx}`,
                 }))
               }
 
               const lowerQuery = query.toLowerCase()
-              return tools
+              return filteredTools
                 .filter(
                   (tool) =>
                     tool.title.toLowerCase().includes(lowerQuery) ||
