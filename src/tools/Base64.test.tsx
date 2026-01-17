@@ -34,19 +34,19 @@ describe('Base64', () => {
       const user = userEvent.setup()
       render(<Base64 />)
 
-      const input = screen.getByPlaceholderText(/paste your data/i) as HTMLTextAreaElement
+      const input = screen.getByPlaceholderText(/paste your data/i)
       await user.type(input, 'test')
       await user.click(screen.getByRole('button', { name: /encode inline/i }))
 
       // Input should now contain the base64 encoded value
-      expect(input.value).toBe('dGVzdA==')
+      expect(input).toHaveValue('dGVzdA==')
     })
 
     it('clears input and output when Clear button is clicked', async () => {
       const user = userEvent.setup()
       render(<Base64 />)
 
-      const input = screen.getByPlaceholderText(/paste your data/i) as HTMLTextAreaElement
+      const input = screen.getByPlaceholderText(/paste your data/i)
       await user.type(input, 'Hello')
       await user.click(screen.getByRole('button', { name: /^encode$/i }))
 
@@ -57,7 +57,7 @@ describe('Base64', () => {
       await user.click(screen.getByRole('button', { name: /clear/i }))
 
       // Input should be empty and output should be gone
-      expect(input.value).toBe('')
+      expect(input).toHaveValue('')
       expect(screen.queryByText('SGVsbG8=')).not.toBeInTheDocument()
     })
   })
@@ -96,12 +96,12 @@ describe('Base64', () => {
       // Switch to decoder tab
       await user.click(screen.getByRole('tab', { name: /decoder/i }))
 
-      const input = screen.getByPlaceholderText(/paste your base64 encoded data/i) as HTMLTextAreaElement
+      const input = screen.getByPlaceholderText(/paste your base64 encoded data/i)
       await user.type(input, 'dGVzdA==')
       await user.click(screen.getByRole('button', { name: /decode inline/i }))
 
       // Input should now contain the decoded value
-      expect(input.value).toBe('test')
+      expect(input).toHaveValue('test')
     })
 
     it('clears input and output when Clear button is clicked', async () => {
@@ -111,7 +111,7 @@ describe('Base64', () => {
       // Switch to decoder tab
       await user.click(screen.getByRole('tab', { name: /decoder/i }))
 
-      const input = screen.getByPlaceholderText(/paste your base64 encoded data/i) as HTMLTextAreaElement
+      const input = screen.getByPlaceholderText(/paste your base64 encoded data/i)
       await user.type(input, 'SGVsbG8=')
       await user.click(screen.getByRole('button', { name: /^decode$/i }))
 
@@ -122,7 +122,7 @@ describe('Base64', () => {
       await user.click(screen.getByRole('button', { name: /clear/i }))
 
       // Input should be empty and output should be gone
-      expect(input.value).toBe('')
+      expect(input).toHaveValue('')
       expect(screen.queryByText('Hello')).not.toBeInTheDocument()
     })
   })
