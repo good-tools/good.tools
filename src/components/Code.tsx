@@ -107,12 +107,26 @@ interface CodePanelPropsMain extends CodePanelProps {
 function CodePanel({ tag, label, code, children }: CodePanelPropsMain) {
   const child = Children.only(children) as ReactElement<CodePanelProps>
 
+  // Extract text content from children if code prop is not provided
+  const getCodeText = (): string => {
+    if (child.props.code) return child.props.code
+    if (code) return code
+
+    // Try to extract text content from children
+    const childProps = child.props as Record<string, unknown>
+    if ('children' in childProps && typeof childProps.children === 'string') {
+      return childProps.children
+    }
+
+    return ''
+  }
+
   return (
     <div className='group dark:bg-white/2.5'>
       <CodePanelHeader tag={child.props.tag ?? tag} label={child.props.label ?? label} />
       <div className='relative'>
         <pre className='whitespace-pre-line break-all p-4 text-xs text-white'>{children}</pre>
-        <CopyButton code={child.props.code ?? code ?? ''} />
+        <CopyButton code={getCodeText()} />
       </div>
     </div>
   )
@@ -134,8 +148,8 @@ function CodeGroupHeader({
   }
 
   return (
-    <div className='flex min-h-[calc(theme(spacing.12)+1px)] flex-wrap items-start gap-x-4 border-b border-zinc-700 bg-zinc-800 px-4 dark:border-zinc-800 dark:bg-transparent'>
-      {title && <h3 className='mr-auto pt-3 text-xs font-semibold text-white'>{title}</h3>}
+    <div className='flex min-h-[calc(theme(spacing.12)+1px)] flex-wrap items-center gap-x-4 border-b border-zinc-700 bg-zinc-800 px-4 dark:border-zinc-800 dark:bg-transparent'>
+      {title && <h3 className='mr-auto py-3 text-xs font-semibold text-white'>{title}</h3>}
       {hasTabs && (
         <Tab.List className='-mb-px flex gap-4 text-xs font-medium'>
           {Children.map(children, (child, childIndex) => (
