@@ -1,3 +1,10 @@
+# [1.21.0](https://github.com/good-tools/good.tools/compare/v1.20.0...v1.21.0) (2026-01-17)
+
+
+### Features
+
+* Migrate from CRA to Vite + TypeScript ([#4](https://github.com/good-tools/good.tools/issues/4)) ([9bf0cdd](https://github.com/good-tools/good.tools/commit/9bf0cddadc15106f9af4d8bba9abb50f16cc72b3))
+
 # [1.20.0](https://github.com/good-tools/good.tools/compare/v1.19.3...v1.20.0) (2026-01-13)
 
 
