@@ -20,7 +20,7 @@ function WrappedTool({ tool }: WrappedToolProps) {
       <Helmet>
         <title>good.tools · {tool.title}</title>
         <meta name='description' content={tool.description} />
-        <meta name='keywords' content={tool.tags.join(',')} />
+        <meta name='keywords' content={tool.searchTags.join(',')} />
       </Helmet>
 
       <Link

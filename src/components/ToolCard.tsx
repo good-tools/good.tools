@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
-import * as Icons from 'lucide-react'
-import { getToolCategory } from '@/lib/categories'
+import { AlertTriangle } from 'lucide-react'
+import { getPrimaryCategory } from '@/lib/categories'
 import type { Tool } from '@/types'
 
 interface ToolCardProps {
@@ -8,10 +8,8 @@ interface ToolCardProps {
 }
 
 function ToolCard({ tool }: ToolCardProps) {
-  const category = getToolCategory(tool)
-  // const iconName = getToolIcon(tool)
-  // const IconComponent = Icons[iconName as keyof typeof Icons] || Icons.Wrench
-  const IconComponent = Icons.Wrench
+  const category = getPrimaryCategory(tool)
+  const IconComponent = tool.icon
 
   return (
     <Link to={tool.href} className='tool-card group block'>
@@ -26,7 +24,7 @@ function ToolCard({ tool }: ToolCardProps) {
 
       {tool.online && (
         <div className='mt-3 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-500'>
-          <Icons.AlertTriangle className='h-3.5 w-3.5' />
+          <AlertTriangle className='h-3.5 w-3.5' />
           <span>Online tool</span>
         </div>
       )}

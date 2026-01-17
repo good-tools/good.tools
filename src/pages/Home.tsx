@@ -5,11 +5,11 @@ import { tools } from '@/config/tools.config'
 import ToolCard from '@/components/ToolCard'
 import SearchBar from '@/components/SearchBar'
 import CategoryFilter from '@/components/CategoryFilter'
-import { CATEGORIES, getToolsByCategory, type CategoryName } from '@/lib/categories'
+import { getToolsByCategory, type CategoryName } from '@/lib/categories'
 
 function Home() {
   const [searchQuery, setSearchQuery] = useState('')
-  const [activeCategory, setActiveCategory] = useState<CategoryName>(CATEGORIES.ALL)
+  const [activeCategory, setActiveCategory] = useState<CategoryName | 'All'>('All')
 
   // Filter tools based on search and category
   const filteredTools = useMemo(() => {
@@ -21,7 +21,7 @@ function Home() {
         (tool) =>
           tool.title.toLowerCase().includes(query) ||
           tool.description.toLowerCase().includes(query) ||
-          tool.tags.some((tag) => tag.toLowerCase().includes(query)),
+          tool.searchTags.some((tag) => tag.toLowerCase().includes(query)),
       )
     }
 
@@ -59,7 +59,7 @@ function Home() {
       >
         <CategoryFilter
           activeCategory={activeCategory}
-          onCategoryChange={(category) => setActiveCategory(category as CategoryName)}
+          onCategoryChange={(category) => setActiveCategory(category as CategoryName | 'All')}
         />
       </div>
 
@@ -78,7 +78,7 @@ function Home() {
             <button
               onClick={() => {
                 setSearchQuery('')
-                setActiveCategory(CATEGORIES.ALL)
+                setActiveCategory('All')
               }}
               className='text-primary hover:underline'
             >

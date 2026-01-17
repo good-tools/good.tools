@@ -48,7 +48,7 @@ function useAutocomplete() {
                   (tool) =>
                     tool.title.toLowerCase().includes(lowerQuery) ||
                     tool.description.toLowerCase().includes(lowerQuery) ||
-                    tool.tags.some((tag) => tag.toLowerCase().includes(lowerQuery)),
+                    tool.searchTags.some((tag) => tag.toLowerCase().includes(lowerQuery)),
                 )
                 .map((tool, idx) => ({
                   ...tool,
@@ -98,9 +98,9 @@ function SearchResult({
         <div className='flex-1 min-w-0'>
           <div className='font-semibold text-foreground group-aria-selected:text-primary'>{result.title}</div>
           <div className='text-sm text-muted-foreground line-clamp-2'>{result.description}</div>
-          {result.tags && result.tags.length > 0 && (
+          {result.searchTags && result.searchTags.length > 0 && (
             <div className='mt-1 flex flex-wrap gap-1'>
-              {result.tags.slice(0, 3).map((tag) => (
+              {result.searchTags.slice(0, 3).map((tag) => (
                 <span key={tag} className='text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground'>
                   {tag}
                 </span>
