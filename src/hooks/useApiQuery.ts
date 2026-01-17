@@ -58,7 +58,7 @@ export function useMyIPQuery() {
   return useQuery<IPAddressInfo>({
     queryKey: ['myip', 'v4'],
     queryFn: async () => {
-      const response = await fetch(`${API_CONFIG.serviceBaseUrl}/ip`)
+      const response = await fetch(`${API_CONFIG.internetToolsBaseUrl}/my-ip`)
       const data: unknown = await response.json()
       if (response.status >= 400 && response.status < 600) {
         throw new Error((data as { message: string }).message || 'Failed to fetch IP address')

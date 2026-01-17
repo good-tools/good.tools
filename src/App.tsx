@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import Home from '@/pages/Home'
 import WrappedTool from '@/pages/WrappedTool'
-import { tools } from '@/config/tools.config'
+import { filteredTools } from '@/config/tools.config'
 import { Layout } from '@/pages/Layout'
 import NotFound from '@/pages/NotFound'
 import { usePageTracking } from '@/hooks/usePageTracking'
@@ -15,7 +15,7 @@ function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path='/' element={<Home />} />
-          {tools.map((tool, idx) => (
+          {filteredTools.map((tool, idx) => (
             <Route key={`r-${idx}`} path={tool.href} element={<WrappedTool tool={tool} />} />
           ))}
           <Route path='*' element={<NotFound />} />

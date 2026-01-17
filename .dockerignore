@@ -1,0 +1,36 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+build
+
+# Development
+.git
+.github
+.vscode
+.idea
+*.log
+*.md
+!README.md
+
+# Test files
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+coverage
+
+# Config files not needed in build
+.env
+.env.*
+!.env.example
+.prettierrc*
+.eslintrc*
+eslint.config.js
+vitest.config.ts
+release.config.cjs
+
+# OS files
+.DS_Store
+Thumbs.db

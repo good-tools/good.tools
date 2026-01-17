@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
+import { runtimeConfig } from '@/config/runtime.config'
 
 /**
  * Google Analytics page view tracking interface
@@ -22,11 +23,15 @@ declare global {
 /**
  * Hook for tracking page views with Google Analytics
  * Automatically tracks on route changes
+ * Respects ENABLE_TELEMETRY runtime config
  */
 export function usePageTracking(): void {
   const location = useLocation()
 
   useEffect(() => {
+    // Skip tracking if telemetry is disabled
+    if (!runtimeConfig.ENABLE_TELEMETRY) return
+
     if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('event', 'page_view', {
         page_path: location.pathname + location.search + location.hash,

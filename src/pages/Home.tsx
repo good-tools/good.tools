@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { Search } from 'lucide-react'
-import { tools } from '@/config/tools.config'
+import { filteredTools as availableTools } from '@/config/tools.config'
 import ToolCard from '@/components/ToolCard'
 import SearchBar from '@/components/SearchBar'
 import CategoryFilter from '@/components/CategoryFilter'
@@ -13,7 +13,7 @@ function Home() {
 
   // Filter tools based on search and category
   const filteredTools = useMemo(() => {
-    let filtered = getToolsByCategory(tools, activeCategory)
+    let filtered = getToolsByCategory(availableTools, activeCategory)
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()

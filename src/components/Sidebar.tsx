@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { ChevronDown, ChevronRight, PanelLeftClose, PanelLeft, Search } from 'lucide-react'
-import { tools } from '@/config/tools.config'
+import { filteredTools } from '@/config/tools.config'
 import { categories, type CategoryName, CATEGORIES } from '@/lib/categories'
 import { useLayoutStore } from '@/stores/useLayoutStore'
 import { cn } from '@/lib/utils'
@@ -106,15 +106,15 @@ export function Sidebar() {
       [CATEGORIES.NETWORK]: [],
     }
 
-    const filteredTools = searchQuery
-      ? tools.filter(
+    const toolsToShow = searchQuery
+      ? filteredTools.filter(
           (tool) =>
             tool.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             tool.searchTags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())),
         )
-      : tools
+      : filteredTools
 
-    filteredTools.forEach((tool) => {
+    toolsToShow.forEach((tool) => {
       const primaryCategory = tool.categories[0]
       if (primaryCategory && groups[primaryCategory]) {
         groups[primaryCategory].push(tool)
@@ -196,7 +196,7 @@ export function Sidebar() {
       {/* Footer */}
       {!sidebarCollapsed && (
         <div className='p-2 border-t border-sidebar-border'>
-          <p className='text-[10px] text-sidebar-foreground/40 text-center'>{tools.length} tools available</p>
+          <p className='text-[10px] text-sidebar-foreground/40 text-center'>{filteredTools.length} tools available</p>
         </div>
       )}
     </aside>
