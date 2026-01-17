@@ -2,8 +2,13 @@
   "name": "good.tools",
   "version": "1.20.0",
   "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
   "dependencies": {
-    "@algolia/autocomplete-core": "^1.7.4",
+    "@algolia/autocomplete-core": "^1.19.4",
     "@goodtools/jdserialize": "^1.0.0",
     "@goodtools/protobuf-decoder": "^1.0.0",
     "@goodtools/wiregasm": "^1.9.0",
@@ -18,12 +23,9 @@
     "@radix-ui/react-switch": "^1.2.6",
     "@tailwindcss/forms": "^0.5.3",
     "@tailwindcss/typography": "^0.5.8",
-    "@tanstack/react-query": "^4.24.6",
+    "@tanstack/react-query": "^5.62.16",
     "@tanstack/react-table": "^8.7.9",
-    "@tanstack/react-virtual": "^3.0.0-alpha.0",
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
+    "@tanstack/react-virtual": "^3.12.0",
     "allotment": "^1.17.1",
     "buffer": "^6.0.3",
     "clsx": "^1.2.1",
@@ -34,37 +36,34 @@
     "jsonpath": "^1.1.1",
     "lru-cache": "^7.14.1",
     "lucide-react": "^0.562.0",
-    "minify-xml": "^3.4.0",
     "moment": "^2.29.4",
     "node-forge": "^1.3.1",
     "pako": "^2.1.0",
-    "pretty-data": "^0.40.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-helmet-async": "^1.3.0",
     "react-inspector": "^6.0.1",
     "react-router-dom": "^6.5.0",
-    "react-scripts": "5.0.1",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^3.2.4",
     "tailwindcss-animate": "^1.0.7",
     "web-vitals": "^2.1.4",
-    "xml-formatter": "^3.2.0",
+    "xml-formatter": "^3.6.7",
     "zustand": "^4.1.5"
   },
   "scripts": {
-    "build-sitemap": "node src/sitemap.js",
-    "start": "react-app-rewired start",
-    "build": "react-app-rewired build",
-    "test": "react-app-rewired test",
-    "eject": "react-scripts eject",
-    "fix:prettier": "prettier \"src/**/*.js\" --write"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "dev": "vite",
+    "dev:remote": "vite --host 0.0.0.0",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "preview:remote": "vite --host 0.0.0.0 preview",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "build-sitemap": "npx tsx src/sitemap.ts",
+    "fix:prettier": "prettier \"src/**/*.{js,ts,jsx,tsx}\" --write"
   },
   "browserslist": {
     "production": [
@@ -79,11 +78,33 @@
     ]
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@semantic-release/changelog": "^6.0.2",
     "@semantic-release/exec": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
-    "prettier": "^2.8.3",
-    "react-app-rewired": "^2.2.1",
-    "sitemap": "^7.1.1"
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jsdom": "^27.0.0",
+    "@types/jsonpath": "^0.2.4",
+    "@types/node": "^20.17.10",
+    "@types/node-forge": "^1.3.11",
+    "@types/pako": "^2.0.3",
+    "@types/react": "^18.2.79",
+    "@types/react-dom": "^18.2.25",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "jsdom": "^27.4.0",
+    "prettier": "^3.8.0",
+    "sitemap": "^7.1.1",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.53.0",
+    "vite": "^5.4.18",
+    "vite-plugin-node-polyfills": "^0.25.0",
+    "vitest": "^4.0.17"
   }
 }
