@@ -1,3 +1,10 @@
+## [1.21.1](https://github.com/good-tools/good.tools/compare/v1.21.0...v1.21.1) (2026-01-17)
+
+
+### Bug Fixes
+
+* dockerized, readme ([26e2964](https://github.com/good-tools/good.tools/commit/26e2964903c46bd6a2ff8addf9746c79508f98aa))
+
 # [1.21.0](https://github.com/good-tools/good.tools/compare/v1.20.0...v1.21.0) (2026-01-17)
 
 
