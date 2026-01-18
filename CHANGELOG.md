@@ -1,3 +1,10 @@
+# [1.22.0](https://github.com/good-tools/good.tools/compare/v1.21.1...v1.22.0) (2026-01-18)
+
+
+### Features
+
+* add JSON Escape/Unescape tool ([#5](https://github.com/good-tools/good.tools/issues/5)) ([31604df](https://github.com/good-tools/good.tools/commit/31604df277c98af2ae773f56ab643f3ea16ee848))
+
 ## [1.21.1](https://github.com/good-tools/good.tools/compare/v1.21.0...v1.21.1) (2026-01-17)
 
 
