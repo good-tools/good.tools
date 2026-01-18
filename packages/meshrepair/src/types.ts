@@ -163,3 +163,8 @@ export interface InitOptions {
    */
   locateFile?: (path: string, prefix: string) => string;
 }
+
+/**
+ * Type of the function that loads the Trigasm WASM module
+ */
+export type TrigasmLoader = (options?: InitOptions) => Promise<TrigasmModule>;

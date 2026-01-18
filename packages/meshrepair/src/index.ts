@@ -15,15 +15,13 @@ import type {
   TrigasmModule,
   EmscriptenFS,
   InitOptions,
+  TrigasmLoader,
 } from './types';
-import { PRESETS, resolveOptions } from './presets';
+import { resolveOptions } from './presets';
 
 // Re-export types and presets
 export * from './types';
 export { PRESETS } from './presets';
-
-// Dynamic import type for the WASM module loader
-type LoadTrigasm = (options?: InitOptions) => Promise<TrigasmModule>;
 
 /**
  * Trigasm - WebAssembly STL Mesh Repair Library
@@ -34,8 +32,9 @@ type LoadTrigasm = (options?: InitOptions) => Promise<TrigasmModule>;
  * @example
  * ```typescript
  * import { Trigasm } from '@goodtools/trigasm';
+ * import loadTrigasm from '@goodtools/trigasm/dist/trigasm.js';
  *
- * const trigasm = await Trigasm.init();
+ * const trigasm = await Trigasm.init(loadTrigasm);
  * const { result, output } = trigasm.repair('model.stl', stlData, 'print-ready');
  * console.log(`Repaired: ${result.holesFilled} holes filled`);
  * ```
@@ -51,22 +50,21 @@ export class Trigasm {
   /**
    * Initialize Trigasm WASM module
    *
+   * @param loader - Function that loads the WASM module
    * @param options - Initialization options
    * @returns Promise resolving to Trigasm instance
    *
    * @example
    * ```typescript
-   * const trigasm = await Trigasm.init({
+   * import loadTrigasm from '@goodtools/trigasm/dist/trigasm.js';
+   *
+   * const trigasm = await Trigasm.init(loadTrigasm, {
    *   locateFile: (path) => `/assets/${path}`
    * });
    * ```
    */
-  static async init(options?: InitOptions): Promise<Trigasm> {
-    // Dynamic import of the WASM module
-    // The built trigasm.js will be copied to built/bin/
-    const loadTrigasm: LoadTrigasm = (await import('../built/bin/trigasm.js')).default;
-
-    const lib = await loadTrigasm(options);
+  static async init(loader: TrigasmLoader, options?: InitOptions): Promise<Trigasm> {
+    const lib = await loader(options);
     return new Trigasm(lib);
   }
 
@@ -162,7 +160,10 @@ export class Trigasm {
     const session = new this.lib.RepairSession(inputPath);
 
     try {
-      const result = session.repair(mergedOptions, finalOutputPath, opts.onProgress);
+      // WASM binding requires a callback function, use no-op if not provided
+
+      const callback = opts.onProgress ?? (() => {});
+      const result = session.repair(mergedOptions, finalOutputPath, callback);
 
       if (result.code !== 0) {
         throw new Error(result.error || `Repair failed with code ${result.code}`);
@@ -208,7 +209,10 @@ export class Trigasm {
     const session = new this.lib.RepairSession(inputPath);
 
     try {
-      const result = session.repair(mergedOptions, finalOutputPath, opts.onProgress);
+      // WASM binding requires a callback function, use no-op if not provided
+
+      const callback = opts.onProgress ?? (() => {});
+      const result = session.repair(mergedOptions, finalOutputPath, callback);
 
       if (result.code !== 0) {
         throw new Error(result.error || `Repair failed with code ${result.code}`);

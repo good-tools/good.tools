@@ -6,11 +6,15 @@ dist/
 built/
 .parcel-cache/
 
-# VCGlib (downloaded during build)
-lib/vcglib/
-lib/tarballs/
-lib/.vcglib
-lib/.trigasm
+# Lib
+lib/*
+!lib/trigasm
+lib/trigasm/tg_build
+!lib/tarballs
+!lib/crossfile.meson
+!lib/Makefile
+lib/tarballs/*
+!lib/tarballs/.gitkeep
 
 # Emscripten artifacts
 *.wasm

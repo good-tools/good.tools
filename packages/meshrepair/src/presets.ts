@@ -22,6 +22,7 @@ export const PRESETS: Record<PresetName, RepairOptions> = {
     removeUnreferencedVertex: true,
     removeDegenerateFace: true,
     fillHoles: false,
+    maxHoleSize: 100,
     removeNonManifoldFace: false,
     removeNonManifoldVertex: false,
     fixNormalOrientation: false,

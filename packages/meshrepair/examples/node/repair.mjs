@@ -8,7 +8,8 @@
  */
 
 import { readFile, writeFile } from 'fs/promises';
-import { Trigasm, PRESETS } from '@goodtools/trigasm';
+import { Trigasm } from '@goodtools/trigasm';
+import loadTrigasm from '@goodtools/trigasm/dist/trigasm.js';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -24,7 +25,7 @@ async function main() {
   console.log(`Loading Trigasm...`);
 
   // Initialize Trigasm
-  const trigasm = await Trigasm.init();
+  const trigasm = await Trigasm.init(loadTrigasm);
 
   console.log(`Reading ${inputPath}...`);
 

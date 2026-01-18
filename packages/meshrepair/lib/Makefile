@@ -16,7 +16,7 @@ checksum = echo "$(1) $(2)" | sha512sum --check --status
 EXTRACT_DIR = $(patsubst %.tar,%,$(basename $(notdir $<)))
 MOVE = mv $(EXTRACT_DIR) $@ && touch $@
 CLEANUP = rm -rf $@
-BUILD_DIR = $</wg_build
+BUILD_DIR = $</tg_build
 
 # Meson configuration
 MESON_CLEAN = rm -rf $(BUILD_DIR)/meson-private
@@ -59,7 +59,7 @@ vcglib: vcglib-$(VCGLIB_VERSION).tar.gz .sum-vcglib
 #
 # Trigasm WASM Library
 #
-.trigasm: .vcglib trigasm crossfile.meson
+.trigasm: trigasm .vcglib crossfile.meson
 	@echo "[+] Building Trigasm"
 	$(MESON_CLEAN)
 	$(MESON_SETUP)

@@ -27,9 +27,10 @@ npm install @goodtools/trigasm
 
 ```typescript
 import { Trigasm } from '@goodtools/trigasm';
+import loadTrigasm from '@goodtools/trigasm/dist/trigasm.js';
 
 // Initialize
-const trigasm = await Trigasm.init();
+const trigasm = await Trigasm.init(loadTrigasm);
 
 // Load and repair an STL file
 const stlData = await fetch('/model.stl').then((r) => r.arrayBuffer());
@@ -87,7 +88,9 @@ const { result, output } = trigasm.repair('model.stl', data, 'print-ready', (ste
 For large files, write directly to the virtual filesystem to avoid extra memory copies:
 
 ```typescript
-const trigasm = await Trigasm.init();
+import loadTrigasm from '@goodtools/trigasm/dist/trigasm.js';
+
+const trigasm = await Trigasm.init(loadTrigasm);
 
 // Write large file directly to virtual FS
 trigasm.FS.writeFile('/uploads/huge-model.stl', hugeBuffer);
@@ -105,7 +108,9 @@ const repairedData = trigasm.FS.readFile(outputPath);
 ### Custom WASM Location
 
 ```typescript
-const trigasm = await Trigasm.init({
+import loadTrigasm from '@goodtools/trigasm/dist/trigasm.js';
+
+const trigasm = await Trigasm.init(loadTrigasm, {
   locateFile: (path, prefix) => {
     if (path.endsWith('.wasm')) return '/assets/trigasm.wasm';
     return prefix + path;
@@ -115,13 +120,15 @@ const trigasm = await Trigasm.init({
 
 ## API Reference
 
-### `Trigasm.init(options?)`
+### `Trigasm.init(loader, options?)`
 
 Initialize the Trigasm WASM module.
 
-**Options:**
+**Parameters:**
 
-- `locateFile?: (path: string, prefix: string) => string` - Custom function to locate WASM files
+- `loader: TrigasmLoader` - Function that loads the WASM module (import from `@goodtools/trigasm/dist/trigasm.js`)
+- `options?: InitOptions` - Optional initialization options
+  - `locateFile?: (path: string, prefix: string) => string` - Custom function to locate WASM files
 
 **Returns:** `Promise<Trigasm>`
 
@@ -197,7 +204,7 @@ interface RepairResult {
 ### Prerequisites
 
 - Docker
-- Node.js 18+
+- Node.js 22+
 
 ### Building
 
