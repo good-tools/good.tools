@@ -204,7 +204,7 @@ describe('JsonEscape', () => {
 
       // Escape
       await user.click(screen.getByRole('button', { name: /^escape$/i }))
-      const escapedValue = input.value
+      const escapedValue = (input as HTMLTextAreaElement).value
       expect(escapedValue).toBe('Hello \\"World\\"\\nNew line\\tTab')
 
       // Unescape

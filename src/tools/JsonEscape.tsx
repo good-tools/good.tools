@@ -23,8 +23,8 @@ function escapeJson(str: string): string {
 function unescapeJson(str: string): string {
   try {
     // Use JSON.parse with a wrapper to handle the unescaping
-    return JSON.parse(`"${str}"`)
-  } catch (error) {
+    return JSON.parse(`"${str}"`) as string
+  } catch {
     // If JSON.parse fails, try manual replacement
     return str
       .replace(/\\n/g, '\n')
