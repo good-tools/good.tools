@@ -14,6 +14,7 @@ import {
   MapPin,
   Braces,
   Code2,
+  Quote,
 } from 'lucide-react'
 import { ROUTES } from './routes.config'
 import { CATEGORIES, type Tool } from '@/types/tool.types'
@@ -256,6 +257,16 @@ export const tools: Tool[] = [
         url: 'https://www.npmjs.com/package/react-inspector',
       },
     ],
+  },
+  {
+    title: 'JSON Escape',
+    href: ROUTES['json-escape'],
+    description: 'Escape or unescape JSON special characters in text',
+    icon: Quote,
+    categories: [CATEGORIES.DEVELOPMENT],
+    searchTags: ['json', 'escape', 'unescape', 'quotes', 'string', 'format'],
+    component: React.lazy(() => import('@/tools/JsonEscape')),
+    online: false,
   },
   {
     title: 'XML Formatter',
