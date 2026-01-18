@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+built/
+.parcel-cache/
+
+# VCGlib (downloaded during build)
+lib/vcglib/
+lib/tarballs/
+lib/.vcglib
+lib/.trigasm
+
+# Emscripten artifacts
+*.wasm
+*.data
+*.wasm.gz
+*.data.gz
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/
+
+# Environment
+.env
+.env.local
