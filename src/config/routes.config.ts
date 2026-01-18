@@ -17,6 +17,7 @@ export const ROUTES = {
   'whats-my-ip': '/whats-my-ip',
   'ip-location': '/ip-location',
   'json-formatter': '/json',
+  'json-escape': '/json-escape',
   'xml-formatter': '/xml',
 } as const
 
