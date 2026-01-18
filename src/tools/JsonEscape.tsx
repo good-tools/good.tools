@@ -13,8 +13,6 @@ function escapeJson(str: string): string {
     .replace(/\n/g, '\\n')
     .replace(/\r/g, '\\r')
     .replace(/\t/g, '\\t')
-    .replace(/\b/g, '\\b')
-    .replace(/\f/g, '\\f')
 }
 
 /**
@@ -30,8 +28,6 @@ function unescapeJson(str: string): string {
       .replace(/\\n/g, '\n')
       .replace(/\\r/g, '\r')
       .replace(/\\t/g, '\t')
-      .replace(/\\b/g, '\b')
-      .replace(/\\f/g, '\f')
       .replace(/\\"/g, '"')
       .replace(/\\\\/g, '\\')
   }
