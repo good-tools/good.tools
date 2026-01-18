@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import JsonEscape from './JsonEscape'
 import { useJsonEscapeStore } from '@/stores'
@@ -24,7 +24,11 @@ describe('JsonEscape', () => {
       render(<JsonEscape />)
 
       const input = screen.getByPlaceholderText(/paste your text here/i)
-      useJsonEscapeStore.getState().setInput('Hello "World"')
+      act(() => {
+        act(() => {
+          useJsonEscapeStore.getState().setInput('Hello "World"')
+        })
+      })
       await user.click(screen.getByRole('button', { name: /^escape$/i }))
 
       expect(input).toHaveValue('Hello \\"World\\"')
@@ -35,7 +39,11 @@ describe('JsonEscape', () => {
       render(<JsonEscape />)
 
       const input = screen.getByPlaceholderText(/paste your text here/i)
-      useJsonEscapeStore.getState().setInput('C:\\Users\\Test')
+      act(() => {
+        act(() => {
+          useJsonEscapeStore.getState().setInput('C:\\Users\\Test')
+        })
+      })
       await user.click(screen.getByRole('button', { name: /^escape$/i }))
 
       expect(input).toHaveValue('C:\\\\Users\\\\Test')
@@ -47,7 +55,9 @@ describe('JsonEscape', () => {
 
       const input = screen.getByPlaceholderText(/paste your text here/i)
       // Directly set value with newline
-      useJsonEscapeStore.getState().setInput('Line1\nLine2')
+      act(() => {
+        useJsonEscapeStore.getState().setInput('Line1\nLine2')
+      })
       await user.click(screen.getByRole('button', { name: /^escape$/i }))
 
       expect(input).toHaveValue('Line1\\nLine2')
@@ -58,7 +68,9 @@ describe('JsonEscape', () => {
       render(<JsonEscape />)
 
       const input = screen.getByPlaceholderText(/paste your text here/i)
-      useJsonEscapeStore.getState().setInput('Column1\tColumn2')
+      act(() => {
+        useJsonEscapeStore.getState().setInput('Column1\tColumn2')
+      })
       await user.click(screen.getByRole('button', { name: /^escape$/i }))
 
       expect(input).toHaveValue('Column1\\tColumn2')
@@ -69,7 +81,9 @@ describe('JsonEscape', () => {
       render(<JsonEscape />)
 
       const input = screen.getByPlaceholderText(/paste your text here/i)
-      useJsonEscapeStore.getState().setInput('Line1\rLine2')
+      act(() => {
+        useJsonEscapeStore.getState().setInput('Line1\rLine2')
+      })
       await user.click(screen.getByRole('button', { name: /^escape$/i }))
 
       expect(input).toHaveValue('Line1\\rLine2')
@@ -80,7 +94,9 @@ describe('JsonEscape', () => {
       render(<JsonEscape />)
 
       const input = screen.getByPlaceholderText(/paste your text here/i)
-      useJsonEscapeStore.getState().setInput('Hello "World"\nNew line\tTab')
+      act(() => {
+        useJsonEscapeStore.getState().setInput('Hello "World"\nNew line\tTab')
+      })
       await user.click(screen.getByRole('button', { name: /^escape$/i }))
 
       expect(input).toHaveValue('Hello \\"World\\"\\nNew line\\tTab')
@@ -103,7 +119,9 @@ describe('JsonEscape', () => {
       render(<JsonEscape />)
 
       const input = screen.getByPlaceholderText(/paste your text here/i)
-      useJsonEscapeStore.getState().setInput('Hello \\"World\\"')
+      act(() => {
+        useJsonEscapeStore.getState().setInput('Hello \\"World\\"')
+      })
       await user.click(screen.getByRole('button', { name: /unescape/i }))
 
       expect(input).toHaveValue('Hello "World"')
@@ -114,7 +132,9 @@ describe('JsonEscape', () => {
       render(<JsonEscape />)
 
       const input = screen.getByPlaceholderText(/paste your text here/i)
-      useJsonEscapeStore.getState().setInput('Line1\\nLine2')
+      act(() => {
+        useJsonEscapeStore.getState().setInput('Line1\\nLine2')
+      })
       await user.click(screen.getByRole('button', { name: /unescape/i }))
 
       expect(input).toHaveValue('Line1\nLine2')
@@ -125,7 +145,9 @@ describe('JsonEscape', () => {
       render(<JsonEscape />)
 
       const input = screen.getByPlaceholderText(/paste your text here/i)
-      useJsonEscapeStore.getState().setInput('Column1\\tColumn2')
+      act(() => {
+        useJsonEscapeStore.getState().setInput('Column1\\tColumn2')
+      })
       await user.click(screen.getByRole('button', { name: /unescape/i }))
 
       expect(input).toHaveValue('Column1\tColumn2')
@@ -136,7 +158,9 @@ describe('JsonEscape', () => {
       render(<JsonEscape />)
 
       const input = screen.getByPlaceholderText(/paste your text here/i)
-      useJsonEscapeStore.getState().setInput('C:\\\\Users\\\\Test')
+      act(() => {
+        useJsonEscapeStore.getState().setInput('C:\\\\Users\\\\Test')
+      })
       await user.click(screen.getByRole('button', { name: /unescape/i }))
 
       expect(input).toHaveValue('C:\\Users\\Test')
@@ -147,7 +171,9 @@ describe('JsonEscape', () => {
       render(<JsonEscape />)
 
       const input = screen.getByPlaceholderText(/paste your text here/i)
-      useJsonEscapeStore.getState().setInput('Hello \\"World\\"\\nNew line\\tTab')
+      act(() => {
+        useJsonEscapeStore.getState().setInput('Hello \\"World\\"\\nNew line\\tTab')
+      })
       await user.click(screen.getByRole('button', { name: /unescape/i }))
 
       expect(input).toHaveValue('Hello "World"\nNew line\tTab')
@@ -200,7 +226,9 @@ describe('JsonEscape', () => {
 
       const input = screen.getByPlaceholderText(/paste your text here/i)
       const originalText = 'Hello "World"\nNew line\tTab'
-      useJsonEscapeStore.getState().setInput(originalText)
+      act(() => {
+        useJsonEscapeStore.getState().setInput(originalText)
+      })
 
       // Escape
       await user.click(screen.getByRole('button', { name: /^escape$/i }))
