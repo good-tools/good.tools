@@ -24,7 +24,7 @@ describe('JsonEscape', () => {
       render(<JsonEscape />)
 
       const input = screen.getByPlaceholderText(/paste your text here/i)
-      await user.type(input, 'Hello "World"')
+      useJsonEscapeStore.getState().setInput('Hello "World"')
       await user.click(screen.getByRole('button', { name: /^escape$/i }))
 
       expect(input).toHaveValue('Hello \\"World\\"')
@@ -35,10 +35,10 @@ describe('JsonEscape', () => {
       render(<JsonEscape />)
 
       const input = screen.getByPlaceholderText(/paste your text here/i)
-      await user.type(input, 'C:\\\\Users\\\\Test')
+      useJsonEscapeStore.getState().setInput('C:\\Users\\Test')
       await user.click(screen.getByRole('button', { name: /^escape$/i }))
 
-      expect(input).toHaveValue('C:\\\\\\\\Users\\\\\\\\Test')
+      expect(input).toHaveValue('C:\\\\Users\\\\Test')
     })
 
     it('escapes newlines', async () => {
@@ -103,7 +103,7 @@ describe('JsonEscape', () => {
       render(<JsonEscape />)
 
       const input = screen.getByPlaceholderText(/paste your text here/i)
-      await user.type(input, 'Hello \\\\"World\\\\"')
+      useJsonEscapeStore.getState().setInput('Hello \\"World\\"')
       await user.click(screen.getByRole('button', { name: /unescape/i }))
 
       expect(input).toHaveValue('Hello "World"')
@@ -114,7 +114,7 @@ describe('JsonEscape', () => {
       render(<JsonEscape />)
 
       const input = screen.getByPlaceholderText(/paste your text here/i)
-      await user.type(input, 'Line1\\\\nLine2')
+      useJsonEscapeStore.getState().setInput('Line1\\nLine2')
       await user.click(screen.getByRole('button', { name: /unescape/i }))
 
       expect(input).toHaveValue('Line1\nLine2')
@@ -125,7 +125,7 @@ describe('JsonEscape', () => {
       render(<JsonEscape />)
 
       const input = screen.getByPlaceholderText(/paste your text here/i)
-      await user.type(input, 'Column1\\\\tColumn2')
+      useJsonEscapeStore.getState().setInput('Column1\\tColumn2')
       await user.click(screen.getByRole('button', { name: /unescape/i }))
 
       expect(input).toHaveValue('Column1\tColumn2')
@@ -136,10 +136,10 @@ describe('JsonEscape', () => {
       render(<JsonEscape />)
 
       const input = screen.getByPlaceholderText(/paste your text here/i)
-      await user.type(input, 'C:\\\\\\\\Users\\\\\\\\Test')
+      useJsonEscapeStore.getState().setInput('C:\\\\Users\\\\Test')
       await user.click(screen.getByRole('button', { name: /unescape/i }))
 
-      expect(input).toHaveValue('C:\\\\Users\\\\Test')
+      expect(input).toHaveValue('C:\\Users\\Test')
     })
 
     it('unescapes multiple special characters at once', async () => {
@@ -147,7 +147,7 @@ describe('JsonEscape', () => {
       render(<JsonEscape />)
 
       const input = screen.getByPlaceholderText(/paste your text here/i)
-      await user.type(input, 'Hello \\\\"World\\\\"\\\\nNew line\\\\tTab')
+      useJsonEscapeStore.getState().setInput('Hello \\"World\\"\\nNew line\\tTab')
       await user.click(screen.getByRole('button', { name: /unescape/i }))
 
       expect(input).toHaveValue('Hello "World"\nNew line\tTab')
