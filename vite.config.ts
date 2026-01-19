@@ -71,6 +71,8 @@ export default defineConfig({
     include: [
       "@goodtools/wiregasm",
       "@goodtools/wiregasm/dist/wiregasm",
+      "@goodtools/meshrepair",
+      "@goodtools/meshrepair/dist/meshrepair.js",
       "pako",
       "buffer"
     ],
