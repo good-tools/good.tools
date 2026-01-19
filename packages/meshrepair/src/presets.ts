@@ -1,7 +1,7 @@
 /**
- * Trigasm - WebAssembly STL Mesh Repair Library
+ * MeshRepair - WebAssembly STL Mesh Repair Library
  *
- * Repair presets for common use cases
+ * Preset configurations for common repair operations
  *
  * SPDX-License-Identifier: GPL-3.0
  */
@@ -9,12 +9,12 @@
 import type { RepairOptions, PresetName } from './types';
 
 /**
- * Predefined repair presets for common use cases
+ * Preset configurations for common repair operations
  */
-export const PRESETS: Record<PresetName, RepairOptions> = {
+export const PRESETS: Record<PresetName, Required<RepairOptions>> = {
   /**
-   * Minimal repairs - only remove duplicates and degenerate geometry
-   * Fast and safe for most meshes
+   * Minimal repair - just remove duplicates and degenerate geometry
+   * Best for cleaning up already-good models
    */
   minimal: {
     removeDuplicateVertex: true,
@@ -33,8 +33,8 @@ export const PRESETS: Record<PresetName, RepairOptions> = {
   },
 
   /**
-   * Print-ready - optimized for 3D printing
-   * Fills holes, fixes normals, ensures watertight mesh
+   * Print-ready - recommended for 3D printing
+   * Fills holes and fixes normals for watertight manifold output
    */
   'print-ready': {
     removeDuplicateVertex: true,
@@ -54,7 +54,7 @@ export const PRESETS: Record<PresetName, RepairOptions> = {
 
   /**
    * Aggressive - all repairs enabled
-   * Maximum cleanup, may modify mesh significantly
+   * Use when other presets fail to produce a valid mesh
    */
   aggressive: {
     removeDuplicateVertex: true,
@@ -62,7 +62,7 @@ export const PRESETS: Record<PresetName, RepairOptions> = {
     removeUnreferencedVertex: true,
     removeDegenerateFace: true,
     fillHoles: true,
-    maxHoleSize: 1000,
+    maxHoleSize: 200,
     removeNonManifoldFace: true,
     removeNonManifoldVertex: true,
     fixNormalOrientation: true,
@@ -71,26 +71,23 @@ export const PRESETS: Record<PresetName, RepairOptions> = {
     removeFaceFoldByFlip: true,
     binaryOutput: true,
   },
-} as const;
+};
 
 /**
- * Get repair options from a preset name or options object
+ * Resolve options - merge preset with custom options
  */
-export function resolveOptions(
-  optionsOrPreset: RepairOptions | PresetName | undefined
-): RepairOptions {
-  if (optionsOrPreset === undefined) {
-    return { ...PRESETS.minimal };
+export function resolveOptions(options?: RepairOptions | PresetName): Required<RepairOptions> {
+  if (!options) {
+    return PRESETS['minimal'];
   }
 
-  if (typeof optionsOrPreset === 'string') {
-    const preset = PRESETS[optionsOrPreset];
-    if (!preset) {
-      throw new Error(`Unknown preset: ${optionsOrPreset}`);
-    }
-    return { ...preset };
+  if (typeof options === 'string') {
+    return PRESETS[options];
   }
 
-  // Merge with minimal defaults
-  return { ...PRESETS.minimal, ...optionsOrPreset };
+  // Merge with minimal preset for defaults
+  return {
+    ...PRESETS['minimal'],
+    ...options,
+  };
 }

@@ -1,7 +1,7 @@
-# Trigasm Build System
+# MeshRepair Build System
 # Based on Wiregasm's build pattern
 
-all: .trigasm
+all: .meshrepair
 
 TARBALLS := tarballs
 PREFIX := ../built
@@ -16,7 +16,7 @@ checksum = echo "$(1) $(2)" | sha512sum --check --status
 EXTRACT_DIR = $(patsubst %.tar,%,$(basename $(notdir $<)))
 MOVE = mv $(EXTRACT_DIR) $@ && touch $@
 CLEANUP = rm -rf $@
-BUILD_DIR = $</tg_build
+BUILD_DIR = $</mr_build
 
 # Meson configuration
 MESON_CLEAN = rm -rf $(BUILD_DIR)/meson-private
@@ -25,7 +25,7 @@ MESON_BUILD = meson compile -C $(BUILD_DIR) && meson install -C $(BUILD_DIR)
 
 mostlyclean:
 	rm -rf vcglib
-	rm -rf .vcglib .trigasm
+	rm -rf .vcglib .meshrepair
 	rm -rf .sum-*
 
 clean: mostlyclean
@@ -57,10 +57,10 @@ vcglib: vcglib-$(VCGLIB_VERSION).tar.gz .sum-vcglib
 	touch $@
 
 #
-# Trigasm WASM Library
+# MeshRepair WASM Library
 #
-.trigasm: trigasm .vcglib crossfile.meson
-	@echo "[+] Building Trigasm"
+.meshrepair: meshrepair .vcglib crossfile.meson
+	@echo "[+] Building MeshRepair"
 	$(MESON_CLEAN)
 	$(MESON_SETUP)
 	+$(MESON_BUILD)

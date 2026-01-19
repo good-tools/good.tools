@@ -1,5 +1,5 @@
 /**
- * Trigasm - WebAssembly STL Mesh Repair Library
+ * MeshRepair - WebAssembly STL Mesh Repair Library
  *
  * TypeScript type definitions
  *
@@ -121,7 +121,7 @@ export interface RepairFileOptions {
 export type PresetName = 'minimal' | 'print-ready' | 'aggressive';
 
 /**
- * Emscripten FS interface (subset used by Trigasm)
+ * Emscripten FS interface (subset used by MeshRepair)
  */
 export interface EmscriptenFS {
   writeFile(path: string, data: string | ArrayBufferView, opts?: { encoding?: string }): void;
@@ -144,15 +144,15 @@ export interface RepairSessionInstance {
 }
 
 /**
- * Internal: Trigasm WASM module interface
+ * Internal: MeshRepair WASM module interface
  */
-export interface TrigasmModule {
+export interface MeshRepairModule {
   FS: EmscriptenFS;
   RepairSession: new (path: string) => RepairSessionInstance;
 }
 
 /**
- * Options for initializing Trigasm
+ * Options for initializing MeshRepair
  */
 export interface InitOptions {
   /**
@@ -165,6 +165,6 @@ export interface InitOptions {
 }
 
 /**
- * Type of the function that loads the Trigasm WASM module
+ * Type of the function that loads the MeshRepair WASM module
  */
-export type TrigasmLoader = (options?: InitOptions) => Promise<TrigasmModule>;
+export type MeshRepairLoader = (options?: InitOptions) => Promise<MeshRepairModule>;

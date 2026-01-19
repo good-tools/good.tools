@@ -1,11 +1,11 @@
-# Trigasm
+# MeshRepair
 
-[![Build](https://github.com/good-tools/trigasm/actions/workflows/ci.yml/badge.svg)](https://github.com/good-tools/trigasm/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/@goodtools/trigasm)](https://www.npmjs.com/package/@goodtools/trigasm)
+[![Build](https://github.com/good-tools/meshrepair/actions/workflows/ci.yml/badge.svg)](https://github.com/good-tools/meshrepair/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/@goodtools/meshrepair)](https://www.npmjs.com/package/@goodtools/meshrepair)
 
 The high-performance, WebAssembly-powered mesh repair engine for the browser.
 
-Trigasm is a lightweight, headless port of [VCGlib](https://github.com/cnr-isti-vclab/vcglib) (Visualization and Computer Graphics Library) specialized for the automated repair and sanitization of STL files. Built with Emscripten, it brings the industrial-grade mesh processing power of MeshLab directly into web-based 3D printing slicers, viewers, and CAD tools.
+MeshRepair is a lightweight, headless port of [VCGlib](https://github.com/cnr-isti-vclab/vcglib) (Visualization and Computer Graphics Library) specialized for the automated repair and sanitization of STL files. Built with Emscripten, it brings the industrial-grade mesh processing power of MeshLab directly into web-based 3D printing slicers, viewers, and CAD tools.
 
 ## Features
 
@@ -18,7 +18,7 @@ Trigasm is a lightweight, headless port of [VCGlib](https://github.com/cnr-isti-
 ## Installation
 
 ```bash
-npm install @goodtools/trigasm
+npm install @goodtools/meshrepair
 ```
 
 ## Usage
@@ -26,15 +26,15 @@ npm install @goodtools/trigasm
 ### Basic Usage
 
 ```typescript
-import { Trigasm } from '@goodtools/trigasm';
-import loadTrigasm from '@goodtools/trigasm/dist/trigasm.js';
+import { MeshRepair } from '@goodtools/meshrepair';
+import loadMeshRepair from '@goodtools/meshrepair/wasm';
 
 // Initialize
-const trigasm = await Trigasm.init(loadTrigasm);
+const meshrepair = await MeshRepair.init(loadMeshRepair);
 
 // Load and repair an STL file
 const stlData = await fetch('/model.stl').then((r) => r.arrayBuffer());
-const { result, output } = trigasm.repair('model.stl', new Uint8Array(stlData), 'print-ready');
+const { result, output } = meshrepair.repair('model.stl', new Uint8Array(stlData), 'print-ready');
 
 console.log(`Repaired: ${result.originalFaces} -> ${result.finalFaces} faces`);
 console.log(`Holes filled: ${result.holesFilled}`);
@@ -46,25 +46,25 @@ const url = URL.createObjectURL(blob);
 
 ### Using Presets
 
-Trigasm includes three presets for common use cases:
+MeshRepair includes three presets for common use cases:
 
 ```typescript
 // Minimal - just remove duplicates and degenerate geometry
-const { result } = trigasm.repair('model.stl', data, 'minimal');
+const { result } = meshrepair.repair('model.stl', data, 'minimal');
 
 // Print-ready - fill holes, fix normals (recommended for 3D printing)
-const { result } = trigasm.repair('model.stl', data, 'print-ready');
+const { result } = meshrepair.repair('model.stl', data, 'print-ready');
 
 // Aggressive - all repairs enabled
-const { result } = trigasm.repair('model.stl', data, 'aggressive');
+const { result } = meshrepair.repair('model.stl', data, 'aggressive');
 ```
 
 ### Custom Options
 
 ```typescript
-import { Trigasm, PRESETS } from '@goodtools/trigasm';
+import { MeshRepair, PRESETS } from '@goodtools/meshrepair';
 
-const { result, output } = trigasm.repair('model.stl', data, {
+const { result, output } = meshrepair.repair('model.stl', data, {
   // Start from a preset
   ...PRESETS['print-ready'],
 
@@ -78,7 +78,7 @@ const { result, output } = trigasm.repair('model.stl', data, {
 ### Progress Callback
 
 ```typescript
-const { result, output } = trigasm.repair('model.stl', data, 'print-ready', (step, progress) => {
+const { result, output } = meshrepair.repair('model.stl', data, 'print-ready', (step, progress) => {
   console.log(`${step}: ${(progress * 100).toFixed(0)}%`);
 });
 ```
@@ -88,31 +88,27 @@ const { result, output } = trigasm.repair('model.stl', data, 'print-ready', (ste
 For large files, write directly to the virtual filesystem to avoid extra memory copies:
 
 ```typescript
-import loadTrigasm from '@goodtools/trigasm/dist/trigasm.js';
-
-const trigasm = await Trigasm.init(loadTrigasm);
+const meshrepair = await MeshRepair.init(loadMeshRepair);
 
 // Write large file directly to virtual FS
-trigasm.FS.writeFile('/uploads/huge-model.stl', hugeBuffer);
+meshrepair.FS.writeFile('/uploads/huge-model.stl', hugeBuffer);
 
 // Repair by path (memory efficient)
-const { result, outputPath } = trigasm.repairFileInPlace('/uploads/huge-model.stl', {
+const { result, outputPath } = meshrepair.repairFileInPlace('/uploads/huge-model.stl', {
   options: 'print-ready',
   onProgress: (step, p) => updateProgressBar(step, p),
 });
 
 // Read output when ready
-const repairedData = trigasm.FS.readFile(outputPath);
+const repairedData = meshrepair.FS.readFile(outputPath);
 ```
 
 ### Custom WASM Location
 
 ```typescript
-import loadTrigasm from '@goodtools/trigasm/dist/trigasm.js';
-
-const trigasm = await Trigasm.init(loadTrigasm, {
+const meshrepair = await MeshRepair.init(loadMeshRepair, {
   locateFile: (path, prefix) => {
-    if (path.endsWith('.wasm')) return '/assets/trigasm.wasm';
+    if (path.endsWith('.wasm')) return '/assets/meshrepair.wasm';
     return prefix + path;
   },
 });
@@ -120,19 +116,19 @@ const trigasm = await Trigasm.init(loadTrigasm, {
 
 ## API Reference
 
-### `Trigasm.init(loader, options?)`
+### `MeshRepair.init(loader, options?)`
 
-Initialize the Trigasm WASM module.
+Initialize the MeshRepair WASM module.
 
 **Parameters:**
 
-- `loader: TrigasmLoader` - Function that loads the WASM module (import from `@goodtools/trigasm/dist/trigasm.js`)
+- `loader: MeshRepairLoader` - Function that loads the WASM module (import from `@goodtools/meshrepair/wasm`)
 - `options?: InitOptions` - Optional initialization options
   - `locateFile?: (path: string, prefix: string) => string` - Custom function to locate WASM files
 
-**Returns:** `Promise<Trigasm>`
+**Returns:** `Promise<MeshRepair>`
 
-### `trigasm.repair(name, data, options?, onProgress?)`
+### `meshrepair.repair(name, data, options?, onProgress?)`
 
 Repair an STL file by passing data directly.
 
@@ -145,19 +141,19 @@ Repair an STL file by passing data directly.
 
 **Returns:** `{ result: RepairResult, output: Uint8Array }`
 
-### `trigasm.repairFile(inputPath, options?)`
+### `meshrepair.repairFile(inputPath, options?)`
 
 Repair an STL file from a path in the virtual filesystem.
 
-### `trigasm.repairFileInPlace(inputPath, options?)`
+### `meshrepair.repairFileInPlace(inputPath, options?)`
 
 Repair without reading output back to JavaScript (memory efficient).
 
-### `trigasm.FS`
+### `meshrepair.FS`
 
 Direct access to Emscripten virtual filesystem for large file handling.
 
-### `trigasm.destroy()`
+### `meshrepair.destroy()`
 
 Clean up resources.
 
@@ -210,7 +206,7 @@ interface RepairResult {
 
 ```bash
 # Build the Docker image with Emscripten
-docker build -t goodtools/trigasm-builder -f docker/build.Dockerfile .
+npm run build:builder
 
 # Build the WASM library
 npm run build:emscripten
@@ -229,9 +225,29 @@ npm run build:emscripten-local
 npm run build
 ```
 
+## Contributing
+
+This project uses [Changesets](https://github.com/changesets/changesets) for version management and changelog generation.
+
+### Adding a Changeset
+
+When making changes that should be included in the next release:
+
+```bash
+npm run changeset
+```
+
+Select the package, choose the change type (major/minor/patch), and write a summary. This creates a changeset file that will be included in the next release.
+
+### Change Types
+
+- **major**: Breaking changes (e.g., API changes, renamed exports)
+- **minor**: New features (backward compatible)
+- **patch**: Bug fixes
+
 ## License
 
-Trigasm is licensed under the [GNU General Public License v3.0](LICENSE), the same license as [VCGlib](https://github.com/cnr-isti-vclab/vcglib).
+MeshRepair is licensed under the [GNU General Public License v3.0](LICENSE), the same license as [VCGlib](https://github.com/cnr-isti-vclab/vcglib).
 
 VCGlib is developed by the [Visual Computing Lab](http://vcg.isti.cnr.it) at ISTI-CNR.
 

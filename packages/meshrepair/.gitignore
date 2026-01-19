@@ -8,8 +8,8 @@ built/
 
 # Lib
 lib/*
-!lib/trigasm
-lib/trigasm/tg_build
+!lib/meshrepair
+lib/meshrepair/mr_build
 !lib/tarballs
 !lib/crossfile.meson
 !lib/Makefile

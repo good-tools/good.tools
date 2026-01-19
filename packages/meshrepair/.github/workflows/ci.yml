@@ -15,7 +15,7 @@ jobs:
       !contains(github.event.head_commit.message, 'skip-ci')
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup emsdk
       uses: mymindstorm/setup-emsdk@v14
@@ -35,32 +35,33 @@ jobs:
         pip3 install meson
 
     - name: Configure Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version-file: '.nvmrc'
         cache: 'npm'
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: |
           built/*
-          !built/bin/trigasm.js
-          !built/bin/trigasm.wasm
+          !built/bin/meshrepair.js
+          !built/bin/meshrepair.wasm
           lib/*
-          !lib/trigasm
+          !lib/meshrepair
           !lib/crossfile.meson
           !lib/Makefile
-        key: lib-${{ hashFiles('lib/Makefile', 'lib/crossfile.meson', 'lib/trigasm/**') }}
+        key: lib-${{ hashFiles('lib/Makefile', 'lib/crossfile.meson', 'lib/meshrepair/**') }}
 
     - name: Build WASM lib
       run: npm run build:emscripten-local
 
     - name: Upload Artifacts
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       uses: actions/upload-artifact@v4
       with:
         name: lib
         path: |
-          built/bin/trigasm.*
+          built/bin/meshrepair.*
 
     - name: Load Dependencies
       run: npm ci

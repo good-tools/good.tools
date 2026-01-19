@@ -1,67 +1,63 @@
 /**
- * Trigasm Node.js Example
+ * MeshRepair Node.js Example
  *
- * Demonstrates how to use Trigasm to repair STL files in Node.js
- *
- * Usage:
- *   node repair.mjs input.stl [output.stl]
+ * Demonstrates how to use MeshRepair to repair STL files in Node.js
  */
 
-import { readFile, writeFile } from 'fs/promises';
-import { Trigasm } from '@goodtools/trigasm';
-import loadTrigasm from '@goodtools/trigasm/dist/trigasm.js';
+import { readFileSync, writeFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { MeshRepair } from '@goodtools/meshrepair';
+import loadMeshRepair from '@goodtools/meshrepair/wasm';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 async function main() {
-  const args = process.argv.slice(2);
-
-  if (args.length < 1) {
+  // Get input file from command line or use default
+  const inputFile = process.argv[2];
+  if (!inputFile) {
     console.error('Usage: node repair.mjs <input.stl> [output.stl]');
     process.exit(1);
   }
 
-  const inputPath = args[0];
-  const outputPath = args[1] || inputPath.replace(/\.stl$/i, '_repaired.stl');
+  const outputFile = process.argv[3] || inputFile.replace('.stl', '_repaired.stl');
 
-  console.log(`Loading Trigasm...`);
+  console.log(`Loading MeshRepair...`);
 
-  // Initialize Trigasm
-  const trigasm = await Trigasm.init(loadTrigasm);
+  // Initialize MeshRepair
+  const meshrepair = await MeshRepair.init(loadMeshRepair);
 
-  console.log(`Reading ${inputPath}...`);
+  console.log(`Reading ${inputFile}...`);
+  const inputData = readFileSync(inputFile);
 
-  // Read input file
-  const inputData = await readFile(inputPath);
+  console.log(`Repairing...`);
 
-  console.log(`Repairing mesh...`);
-
-  // Repair with print-ready preset and progress callback
-  const { result, output } = trigasm.repair(
-    inputPath.split('/').pop(),
+  // Repair with print-ready preset
+  const { result, output } = meshrepair.repair(
+    inputFile.split('/').pop(),
     inputData,
     'print-ready',
     (step, progress) => {
-      const pct = (progress * 100).toFixed(0);
-      process.stdout.write(`\r  ${step}: ${pct}%`);
-      if (progress === 1) console.log();
+      console.log(`  ${step}: ${(progress * 100).toFixed(0)}%`);
     }
   );
 
-  // Print statistics
-  console.log(`\nRepair complete!`);
-  console.log(`  Vertices: ${result.originalVertices} -> ${result.finalVertices}`);
-  console.log(`  Faces: ${result.originalFaces} -> ${result.finalFaces}`);
+  console.log('\nRepair complete!');
+  console.log(`  Original: ${result.originalVertices} vertices, ${result.originalFaces} faces`);
+  console.log(`  Final: ${result.finalVertices} vertices, ${result.finalFaces} faces`);
   console.log(`  Duplicate vertices removed: ${result.duplicateVerticesRemoved}`);
   console.log(`  Duplicate faces removed: ${result.duplicateFacesRemoved}`);
   console.log(`  Degenerate faces removed: ${result.degenerateFacesRemoved}`);
-  console.log(`  Unreferenced vertices removed: ${result.unreferencedVerticesRemoved}`);
   console.log(`  Holes filled: ${result.holesFilled}`);
 
-  // Write output file
-  await writeFile(outputPath, output);
-  console.log(`\nSaved repaired mesh to ${outputPath}`);
+  console.log(`\nWriting ${outputFile}...`);
+  writeFileSync(outputFile, output);
+
+  console.log('Done!');
 
   // Cleanup
-  trigasm.destroy();
+  meshrepair.destroy();
 }
 
 main().catch((err) => {

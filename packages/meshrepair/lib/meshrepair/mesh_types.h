@@ -1,13 +1,13 @@
 /**
- * Trigasm - WebAssembly STL Mesh Repair Library
+ * MeshRepair - WebAssembly STL Mesh Repair Library
  * 
  * Mesh type definitions using VCGlib
  * 
  * SPDX-License-Identifier: GPL-3.0
  */
 
-#ifndef TRIGASM_MESH_TYPES_H
-#define TRIGASM_MESH_TYPES_H
+#ifndef MESHREPAIR_MESH_TYPES_H
+#define MESHREPAIR_MESH_TYPES_H
 
 #include <vcg/complex/complex.h>
 #include <vcg/complex/algorithms/clean.h>
@@ -20,22 +20,22 @@
 #include <wrap/io_trimesh/export_stl.h>
 
 // Forward declarations
-class TrigasmVertex;
-class TrigasmEdge;
-class TrigasmFace;
+class MeshRepairVertex;
+class MeshRepairEdge;
+class MeshRepairFace;
 
 /**
  * UsedTypes declaration for VCG mesh
  */
-struct TrigasmUsedTypes : public vcg::UsedTypes<
-    vcg::Use<TrigasmVertex>::AsVertexType,
-    vcg::Use<TrigasmEdge>::AsEdgeType,
-    vcg::Use<TrigasmFace>::AsFaceType> {};
+struct MeshRepairUsedTypes : public vcg::UsedTypes<
+    vcg::Use<MeshRepairVertex>::AsVertexType,
+    vcg::Use<MeshRepairEdge>::AsEdgeType,
+    vcg::Use<MeshRepairFace>::AsFaceType> {};
 
 /**
  * Vertex type with required components for mesh repair
  */
-class TrigasmVertex : public vcg::Vertex<TrigasmUsedTypes,
+class MeshRepairVertex : public vcg::Vertex<MeshRepairUsedTypes,
     vcg::vertex::Coord3f,      // 3D coordinates (float)
     vcg::vertex::Normal3f,     // Normal vector
     vcg::vertex::BitFlags,     // Status flags
@@ -46,7 +46,7 @@ class TrigasmVertex : public vcg::Vertex<TrigasmUsedTypes,
 /**
  * Face type with required components for mesh repair
  */
-class TrigasmFace : public vcg::Face<TrigasmUsedTypes,
+class MeshRepairFace : public vcg::Face<MeshRepairUsedTypes,
     vcg::face::VertexRef,      // References to vertices
     vcg::face::Normal3f,       // Face normal
     vcg::face::BitFlags,       // Status flags
@@ -58,15 +58,15 @@ class TrigasmFace : public vcg::Face<TrigasmUsedTypes,
 /**
  * Edge type (minimal, used for some algorithms)
  */
-class TrigasmEdge : public vcg::Edge<TrigasmUsedTypes> {};
+class MeshRepairEdge : public vcg::Edge<MeshRepairUsedTypes> {};
 
 /**
- * The main mesh type used throughout Trigasm
+ * The main mesh type used throughout MeshRepair
  */
-class TrigasmMesh : public vcg::tri::TriMesh<
-    std::vector<TrigasmVertex>,
-    std::vector<TrigasmFace>,
-    std::vector<TrigasmEdge>
+class MeshRepairMesh : public vcg::tri::TriMesh<
+    std::vector<MeshRepairVertex>,
+    std::vector<MeshRepairFace>,
+    std::vector<MeshRepairEdge>
 > {};
 
-#endif // TRIGASM_MESH_TYPES_H
+#endif // MESHREPAIR_MESH_TYPES_H

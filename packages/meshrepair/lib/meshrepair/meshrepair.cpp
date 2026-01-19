@@ -1,5 +1,5 @@
 /**
- * Trigasm - WebAssembly STL Mesh Repair Library
+ * MeshRepair - WebAssembly STL Mesh Repair Library
  * 
  * Core mesh repair implementation using VCGlib
  * 
@@ -85,7 +85,7 @@ class RepairSession {
 private:
     std::string inputPath;
     std::string outputPath;
-    TrigasmMesh mesh;
+    MeshRepairMesh mesh;
     bool loaded = false;
 
 public:
@@ -110,11 +110,11 @@ public:
         reportProgress(callback, "loading", 0.0f);
         
         int loadMask = 0;
-        int err = vcg::tri::io::ImporterSTL<TrigasmMesh>::Open(mesh, inputPath.c_str(), loadMask);
+        int err = vcg::tri::io::ImporterSTL<MeshRepairMesh>::Open(mesh, inputPath.c_str(), loadMask);
         
         if (err != 0) {
             result.code = 1;
-            result.error = vcg::tri::io::ImporterSTL<TrigasmMesh>::ErrorMsg(err);
+            result.error = vcg::tri::io::ImporterSTL<MeshRepairMesh>::ErrorMsg(err);
             return result;
         }
         
@@ -127,28 +127,28 @@ public:
         // Step 2: Remove duplicate vertices
         if (opts.removeDuplicateVertex) {
             reportProgress(callback, "removeDuplicateVertex", 0.0f);
-            result.duplicateVerticesRemoved = vcg::tri::Clean<TrigasmMesh>::RemoveDuplicateVertex(mesh, false);
+            result.duplicateVerticesRemoved = vcg::tri::Clean<MeshRepairMesh>::RemoveDuplicateVertex(mesh, false);
             reportProgress(callback, "removeDuplicateVertex", 1.0f);
         }
 
         // Step 3: Remove duplicate faces
         if (opts.removeDuplicateFace) {
             reportProgress(callback, "removeDuplicateFace", 0.0f);
-            result.duplicateFacesRemoved = vcg::tri::Clean<TrigasmMesh>::RemoveDuplicateFace(mesh);
+            result.duplicateFacesRemoved = vcg::tri::Clean<MeshRepairMesh>::RemoveDuplicateFace(mesh);
             reportProgress(callback, "removeDuplicateFace", 1.0f);
         }
 
         // Step 4: Remove degenerate faces
         if (opts.removeDegenerateFace) {
             reportProgress(callback, "removeDegenerateFace", 0.0f);
-            result.degenerateFacesRemoved = vcg::tri::Clean<TrigasmMesh>::RemoveDegenerateFace(mesh);
+            result.degenerateFacesRemoved = vcg::tri::Clean<MeshRepairMesh>::RemoveDegenerateFace(mesh);
             reportProgress(callback, "removeDegenerateFace", 1.0f);
         }
 
         // Step 5: Remove unreferenced vertices
         if (opts.removeUnreferencedVertex) {
             reportProgress(callback, "removeUnreferencedVertex", 0.0f);
-            result.unreferencedVerticesRemoved = vcg::tri::Clean<TrigasmMesh>::RemoveUnreferencedVertex(mesh);
+            result.unreferencedVerticesRemoved = vcg::tri::Clean<MeshRepairMesh>::RemoveUnreferencedVertex(mesh);
             reportProgress(callback, "removeUnreferencedVertex", 1.0f);
         }
 
@@ -158,32 +158,32 @@ public:
                           opts.removeTVertexByFlip || opts.removeFaceFoldByFlip;
         
         if (needsFFAdj) {
-            vcg::tri::UpdateTopology<TrigasmMesh>::FaceFace(mesh);
+            vcg::tri::UpdateTopology<MeshRepairMesh>::FaceFace(mesh);
         }
 
         // Step 6: Remove non-manifold faces
         if (opts.removeNonManifoldFace) {
             reportProgress(callback, "removeNonManifoldFace", 0.0f);
-            result.nonManifoldFacesRemoved = vcg::tri::Clean<TrigasmMesh>::RemoveNonManifoldFace(mesh);
+            result.nonManifoldFacesRemoved = vcg::tri::Clean<MeshRepairMesh>::RemoveNonManifoldFace(mesh);
             reportProgress(callback, "removeNonManifoldFace", 1.0f);
         }
 
         // Step 7: Remove non-manifold vertices
         if (opts.removeNonManifoldVertex) {
             reportProgress(callback, "removeNonManifoldVertex", 0.0f);
-            result.nonManifoldVerticesRemoved = vcg::tri::Clean<TrigasmMesh>::RemoveNonManifoldVertex(mesh);
+            result.nonManifoldVerticesRemoved = vcg::tri::Clean<MeshRepairMesh>::RemoveNonManifoldVertex(mesh);
             reportProgress(callback, "removeNonManifoldVertex", 1.0f);
         }
 
         // Rebuild topology after manifold repairs
         if (opts.removeNonManifoldFace || opts.removeNonManifoldVertex) {
-            vcg::tri::UpdateTopology<TrigasmMesh>::FaceFace(mesh);
+            vcg::tri::UpdateTopology<MeshRepairMesh>::FaceFace(mesh);
         }
 
         // Step 8: Fill holes
         if (opts.fillHoles) {
             reportProgress(callback, "fillHoles", 0.0f);
-            result.holesFilled = vcg::tri::Hole<TrigasmMesh>::EarCuttingFill<vcg::tri::MinimumWeightEar<TrigasmMesh>>(
+            result.holesFilled = vcg::tri::Hole<MeshRepairMesh>::EarCuttingFill<vcg::tri::MinimumWeightEar<MeshRepairMesh>>(
                 mesh, opts.maxHoleSize, false);
             reportProgress(callback, "fillHoles", 1.0f);
         }
@@ -192,39 +192,39 @@ public:
         if (opts.fixNormalOrientation) {
             reportProgress(callback, "fixNormalOrientation", 0.0f);
             bool isOriented, isOrientable;
-            vcg::tri::Clean<TrigasmMesh>::OrientCoherentlyMesh(mesh, isOriented, isOrientable);
+            vcg::tri::Clean<MeshRepairMesh>::OrientCoherentlyMesh(mesh, isOriented, isOrientable);
             reportProgress(callback, "fixNormalOrientation", 1.0f);
         }
 
         // Step 10: Flip normals to point outside
         if (opts.flipNormalsOutside) {
             reportProgress(callback, "flipNormalsOutside", 0.0f);
-            vcg::tri::Clean<TrigasmMesh>::FlipNormalOutside(mesh);
+            vcg::tri::Clean<MeshRepairMesh>::FlipNormalOutside(mesh);
             reportProgress(callback, "flipNormalsOutside", 1.0f);
         }
 
         // Step 11: Remove T-vertices by edge flip
         if (opts.removeTVertexByFlip) {
             reportProgress(callback, "removeTVertexByFlip", 0.0f);
-            vcg::tri::UpdateTopology<TrigasmMesh>::FaceFace(mesh);
-            vcg::tri::Clean<TrigasmMesh>::RemoveTVertexByFlip(mesh);
+            vcg::tri::UpdateTopology<MeshRepairMesh>::FaceFace(mesh);
+            vcg::tri::Clean<MeshRepairMesh>::RemoveTVertexByFlip(mesh);
             reportProgress(callback, "removeTVertexByFlip", 1.0f);
         }
 
         // Step 12: Remove face folds by edge flip
         if (opts.removeFaceFoldByFlip) {
             reportProgress(callback, "removeFaceFoldByFlip", 0.0f);
-            vcg::tri::UpdateTopology<TrigasmMesh>::FaceFace(mesh);
-            vcg::tri::Clean<TrigasmMesh>::RemoveFaceFoldByFlip(mesh);
+            vcg::tri::UpdateTopology<MeshRepairMesh>::FaceFace(mesh);
+            vcg::tri::Clean<MeshRepairMesh>::RemoveFaceFoldByFlip(mesh);
             reportProgress(callback, "removeFaceFoldByFlip", 1.0f);
         }
 
         // Compact the mesh (remove deleted elements)
-        vcg::tri::Allocator<TrigasmMesh>::CompactFaceVector(mesh);
-        vcg::tri::Allocator<TrigasmMesh>::CompactVertexVector(mesh);
+        vcg::tri::Allocator<MeshRepairMesh>::CompactFaceVector(mesh);
+        vcg::tri::Allocator<MeshRepairMesh>::CompactVertexVector(mesh);
 
         // Update normals before export
-        vcg::tri::UpdateNormal<TrigasmMesh>::PerVertexNormalizedPerFaceNormalized(mesh);
+        vcg::tri::UpdateNormal<MeshRepairMesh>::PerVertexNormalizedPerFaceNormalized(mesh);
 
         // Record final statistics
         result.finalVertices = mesh.VN();
@@ -233,7 +233,7 @@ public:
         // Step 13: Export the repaired mesh
         reportProgress(callback, "exporting", 0.0f);
         
-        int exportErr = vcg::tri::io::ExporterSTL<TrigasmMesh>::Save(
+        int exportErr = vcg::tri::io::ExporterSTL<MeshRepairMesh>::Save(
             mesh, 
             outputPath.c_str(), 
             opts.binaryOutput
@@ -241,7 +241,7 @@ public:
         
         if (exportErr != 0) {
             result.code = 2;
-            result.error = vcg::tri::io::ExporterSTL<TrigasmMesh>::ErrorMsg(exportErr);
+            result.error = vcg::tri::io::ExporterSTL<MeshRepairMesh>::ErrorMsg(exportErr);
             return result;
         }
         

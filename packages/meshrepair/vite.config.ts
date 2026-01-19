@@ -7,7 +7,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
-      name: 'Trigasm',
+      name: 'MeshRepair',
       formats: ['es', 'cjs'],
       fileName: (format) => {
         if (format === 'es') return 'index.js';
@@ -34,7 +34,7 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
-          src: 'built/bin/trigasm.*',
+          src: 'built/bin/meshrepair.*',
           dest: '.',
         },
       ],

@@ -1,5 +1,5 @@
 /**
- * Trigasm - WebAssembly STL Mesh Repair Library
+ * MeshRepair - WebAssembly STL Mesh Repair Library
  * 
  * Emscripten/Embind bindings for JavaScript interop
  * 
@@ -7,11 +7,11 @@
  */
 
 #include <emscripten/bind.h>
-#include "trigasm.cpp"
+#include "meshrepair.cpp"
 
 using namespace emscripten;
 
-EMSCRIPTEN_BINDINGS(trigasm) {
+EMSCRIPTEN_BINDINGS(meshrepair) {
     // Bind RepairOptions struct
     value_object<RepairOptions>("RepairOptions")
         .field("removeDuplicateVertex", &RepairOptions::removeDuplicateVertex)

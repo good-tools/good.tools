@@ -1,5 +1,5 @@
 /**
- * Trigasm - WebAssembly STL Mesh Repair Library
+ * MeshRepair - WebAssembly STL Mesh Repair Library
  *
  * Main TypeScript wrapper class
  *
@@ -12,10 +12,10 @@ import type {
   RepairFileOptions,
   ProgressCallback,
   PresetName,
-  TrigasmModule,
+  MeshRepairModule,
   EmscriptenFS,
   InitOptions,
-  TrigasmLoader,
+  MeshRepairLoader,
 } from './types';
 import { resolveOptions } from './presets';
 
@@ -24,51 +24,55 @@ export * from './types';
 export { PRESETS } from './presets';
 
 /**
- * Trigasm - WebAssembly STL Mesh Repair Library
+ * MeshRepair - WebAssembly STL Mesh Repair Library
  *
  * A lightweight, headless port of VCGlib for automated repair
  * and sanitization of STL files in the browser.
  *
  * @example
  * ```typescript
- * import { Trigasm } from '@goodtools/trigasm';
- * import loadTrigasm from '@goodtools/trigasm/dist/trigasm.js';
+ * import { MeshRepair } from '@goodtools/meshrepair';
+ * import loadMeshRepair from '@goodtools/meshrepair/wasm';
  *
- * const trigasm = await Trigasm.init(loadTrigasm);
- * const { result, output } = trigasm.repair('model.stl', stlData, 'print-ready');
+ * const meshrepair = await MeshRepair.init(loadMeshRepair);
+ * const { result, output } = meshrepair.repair('model.stl', stlData, 'print-ready');
  * console.log(`Repaired: ${result.holesFilled} holes filled`);
  * ```
  */
-export class Trigasm {
+export class MeshRepair {
   /** Direct access to Emscripten virtual filesystem */
   public readonly FS: EmscriptenFS;
 
-  private lib: TrigasmModule;
+  private lib: MeshRepairModule;
   private uploadDir = '/uploads';
   private outputDir = '/output';
 
   /**
-   * Initialize Trigasm WASM module
+   * Initialize MeshRepair WASM module
    *
-   * @param loader - Function that loads the WASM module
+   * @param loader - Function that loads the WASM module (import from '@goodtools/meshrepair/wasm')
    * @param options - Initialization options
-   * @returns Promise resolving to Trigasm instance
+   * @returns Promise resolving to MeshRepair instance
    *
    * @example
    * ```typescript
-   * import loadTrigasm from '@goodtools/trigasm/dist/trigasm.js';
+   * import { MeshRepair } from '@goodtools/meshrepair';
+   * import loadMeshRepair from '@goodtools/meshrepair/wasm';
    *
-   * const trigasm = await Trigasm.init(loadTrigasm, {
+   * const meshrepair = await MeshRepair.init(loadMeshRepair);
+   *
+   * // With custom WASM location
+   * const meshrepair = await MeshRepair.init(loadMeshRepair, {
    *   locateFile: (path) => `/assets/${path}`
    * });
    * ```
    */
-  static async init(loader: TrigasmLoader, options?: InitOptions): Promise<Trigasm> {
+  static async init(loader: MeshRepairLoader, options?: InitOptions): Promise<MeshRepair> {
     const lib = await loader(options);
-    return new Trigasm(lib);
+    return new MeshRepair(lib);
   }
 
-  private constructor(lib: TrigasmModule) {
+  private constructor(lib: MeshRepairModule) {
     this.lib = lib;
     this.FS = lib.FS;
 
@@ -100,7 +104,7 @@ export class Trigasm {
    * @example
    * ```typescript
    * const stlData = await fetch('/model.stl').then(r => r.arrayBuffer());
-   * const { result, output } = trigasm.repair('model.stl', new Uint8Array(stlData), 'print-ready');
+   * const { result, output } = meshrepair.repair('model.stl', new Uint8Array(stlData), 'print-ready');
    * ```
    */
   repair(
@@ -140,10 +144,10 @@ export class Trigasm {
    * @example
    * ```typescript
    * // Write large file directly to FS
-   * trigasm.FS.writeFile('/uploads/huge.stl', hugeBuffer);
+   * meshrepair.FS.writeFile('/uploads/huge.stl', hugeBuffer);
    *
    * // Repair by path
-   * const { result, output } = trigasm.repairFile('/uploads/huge.stl', {
+   * const { result, output } = meshrepair.repairFile('/uploads/huge.stl', {
    *   options: 'print-ready',
    *   onProgress: (step, p) => console.log(`${step}: ${p * 100}%`)
    * });
@@ -161,7 +165,6 @@ export class Trigasm {
 
     try {
       // WASM binding requires a callback function, use no-op if not provided
-
       const callback = opts.onProgress ?? (() => {});
       const result = session.repair(mergedOptions, finalOutputPath, callback);
 
@@ -188,14 +191,14 @@ export class Trigasm {
    *
    * @example
    * ```typescript
-   * trigasm.FS.writeFile('/uploads/huge.stl', hugeBuffer);
+   * meshrepair.FS.writeFile('/uploads/huge.stl', hugeBuffer);
    *
-   * const { result, outputPath } = trigasm.repairFileInPlace('/uploads/huge.stl', {
+   * const { result, outputPath } = meshrepair.repairFileInPlace('/uploads/huge.stl', {
    *   options: 'aggressive'
    * });
    *
    * // Read output when needed
-   * const repairedData = trigasm.FS.readFile(outputPath);
+   * const repairedData = meshrepair.FS.readFile(outputPath);
    * ```
    */
   repairFileInPlace(
@@ -210,7 +213,6 @@ export class Trigasm {
 
     try {
       // WASM binding requires a callback function, use no-op if not provided
-
       const callback = opts.onProgress ?? (() => {});
       const result = session.repair(mergedOptions, finalOutputPath, callback);
 
@@ -268,4 +270,4 @@ export class Trigasm {
   }
 }
 
-export default Trigasm;
+export default MeshRepair;
