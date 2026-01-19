@@ -13,6 +13,7 @@ jobs:
       github.event.workflow_run.conclusion == 'success' &&
       github.repository == 'good-tools/meshrepair'
     permissions:
+      actions: read
       contents: write
       pull-requests: write
       id-token: write
