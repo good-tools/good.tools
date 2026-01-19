@@ -12,7 +12,9 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-24.04
-    if: github.repository == 'good-tools/meshrepair'
+    if: |
+      github.repository == 'good-tools/meshrepair' &&
+      !contains(github.event.head_commit.message, 'skip-ci')
     permissions:
       contents: write
       pull-requests: write

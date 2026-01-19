@@ -1,6 +1,6 @@
 # MeshRepair
 
-[![Build](https://github.com/good-tools/meshrepair/actions/workflows/ci.yml/badge.svg)](https://github.com/good-tools/meshrepair/actions/workflows/ci.yml)
+[![Release](https://github.com/good-tools/meshrepair/actions/workflows/cd.yml/badge.svg)](https://github.com/good-tools/meshrepair/actions/workflows/cd.yml)
 [![npm](https://img.shields.io/npm/v/@goodtools/meshrepair)](https://www.npmjs.com/package/@goodtools/meshrepair)
 
 The high-performance, WebAssembly-powered mesh repair engine for the browser.
