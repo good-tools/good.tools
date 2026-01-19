@@ -1,9 +1,6 @@
 name: Build & Test
 
 on:
-  push:
-    branches:
-      - master
   pull_request:
     branches:
       - master
@@ -11,60 +8,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    if: |
-      !contains(github.event.head_commit.message, 'skip-ci')
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Setup emsdk
-      uses: mymindstorm/setup-emsdk@v14
-      with:
-        version: 4.0.23
-
-    - name: Verify EMSDK
-      run: emcc -v
-
-    - name: Install build tools
-      run: |
-        sudo apt-get -qq -y update && sudo DEBIAN_FRONTEND="noninteractive" apt-get install -y --no-install-recommends \
-          ninja-build \
-          python3-pip \
-          curl \
-          xz-utils
-        pip3 install meson
-
-    - name: Configure Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version-file: '.nvmrc'
-        cache: 'npm'
-
-    - uses: actions/cache@v4
-      with:
-        path: |
-          built/*
-          !built/bin/meshrepair.js
-          !built/bin/meshrepair.wasm
-          lib/*
-          !lib/meshrepair
-          !lib/crossfile.meson
-          !lib/Makefile
-        key: lib-${{ hashFiles('lib/Makefile', 'lib/crossfile.meson', 'lib/meshrepair/**') }}
-
-    - name: Build WASM lib
-      run: npm run build:emscripten-local
-
-    - name: Upload Artifacts
-      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-      uses: actions/upload-artifact@v6
-      with:
-        name: lib
-        path: |
-          built/bin/meshrepair.*
-
-    - name: Load Dependencies
-      run: npm ci
+    - name: Setup Build Environment
+      uses: ./.github/actions/setup-build
 
     - name: Run Tests
       run: npm test

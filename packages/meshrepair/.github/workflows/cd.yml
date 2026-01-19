@@ -1,19 +1,19 @@
 name: Release
 
 on:
-  workflow_run:
-    workflows: [Build & Test]
-    branches: [master]
-    types: [completed]
+  push:
+    branches:
+      - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   release:
     runs-on: ubuntu-24.04
-    if: |
-      github.event.workflow_run.conclusion == 'success' &&
-      github.repository == 'good-tools/meshrepair'
+    if: github.repository == 'good-tools/meshrepair'
     permissions:
-      actions: read
       contents: write
       pull-requests: write
       id-token: write
@@ -21,29 +21,18 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Configure Node.js
-      uses: actions/setup-node@v4
+    - name: Setup Build Environment
+      uses: ./.github/actions/setup-build
       with:
-        node-version-file: '.nvmrc'
-        cache: 'npm'
         registry-url: 'https://registry.npmjs.org'
 
-    - name: Download artifacts
-      uses: actions/download-artifact@v6
-      with:
-        name: lib
-        path: built/bin/
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        run-id: ${{ github.event.workflow_run.id }}
+    - name: Update npm for Trusted Publishers
+      run: npm install -g npm@latest
 
-    - name: Load Dependencies
-      run: npm ci
-
-    - name: Build
-      run: npm run build
+    - name: Run Tests
+      run: npm test
 
     - name: Create Release Pull Request or Publish
-      id: changesets
       uses: changesets/action@v1
       with:
         publish: npm run release
