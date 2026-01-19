@@ -9,6 +9,7 @@ export const CATEGORIES = {
   ENCODING: 'Encoding',
   SECURITY: 'Security',
   NETWORK: 'Network',
+  '3D': '3D & CAD',
 } as const
 
 export type CategoryName = (typeof CATEGORIES)[keyof typeof CATEGORIES]

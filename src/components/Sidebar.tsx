@@ -104,6 +104,7 @@ export function Sidebar() {
       [CATEGORIES.ENCODING]: [],
       [CATEGORIES.SECURITY]: [],
       [CATEGORIES.NETWORK]: [],
+      [CATEGORIES['3D']]: [],
     }
 
     const toolsToShow = searchQuery
