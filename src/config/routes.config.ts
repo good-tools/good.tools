@@ -19,6 +19,7 @@ export const ROUTES = {
   'json-formatter': '/json',
   'json-escape': '/json-escape',
   'xml-formatter': '/xml',
+  'stl-repair': '/stl-repair',
 } as const
 
 export type ToolKey = keyof typeof ROUTES

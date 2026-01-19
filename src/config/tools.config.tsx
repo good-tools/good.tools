@@ -15,6 +15,7 @@ import {
   Braces,
   Code2,
   Quote,
+  Box,
 } from 'lucide-react'
 import { ROUTES } from './routes.config'
 import { CATEGORIES, type Tool } from '@/types/tool.types'
@@ -199,6 +200,26 @@ export const tools: Tool[] = [
     warning: function () {
       return <div>This tool uses a large (~18 MB) WASM binary for packet dissection in your browser.</div>
     },
+  },
+  {
+    title: 'STL Repair',
+    href: ROUTES['stl-repair'],
+    description: 'Repair and fix STL mesh files for 3D printing - fill holes, fix normals, remove duplicates',
+    icon: Box,
+    categories: [CATEGORIES['3D']],
+    searchTags: ['stl', 'mesh', 'repair', '3d', 'print', 'fix', 'holes', 'normals', 'manifold', 'cad'],
+    component: React.lazy(() => import('@/tools/STLRepair')),
+    online: false,
+    dependencies: [
+      {
+        name: '@goodtools/meshrepair',
+        url: 'https://www.npmjs.com/package/@goodtools/meshrepair',
+      },
+      {
+        name: 'three.js',
+        url: 'https://threejs.org',
+      },
+    ],
   },
   {
     title: 'Whats My IP',
