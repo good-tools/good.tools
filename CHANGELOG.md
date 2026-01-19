@@ -1,3 +1,10 @@
+# [1.23.0](https://github.com/good-tools/good.tools/compare/v1.22.0...v1.23.0) (2026-01-19)
+
+
+### Features
+
+* Implement STL Repair tool with WASM support and improved UI ([#6](https://github.com/good-tools/good.tools/issues/6)) ([6a904b0](https://github.com/good-tools/good.tools/commit/6a904b0607dbf67f9653c067233618f954a05481))
+
 # [1.22.0](https://github.com/good-tools/good.tools/compare/v1.21.1...v1.22.0) (2026-01-18)
 
 
