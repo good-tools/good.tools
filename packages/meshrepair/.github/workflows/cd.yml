@@ -6,8 +6,6 @@ on:
     branches: [master]
     types: [completed]
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
-
 jobs:
   release:
     runs-on: ubuntu-24.04
@@ -32,11 +30,9 @@ jobs:
     - name: Download artifacts
       uses: dawidd6/action-download-artifact@v6
       with:
-        workflow: ci.yml
-        workflow_conclusion: success
+        workflow: ${{ github.event.workflow_run.workflow_id }}
         name: lib
         path: built/bin/
-        branch: master
 
     - name: Load Dependencies
       run: npm ci
