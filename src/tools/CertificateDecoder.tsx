@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { pki } from 'node-forge'
+import * as x509 from '@peculiar/x509'
 import moment from 'moment'
 import { CodeGroup } from '@/components/Code'
 import { Button } from '@/components/ui/button'
@@ -42,46 +42,76 @@ YBoh+bLsodofsWCIogvtpHZmDXK91JDcOr3rSKZtFwL6lg8cYdKXpZ5meDGT6HR6
 0m0=
 -----END CERTIFICATE-----`
 
-interface CertificateExtension {
-  name: string
-  altNames?: Array<{ value: string }>
-  [key: string]: unknown
+interface DecodedCert {
+  subject: string
+  issuer: string
+  notBefore: Date
+  notAfter: Date
+  serialNumber: string
+  publicKeyAlgorithm: string
+  publicKeyPem: string
+  extensions: Array<{ name: string; value: string }>
+  subjectAltNames: string[]
+}
+
+function parseCertificate(pem: string): DecodedCert {
+  const cert = new x509.X509Certificate(pem)
+
+  // Get subject alt names
+  const subjectAltNames: string[] = []
+  const sanExt = cert.extensions.find((e) => e.type === '2.5.29.17') // subjectAltName OID
+  if (sanExt) {
+    const san = new x509.SubjectAlternativeNameExtension(sanExt.rawData)
+    san.names.items.forEach((name) => {
+      subjectAltNames.push(name.value)
+    })
+  }
+
+  // Parse extensions
+  const extensions = cert.extensions.map((ext) => {
+    const names: Record<string, string> = {
+      '2.5.29.14': 'subjectKeyIdentifier',
+      '2.5.29.15': 'keyUsage',
+      '2.5.29.17': 'subjectAltName',
+      '2.5.29.19': 'basicConstraints',
+      '2.5.29.31': 'cRLDistributionPoints',
+      '2.5.29.32': 'certificatePolicies',
+      '2.5.29.35': 'authorityKeyIdentifier',
+      '2.5.29.37': 'extKeyUsage',
+    }
+    return {
+      name: names[ext.type] || ext.type,
+      value: ext.critical ? '(critical)' : '',
+    }
+  })
+
+  return {
+    subject: cert.subject,
+    issuer: cert.issuer,
+    notBefore: cert.notBefore,
+    notAfter: cert.notAfter,
+    serialNumber: cert.serialNumber,
+    publicKeyAlgorithm: cert.publicKey.algorithm.name,
+    publicKeyPem: cert.publicKey.toString('pem'),
+    extensions,
+    subjectAltNames,
+  }
 }
 
 function CertificateDecoder() {
   const [encoded, setEncoded] = useState('')
-  const [decoded, setDecoded] = useState<pki.Certificate | null>(null)
-  const [names, setNames] = useState<string[]>([])
+  const [decoded, setDecoded] = useState<DecodedCert | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const encodedRef = useRef<HTMLTextAreaElement>(null)
 
   const decode = () => {
     try {
-      const data = pki.certificateFromPem(encoded)
+      setError(null)
+      const data = parseCertificate(encoded)
       setDecoded(data)
-
-      const names: string[] = []
-
-      try {
-        const cnField = data.subject.getField('CN') as pki.Attribute
-        if (cnField) {
-          names.push(cnField.value as string)
-        }
-      } catch {
-        // CN field not found
-      }
-
-      const extensions = data.extensions as CertificateExtension[]
-
-      const san = extensions.find((e: CertificateExtension) => e.name === 'subjectAltName')
-      if (san && san.altNames) {
-        san.altNames.forEach((a: { value: string }) => {
-          names.push(a.value)
-        })
-      }
-
-      setNames(names.filter((v, i, a) => a.indexOf(v) === i))
     } catch (err) {
       console.error('Failed to decode certificate:', err)
+      setError(err instanceof Error ? err.message : 'Failed to decode certificate')
       setDecoded(null)
     }
   }
@@ -94,6 +124,7 @@ function CertificateDecoder() {
     reader.addEventListener('load', (event) => {
       setEncoded(event.target?.result as string)
       setDecoded(null)
+      setError(null)
     })
     reader.readAsText(f)
   }
@@ -101,16 +132,25 @@ function CertificateDecoder() {
   const loadExample = () => {
     setEncoded(EXAMPLE_CERT)
     setDecoded(null)
+    setError(null)
   }
 
   const clear = () => {
     setEncoded('')
     setDecoded(null)
+    setError(null)
   }
 
   useEffect(() => {
     encodedRef.current?.focus()
   }, [])
+
+  // Extract CN from subject for display
+  const displayName = decoded
+    ? decoded.subjectAltNames.length > 0
+      ? decoded.subjectAltNames.join(', ')
+      : decoded.subject
+    : ''
 
   return (
     <div>
@@ -137,56 +177,39 @@ function CertificateDecoder() {
           Clear
         </Button>
       </div>
+      {error && (
+        <div className='mt-3 p-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg'>{error}</div>
+      )}
       {decoded !== null && (
         <div className='mt-3 overflow-hidden w-full dark:bg-zinc-800 shadow dark:shadow-zinc-900 sm:rounded-lg'>
           <div className='px-4 py-5 sm:px-6'>
-            <h3 className='text-lg font-medium leading-6'>{names.join(', ')}</h3>
+            <h3 className='text-lg font-medium leading-6'>{displayName}</h3>
           </div>
           <div className='border-t border-gray-200 dark:border-zinc-700 px-4 py-5 sm:px-6'>
             <dl className='grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2'>
               <div className='sm:col-span-1'>
                 <dt className='text-sm font-medium text-gray-500'>Subject</dt>
-                <dd className='mt-1 text-sm'>
-                  {decoded.subject.attributes.map((a, i) => (
-                    <span key={`sb-${i}`} className='pr-2'>
-                      <strong>{a.shortName}</strong> = {a.value}
-                    </span>
-                  ))}
-                </dd>
+                <dd className='mt-1 text-sm'>{decoded.subject}</dd>
               </div>
               <div className='sm:col-span-1'>
                 <dt className='text-sm font-medium text-gray-500'>Issuer</dt>
-                <dd className='mt-1 text-sm'>
-                  {decoded.issuer.attributes.map((a, i) => (
-                    <span key={`is-${i}`} className='pr-2'>
-                      <strong>{a.shortName}</strong> = {a.value}
-                    </span>
-                  ))}
-                </dd>
+                <dd className='mt-1 text-sm'>{decoded.issuer}</dd>
               </div>
               <div className='sm:col-span-1'>
                 <dt className='text-sm font-medium text-gray-500'>Valid From</dt>
                 <dd className='mt-1 text-sm'>
-                  {moment(decoded.validity.notBefore).format('dddd, MMMM Do YYYY, h:mm:ss A')}
-                  <div
-                    className={cn(
-                      moment(decoded.validity.notBefore).isBefore(moment()) ? 'text-green-500' : 'text-red-500',
-                    )}
-                  >
-                    ({moment(decoded.validity.notBefore).fromNow()})
+                  {moment(decoded.notBefore).format('dddd, MMMM Do YYYY, h:mm:ss A')}
+                  <div className={cn(moment(decoded.notBefore).isBefore(moment()) ? 'text-green-500' : 'text-red-500')}>
+                    ({moment(decoded.notBefore).fromNow()})
                   </div>
                 </dd>
               </div>
               <div className='sm:col-span-1'>
                 <dt className='text-sm font-medium text-gray-500'>Valid To</dt>
                 <dd className='mt-1 text-sm'>
-                  {moment(decoded.validity.notAfter).format('dddd, MMMM Do YYYY, h:mm:ss A')}
-                  <div
-                    className={cn(
-                      moment(decoded.validity.notAfter).isAfter(moment()) ? 'text-green-500' : 'text-red-500',
-                    )}
-                  >
-                    ({moment(decoded.validity.notAfter).fromNow()})
+                  {moment(decoded.notAfter).format('dddd, MMMM Do YYYY, h:mm:ss A')}
+                  <div className={cn(moment(decoded.notAfter).isAfter(moment()) ? 'text-green-500' : 'text-red-500')}>
+                    ({moment(decoded.notAfter).fromNow()})
                   </div>
                 </dd>
               </div>
@@ -197,36 +220,19 @@ function CertificateDecoder() {
               <div className='sm:col-span-1'>
                 <dt className='text-sm font-medium text-gray-500'>Extensions</dt>
                 <dd className='mt-1 text-sm'>
-                  {(decoded.extensions as CertificateExtension[]).map((e, i) => (
-                    <ol key={`ex-${i}`}>
+                  {decoded.extensions.map((e, i) => (
+                    <div key={`ex-${i}`}>
                       <span className='font-bold'>{e.name}</span>
-                      <ul className='ml-3'>
-                        {Object.keys(e)
-                          .filter((k) => !['value', 'id', 'name'].includes(k))
-                          .map((k) => (
-                            <li key={`ex-${i}-${k}`}>
-                              {k === 'altNames' && e[k] && (
-                                <>
-                                  {k} = {e[k].map((o: { value: string }) => o.value).join(', ')}
-                                </>
-                              )}
-                              {k !== 'altNames' && (
-                                <>
-                                  {k} = {String(e[k])}
-                                </>
-                              )}
-                            </li>
-                          ))}
-                      </ul>
-                    </ol>
+                      {e.value && <span className='ml-2 text-gray-500'>{e.value}</span>}
+                    </div>
                   ))}
                 </dd>
               </div>
               <div className='sm:col-span-2'>
-                <dt className='text-sm font-medium text-gray-500'>Public Key</dt>
+                <dt className='text-sm font-medium text-gray-500'>Public Key ({decoded.publicKeyAlgorithm})</dt>
                 <dd className='mt-1 text-sm'>
                   <CodeGroup>
-                    <code>{pki.publicKeyToPem(decoded.publicKey)}</code>
+                    <code>{decoded.publicKeyPem}</code>
                   </CodeGroup>
                 </dd>
               </div>
