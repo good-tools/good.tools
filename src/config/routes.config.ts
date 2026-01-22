@@ -20,6 +20,11 @@ export const ROUTES = {
   'json-escape': '/json-escape',
   'xml-formatter': '/xml',
   'stl-repair': '/stl-repair',
+  // Image tools
+  'image-converter': '/image-converter',
+  'image-transform': '/image-transform',
+  'image-compress': '/image-compress',
+  'create-transparent': '/create-transparent',
 } as const
 
 export type ToolKey = keyof typeof ROUTES
