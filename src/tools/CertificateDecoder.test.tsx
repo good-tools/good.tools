@@ -53,6 +53,7 @@ describe('CertificateDecoder', () => {
 
       expect(cert.subject).toContain('good.tools')
       expect(cert.publicKey.algorithm.name).toBe('RSASSA-PKCS1-v1_5')
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
       expect(cert.publicKey.toString('pem')).toContain('-----BEGIN PUBLIC KEY-----')
     })
 
@@ -61,11 +62,13 @@ describe('CertificateDecoder', () => {
 
       expect(cert.subject).toContain('os:admin')
       expect(cert.publicKey.algorithm.name).toBe('Ed25519')
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
       expect(cert.publicKey.toString('pem')).toContain('-----BEGIN PUBLIC KEY-----')
     })
 
     it('should extract public key PEM from Ed25519 certificate', () => {
       const cert = new x509.X509Certificate(ED25519_CERT)
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
       const publicKeyPem = cert.publicKey.toString('pem')
 
       expect(publicKeyPem).toContain('-----BEGIN PUBLIC KEY-----')

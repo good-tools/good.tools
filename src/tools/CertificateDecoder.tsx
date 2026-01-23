@@ -181,6 +181,7 @@ function parseCertificate(pem: string): DecodedCert {
     notAfter: cert.notAfter,
     serialNumber: cert.serialNumber,
     publicKeyAlgorithm: cert.publicKey.algorithm.name,
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
     publicKeyPem: cert.publicKey.toString('pem'),
     extensions,
     subjectAltNames,
