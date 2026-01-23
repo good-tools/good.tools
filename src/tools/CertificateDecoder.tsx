@@ -50,8 +50,108 @@ interface DecodedCert {
   serialNumber: string
   publicKeyAlgorithm: string
   publicKeyPem: string
-  extensions: Array<{ name: string; value: string }>
+  extensions: Array<{ name: string; critical: boolean; details: Record<string, string | boolean> }>
   subjectAltNames: string[]
+}
+
+// OID to name mapping for extensions
+const EXTENSION_NAMES: Record<string, string> = {
+  '2.5.29.14': 'subjectKeyIdentifier',
+  '2.5.29.15': 'keyUsage',
+  '2.5.29.17': 'subjectAltName',
+  '2.5.29.19': 'basicConstraints',
+  '2.5.29.31': 'cRLDistributionPoints',
+  '2.5.29.32': 'certificatePolicies',
+  '2.5.29.35': 'authorityKeyIdentifier',
+  '2.5.29.37': 'extKeyUsage',
+  '1.3.6.1.5.5.7.1.1': 'authorityInfoAccess',
+  '1.3.6.1.4.1.11129.2.4.2': 'timestampList',
+}
+
+// OID to name mapping for extended key usage
+const EKU_NAMES: Record<string, string> = {
+  '1.3.6.1.5.5.7.3.1': 'serverAuth',
+  '1.3.6.1.5.5.7.3.2': 'clientAuth',
+  '1.3.6.1.5.5.7.3.3': 'codeSigning',
+  '1.3.6.1.5.5.7.3.4': 'emailProtection',
+  '1.3.6.1.5.5.7.3.8': 'timeStamping',
+  '1.3.6.1.5.5.7.3.9': 'OCSPSigning',
+}
+
+function parseExtensionDetails(ext: x509.Extension): Record<string, string | boolean> {
+  const details: Record<string, string | boolean> = {}
+
+  try {
+    switch (ext.type) {
+      case '2.5.29.14': {
+        // subjectKeyIdentifier
+        const ski = new x509.SubjectKeyIdentifierExtension(ext.rawData)
+        details.subjectKeyIdentifier = ski.keyId
+        break
+      }
+      case '2.5.29.35': {
+        // authorityKeyIdentifier
+        const aki = new x509.AuthorityKeyIdentifierExtension(ext.rawData)
+        if (aki.keyId) details.keyIdentifier = aki.keyId
+        break
+      }
+      case '2.5.29.17': {
+        // subjectAltName
+        const san = new x509.SubjectAlternativeNameExtension(ext.rawData)
+        const names: string[] = []
+        san.names.items.forEach((name) => names.push(name.value))
+        details.altNames = names.join(', ')
+        break
+      }
+      case '2.5.29.15': {
+        // keyUsage
+        const ku = new x509.KeyUsagesExtension(ext.rawData)
+        details.digitalSignature = !!(ku.usages & x509.KeyUsageFlags.digitalSignature)
+        details.nonRepudiation = !!(ku.usages & x509.KeyUsageFlags.nonRepudiation)
+        details.keyEncipherment = !!(ku.usages & x509.KeyUsageFlags.keyEncipherment)
+        details.dataEncipherment = !!(ku.usages & x509.KeyUsageFlags.dataEncipherment)
+        details.keyAgreement = !!(ku.usages & x509.KeyUsageFlags.keyAgreement)
+        details.keyCertSign = !!(ku.usages & x509.KeyUsageFlags.keyCertSign)
+        details.cRLSign = !!(ku.usages & x509.KeyUsageFlags.cRLSign)
+        details.encipherOnly = !!(ku.usages & x509.KeyUsageFlags.encipherOnly)
+        details.decipherOnly = !!(ku.usages & x509.KeyUsageFlags.decipherOnly)
+        break
+      }
+      case '2.5.29.37': {
+        // extKeyUsage
+        const eku = new x509.ExtendedKeyUsageExtension(ext.rawData)
+        eku.usages.forEach((usage) => {
+          const name = EKU_NAMES[String(usage)] || String(usage)
+          details[name] = true
+        })
+        break
+      }
+      case '2.5.29.19': {
+        // basicConstraints
+        const bc = new x509.BasicConstraintsExtension(ext.rawData)
+        details.cA = bc.ca
+        if (bc.pathLength !== undefined) {
+          details.pathLenConstraint = String(bc.pathLength)
+        }
+        break
+      }
+      case '1.3.6.1.5.5.7.1.1': {
+        // authorityInfoAccess
+        const aia = new x509.AuthorityInfoAccessExtension(ext.rawData)
+        if (aia.ocsp.length > 0) {
+          details.ocsp = aia.ocsp.map((n) => n.value).join(', ')
+        }
+        if (aia.caIssuers.length > 0) {
+          details.caIssuers = aia.caIssuers.map((n) => n.value).join(', ')
+        }
+        break
+      }
+    }
+  } catch {
+    // If we can't parse extension details, just return empty
+  }
+
+  return details
 }
 
 function parseCertificate(pem: string): DecodedCert {
@@ -67,23 +167,12 @@ function parseCertificate(pem: string): DecodedCert {
     })
   }
 
-  // Parse extensions
-  const extensions = cert.extensions.map((ext) => {
-    const names: Record<string, string> = {
-      '2.5.29.14': 'subjectKeyIdentifier',
-      '2.5.29.15': 'keyUsage',
-      '2.5.29.17': 'subjectAltName',
-      '2.5.29.19': 'basicConstraints',
-      '2.5.29.31': 'cRLDistributionPoints',
-      '2.5.29.32': 'certificatePolicies',
-      '2.5.29.35': 'authorityKeyIdentifier',
-      '2.5.29.37': 'extKeyUsage',
-    }
-    return {
-      name: names[ext.type] || ext.type,
-      value: ext.critical ? '(critical)' : '',
-    }
-  })
+  // Parse extensions with full details
+  const extensions = cert.extensions.map((ext) => ({
+    name: EXTENSION_NAMES[ext.type] || ext.type,
+    critical: ext.critical,
+    details: parseExtensionDetails(ext),
+  }))
 
   return {
     subject: cert.subject,
@@ -220,10 +309,17 @@ function CertificateDecoder() {
               <div className='sm:col-span-1'>
                 <dt className='text-sm font-medium text-gray-500'>Extensions</dt>
                 <dd className='mt-1 text-sm'>
-                  {decoded.extensions.map((e, i) => (
-                    <div key={`ex-${i}`}>
-                      <span className='font-bold'>{e.name}</span>
-                      {e.value && <span className='ml-2 text-gray-500'>{e.value}</span>}
+                  {decoded.extensions.map((ext, i) => (
+                    <div key={`ex-${i}`} className='mb-3'>
+                      <span className='font-bold'>{ext.name}</span>
+                      <ul className='ml-4 text-gray-600 dark:text-gray-400'>
+                        <li>critical = {String(ext.critical)}</li>
+                        {Object.entries(ext.details).map(([key, value]) => (
+                          <li key={key}>
+                            {key} = {String(value)}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   ))}
                 </dd>
