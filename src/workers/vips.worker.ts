@@ -80,7 +80,7 @@ async function initVips(): Promise<typeof Vips> {
 /**
  * Resize image based on options
  */
-function resizeImage(vips: typeof Vips, image: Vips.Image, options?: ResizeOptions): Vips.Image {
+function resizeImage(_vips: typeof Vips, image: Vips.Image, options?: ResizeOptions): Vips.Image {
   if (!options || options.mode === 'none') {
     return image
   }
