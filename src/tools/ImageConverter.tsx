@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Button } from '@/components/Button'
 import { XCircleIcon, ArrowDownTrayIcon, TrashIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
 import { filesize } from 'filesize'
@@ -36,6 +36,7 @@ function ImageConverter() {
   const previewRef = useRef<HTMLCanvasElement>(null)
   const resultPreviewRef = useRef<HTMLCanvasElement>(null)
   const requestIdRef = useRef(0)
+  const workerRef = useRef<Worker | null>(null)
 
   // Render image to canvas
   const renderToCanvas = useCallback((canvas: HTMLCanvasElement | null, buffer: ArrayBuffer, mimeType: string) => {
@@ -69,17 +70,15 @@ function ImageConverter() {
     img.src = url
   }, [])
 
-  // Create worker once using useMemo (like Wiregasm pattern)
-  const worker = useMemo(() => {
-    const w = new Worker(new URL('../workers/vips.worker.ts', import.meta.url), {
+  // Set up worker - create inside effect for React Strict Mode compatibility
+  useEffect(() => {
+    // Create worker inside effect so React Strict Mode re-creates it on double-invoke
+    const worker = new Worker(new URL('../workers/vips.worker.ts', import.meta.url), {
       type: 'module',
     })
-    w.onerror = (e) => console.error('Worker Load Error:', e)
-    return w
-  }, [])
+    worker.onerror = (e) => console.error('Worker Load Error:', e)
+    workerRef.current = worker
 
-  // Set up worker message handlers
-  useEffect(() => {
     // Store current outputFormat in ref for use in message handler
     const currentOutputFormat = outputFormat
 
@@ -130,13 +129,14 @@ function ImageConverter() {
 
     return () => {
       worker.terminate()
+      workerRef.current = null
     }
-  }, [worker, outputFormat, renderToCanvas])
+  }, [outputFormat, renderToCanvas])
 
   // Load file
   const handleFile = useCallback(
     async (file: File) => {
-      if (!ready) return
+      if (!ready || !workerRef.current) return
 
       setError(null)
       setResult(null)
@@ -156,12 +156,12 @@ function ImageConverter() {
         // Send a separate copy to worker to get image info
         const workerBuffer = buffer.slice(0)
         const id = ++requestIdRef.current
-        worker.postMessage({ type: 'load', id, buffer: workerBuffer }, [workerBuffer])
+        workerRef.current.postMessage({ type: 'load', id, buffer: workerBuffer }, [workerBuffer])
       } catch (err) {
         setError(`Failed to load image: ${err instanceof Error ? err.message : String(err)}`)
       }
     },
-    [ready, renderToCanvas, worker],
+    [ready, renderToCanvas],
   )
 
   // Handle drop
@@ -191,7 +191,7 @@ function ImageConverter() {
 
   // Convert image
   const convert = useCallback(() => {
-    if (!originalBuffer || !ready) return
+    if (!originalBuffer || !ready || !workerRef.current) return
 
     setConverting(true)
     setError(null)
@@ -199,10 +199,11 @@ function ImageConverter() {
     const id = ++requestIdRef.current
     // Send buffer copy to worker (original buffer can be neutered)
     const bufferCopy = originalBuffer.slice(0)
-    worker.postMessage({ type: 'convert', id, buffer: bufferCopy, format: outputFormat, options: { quality } }, [
-      bufferCopy,
-    ])
-  }, [originalBuffer, outputFormat, quality, ready, worker])
+    workerRef.current.postMessage(
+      { type: 'convert', id, buffer: bufferCopy, format: outputFormat, options: { quality } },
+      [bufferCopy],
+    )
+  }, [originalBuffer, outputFormat, quality, ready])
 
   // Download result
   const download = useCallback(() => {
