@@ -1,8 +1,8 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { Button } from '@/components/Button'
 import { XCircleIcon, ArrowDownTrayIcon, TrashIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
 import { filesize } from 'filesize'
-import type { ImageInfo } from '@/workers/vips.worker'
+import type { ImageInfo, ResizeMode, ResizeOptions } from '@/workers/vips.worker'
 
 type OutputFormat = 'jpeg' | 'png' | 'webp' | 'avif'
 
@@ -16,6 +16,7 @@ function ImageConverter() {
   // File state
   const [fileName, setFileName] = useState<string | null>(null)
   const [originalBuffer, setOriginalBuffer] = useState<ArrayBuffer | null>(null)
+  const [originalMimeType, setOriginalMimeType] = useState<string>('image/png')
   const [imageInfo, setImageInfo] = useState<ImageInfo | null>(null)
   const [originalSize, setOriginalSize] = useState<number>(0)
   const [result, setResult] = useState<ConversionResult | null>(null)
@@ -30,6 +31,12 @@ function ImageConverter() {
   // Options
   const [outputFormat, setOutputFormat] = useState<OutputFormat>('webp')
   const [quality, setQuality] = useState(80)
+
+  // Resize options
+  const [resizeMode, setResizeMode] = useState<ResizeMode>('none')
+  const [resizePercentage, setResizePercentage] = useState(50)
+  const [resizeWidth, setResizeWidth] = useState<number | ''>('')
+  const [resizeHeight, setResizeHeight] = useState<number | ''>('')
 
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -70,6 +77,65 @@ function ImageConverter() {
     img.src = url
   }, [])
 
+  // Store outputFormat in a ref so worker message handler can access current value
+  const outputFormatRef = useRef(outputFormat)
+  useEffect(() => {
+    outputFormatRef.current = outputFormat
+  }, [outputFormat])
+
+  // Calculate preview dimensions based on resize settings
+  const previewDimensions = useMemo(() => {
+    if (!imageInfo) return null
+
+    const { width, height } = imageInfo
+    const aspectRatio = width / height
+
+    switch (resizeMode) {
+      case 'none':
+        return { width, height }
+      case 'percentage': {
+        const scale = resizePercentage / 100
+        return {
+          width: Math.round(width * scale),
+          height: Math.round(height * scale),
+        }
+      }
+      case 'width': {
+        const targetWidth = resizeWidth || width
+        return {
+          width: targetWidth,
+          height: Math.round(targetWidth / aspectRatio),
+        }
+      }
+      case 'height': {
+        const targetHeight = resizeHeight || height
+        return {
+          width: Math.round(targetHeight * aspectRatio),
+          height: targetHeight,
+        }
+      }
+      case 'dimensions':
+        return {
+          width: resizeWidth || width,
+          height: resizeHeight || height,
+        }
+      default:
+        return { width, height }
+    }
+  }, [imageInfo, resizeMode, resizePercentage, resizeWidth, resizeHeight])
+
+  // Build resize options for the worker
+  const buildResizeOptions = useCallback((): ResizeOptions | undefined => {
+    if (resizeMode === 'none') return undefined
+
+    return {
+      mode: resizeMode,
+      percentage: resizeMode === 'percentage' ? resizePercentage : undefined,
+      width: resizeMode === 'width' || resizeMode === 'dimensions' ? resizeWidth || undefined : undefined,
+      height: resizeMode === 'height' || resizeMode === 'dimensions' ? resizeHeight || undefined : undefined,
+    }
+  }, [resizeMode, resizePercentage, resizeWidth, resizeHeight])
+
   // Set up worker - create inside effect for React Strict Mode compatibility
   useEffect(() => {
     // Create worker inside effect so React Strict Mode re-creates it on double-invoke
@@ -78,9 +144,6 @@ function ImageConverter() {
     })
     worker.onerror = (e) => console.error('Worker Load Error:', e)
     workerRef.current = worker
-
-    // Store current outputFormat in ref for use in message handler
-    const currentOutputFormat = outputFormat
 
     worker.onmessage = (event: MessageEvent) => {
       const {
@@ -115,15 +178,13 @@ function ImageConverter() {
         }
       } else if (type === 'converted') {
         const buffer = data as ArrayBuffer
+        const currentFormat = outputFormatRef.current
         setResult({
           buffer,
-          format: currentOutputFormat,
+          format: currentFormat,
           size: buffer.byteLength,
         })
         setConverting(false)
-        // Render result preview
-        const mimeType = currentOutputFormat === 'jpeg' ? 'image/jpeg' : `image/${currentOutputFormat}`
-        renderToCanvas(resultPreviewRef.current, buffer, mimeType)
       }
     }
 
@@ -131,7 +192,22 @@ function ImageConverter() {
       worker.terminate()
       workerRef.current = null
     }
-  }, [outputFormat, renderToCanvas])
+  }, [])
+
+  // Render original preview when buffer changes and canvas is mounted
+  useEffect(() => {
+    if (originalBuffer && previewRef.current) {
+      renderToCanvas(previewRef.current, originalBuffer, originalMimeType)
+    }
+  }, [originalBuffer, originalMimeType, renderToCanvas])
+
+  // Render result preview when result changes and canvas is mounted
+  useEffect(() => {
+    if (result && resultPreviewRef.current) {
+      const mimeType = result.format === 'jpeg' ? 'image/jpeg' : `image/${result.format}`
+      renderToCanvas(resultPreviewRef.current, result.buffer, mimeType)
+    }
+  }, [result, renderToCanvas])
 
   // Load file
   const handleFile = useCallback(
@@ -146,12 +222,11 @@ function ImageConverter() {
         const buffer = await file.arrayBuffer()
         // Store a copy for later use
         const storedBuffer = buffer.slice(0)
-        setOriginalBuffer(storedBuffer)
-        setOriginalSize(storedBuffer.byteLength)
-
-        // Render original preview directly (use stored buffer copy)
         const mimeType = file.type || 'image/png'
-        renderToCanvas(previewRef.current, storedBuffer, mimeType)
+
+        setOriginalBuffer(storedBuffer)
+        setOriginalMimeType(mimeType)
+        setOriginalSize(storedBuffer.byteLength)
 
         // Send a separate copy to worker to get image info
         const workerBuffer = buffer.slice(0)
@@ -161,7 +236,7 @@ function ImageConverter() {
         setError(`Failed to load image: ${err instanceof Error ? err.message : String(err)}`)
       }
     },
-    [ready, renderToCanvas],
+    [ready],
   )
 
   // Handle drop
@@ -199,11 +274,12 @@ function ImageConverter() {
     const id = ++requestIdRef.current
     // Send buffer copy to worker (original buffer can be neutered)
     const bufferCopy = originalBuffer.slice(0)
+    const resizeOptions = buildResizeOptions()
     workerRef.current.postMessage(
-      { type: 'convert', id, buffer: bufferCopy, format: outputFormat, options: { quality } },
+      { type: 'convert', id, buffer: bufferCopy, format: outputFormat, options: { quality, resize: resizeOptions } },
       [bufferCopy],
     )
-  }, [originalBuffer, outputFormat, quality, ready])
+  }, [originalBuffer, outputFormat, quality, ready, buildResizeOptions])
 
   // Download result
   const download = useCallback(() => {
@@ -226,10 +302,15 @@ function ImageConverter() {
   const clear = useCallback(() => {
     setFileName(null)
     setOriginalBuffer(null)
+    setOriginalMimeType('image/png')
     setImageInfo(null)
     setOriginalSize(0)
     setResult(null)
     setError(null)
+    setResizeMode('none')
+    setResizePercentage(50)
+    setResizeWidth('')
+    setResizeHeight('')
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -373,6 +454,128 @@ function ImageConverter() {
               </div>
             </div>
           )}
+
+          {/* Resize options */}
+          <div className='mb-4'>
+            <label className='block text-sm font-medium mb-2'>Resize</label>
+            <div className='flex flex-wrap gap-2 mb-3'>
+              {[
+                { mode: 'none' as const, label: 'None' },
+                { mode: 'percentage' as const, label: '%' },
+                { mode: 'width' as const, label: 'Width' },
+                { mode: 'height' as const, label: 'Height' },
+                { mode: 'dimensions' as const, label: 'Custom' },
+              ].map(({ mode, label }) => (
+                <button
+                  key={mode}
+                  onClick={() => setResizeMode(mode)}
+                  className={`px-3 py-1.5 text-sm rounded-md transition-colors font-medium ${
+                    resizeMode === mode
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-zinc-600'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {/* Percentage slider */}
+            {resizeMode === 'percentage' && (
+              <div>
+                <label className='block text-xs text-gray-500 dark:text-gray-400 mb-1'>
+                  Scale: <span className='font-mono'>{resizePercentage}%</span>
+                </label>
+                <input
+                  type='range'
+                  min={1}
+                  max={200}
+                  value={resizePercentage}
+                  onChange={(e) => setResizePercentage(parseInt(e.target.value))}
+                  className='w-full h-2 bg-gray-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-indigo-600'
+                />
+                <div className='flex justify-between text-xs text-gray-400 mt-1'>
+                  <span>1%</span>
+                  <span>100%</span>
+                  <span>200%</span>
+                </div>
+              </div>
+            )}
+
+            {/* Width input */}
+            {resizeMode === 'width' && (
+              <div>
+                <label className='block text-xs text-gray-500 dark:text-gray-400 mb-1'>Target Width (px)</label>
+                <input
+                  type='number'
+                  min={1}
+                  placeholder={imageInfo?.width.toString() || ''}
+                  value={resizeWidth}
+                  onChange={(e) => setResizeWidth(e.target.value ? parseInt(e.target.value) : '')}
+                  className='w-full px-3 py-2 text-sm border border-gray-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500'
+                />
+                <p className='text-xs text-gray-400 mt-1'>Height will be calculated to maintain aspect ratio</p>
+              </div>
+            )}
+
+            {/* Height input */}
+            {resizeMode === 'height' && (
+              <div>
+                <label className='block text-xs text-gray-500 dark:text-gray-400 mb-1'>Target Height (px)</label>
+                <input
+                  type='number'
+                  min={1}
+                  placeholder={imageInfo?.height.toString() || ''}
+                  value={resizeHeight}
+                  onChange={(e) => setResizeHeight(e.target.value ? parseInt(e.target.value) : '')}
+                  className='w-full px-3 py-2 text-sm border border-gray-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500'
+                />
+                <p className='text-xs text-gray-400 mt-1'>Width will be calculated to maintain aspect ratio</p>
+              </div>
+            )}
+
+            {/* Custom dimensions */}
+            {resizeMode === 'dimensions' && (
+              <div className='flex gap-3'>
+                <div className='flex-1'>
+                  <label className='block text-xs text-gray-500 dark:text-gray-400 mb-1'>Width (px)</label>
+                  <input
+                    type='number'
+                    min={1}
+                    placeholder={imageInfo?.width.toString() || ''}
+                    value={resizeWidth}
+                    onChange={(e) => setResizeWidth(e.target.value ? parseInt(e.target.value) : '')}
+                    className='w-full px-3 py-2 text-sm border border-gray-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500'
+                  />
+                </div>
+                <div className='flex items-end pb-2 text-gray-400'>×</div>
+                <div className='flex-1'>
+                  <label className='block text-xs text-gray-500 dark:text-gray-400 mb-1'>Height (px)</label>
+                  <input
+                    type='number'
+                    min={1}
+                    placeholder={imageInfo?.height.toString() || ''}
+                    value={resizeHeight}
+                    onChange={(e) => setResizeHeight(e.target.value ? parseInt(e.target.value) : '')}
+                    className='w-full px-3 py-2 text-sm border border-gray-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500'
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Preview dimensions */}
+            {resizeMode !== 'none' && previewDimensions && imageInfo && (
+              <div className='mt-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-zinc-900 px-2 py-1 rounded'>
+                Output:{' '}
+                <span className='font-mono'>
+                  {previewDimensions.width}×{previewDimensions.height}
+                </span>{' '}
+                <span className='text-gray-400'>
+                  (original: {imageInfo.width}×{imageInfo.height})
+                </span>
+              </div>
+            )}
+          </div>
 
           {/* Action buttons */}
           <div className='flex items-center justify-between'>

@@ -24,9 +24,19 @@ export interface VipsWorkerResponse {
 
 export type OutputFormat = 'jpeg' | 'png' | 'webp' | 'avif'
 
+export type ResizeMode = 'none' | 'percentage' | 'width' | 'height' | 'dimensions'
+
+export interface ResizeOptions {
+  mode: ResizeMode
+  percentage?: number
+  width?: number
+  height?: number
+}
+
 export interface ConvertOptions {
   quality?: number
   compressionLevel?: number
+  resize?: ResizeOptions
 }
 
 export interface ImageInfo {
@@ -68,6 +78,52 @@ async function initVips(): Promise<typeof Vips> {
 }
 
 /**
+ * Resize image based on options
+ */
+function resizeImage(vips: typeof Vips, image: Vips.Image, options?: ResizeOptions): Vips.Image {
+  if (!options || options.mode === 'none') {
+    return image
+  }
+
+  const originalWidth = image.width
+  const originalHeight = image.height
+  const aspectRatio = originalWidth / originalHeight
+
+  let targetWidth = originalWidth
+  let targetHeight = originalHeight
+
+  if (options.mode === 'percentage') {
+    const scale = (options.percentage || 100) / 100
+    targetWidth = Math.round(originalWidth * scale)
+    targetHeight = Math.round(originalHeight * scale)
+  } else if (options.mode === 'width') {
+    targetWidth = options.width || originalWidth
+    targetHeight = Math.round(targetWidth / aspectRatio)
+  } else if (options.mode === 'height') {
+    targetHeight = options.height || originalHeight
+    targetWidth = Math.round(targetHeight * aspectRatio)
+  } else if (options.mode === 'dimensions') {
+    targetWidth = options.width || originalWidth
+    targetHeight = options.height || originalHeight
+  }
+
+  // Ensure minimum dimensions
+  targetWidth = Math.max(1, targetWidth)
+  targetHeight = Math.max(1, targetHeight)
+
+  // No resize needed if same dimensions
+  if (targetWidth === originalWidth && targetHeight === originalHeight) {
+    return image
+  }
+
+  // Use resize with scale factor
+  const hScale = targetWidth / originalWidth
+  const vScale = targetHeight / originalHeight
+
+  return image.resize(hScale, { vscale: vScale })
+}
+
+/**
  * Convert image to specified format
  */
 function convertFormat(
@@ -77,19 +133,25 @@ function convertFormat(
   options: ConvertOptions = {},
 ): Uint8Array {
   const data = new Uint8Array(imageData)
-  const image = vips.Image.newFromBuffer(data)
+  let image = vips.Image.newFromBuffer(data)
 
-  if (format === 'jpeg') {
-    return image.jpegsaveBuffer({ Q: options.quality || 85 })
-  } else if (format === 'png') {
-    return image.pngsaveBuffer({ compression: options.compressionLevel || 6 })
-  } else if (format === 'webp') {
-    return image.webpsaveBuffer({ Q: options.quality || 85 })
-  } else if (format === 'avif') {
-    return image.heifsaveBuffer({ Q: options.quality || 50, compression: 'av1' })
+  // Apply resize if requested
+  image = resizeImage(vips, image, options.resize)
+
+  switch (format) {
+    case 'jpeg':
+      return image.jpegsaveBuffer({ Q: options.quality || 85 })
+    case 'png':
+      return image.pngsaveBuffer({ compression: options.compressionLevel || 6 })
+    case 'webp':
+      return image.webpsaveBuffer({ Q: options.quality || 85 })
+    case 'avif':
+      return image.heifsaveBuffer({ Q: options.quality || 50, compression: 'av1' })
+    default: {
+      const _exhaustiveCheck: never = format
+      throw new Error(`Unsupported format: ${String(_exhaustiveCheck)}`)
+    }
   }
-
-  throw new Error(`Unsupported format: ${format}`)
 }
 
 /**
