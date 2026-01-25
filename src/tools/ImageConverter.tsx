@@ -4,7 +4,7 @@ import { XCircleIcon, ArrowDownTrayIcon, TrashIcon, DocumentTextIcon } from '@he
 import { filesize } from 'filesize'
 import type { ImageInfo, ResizeMode, ResizeOptions } from '@/workers/vips.worker'
 
-type OutputFormat = 'jpeg' | 'png' | 'webp' | 'avif'
+type OutputFormat = 'jpeg' | 'png' | 'webp'
 
 interface ConversionResult {
   buffer: ArrayBuffer
@@ -370,7 +370,7 @@ function ImageConverter() {
                 </svg>
               </div>
               <p className='text-gray-600 dark:text-gray-400'>Drop an image here, or click to select</p>
-              <p className='text-xs text-gray-400 dark:text-gray-600 mt-1'>Supports JPEG, PNG, WebP, AVIF</p>
+              <p className='text-xs text-gray-400 dark:text-gray-600 mt-1'>Supports JPEG, PNG, WebP</p>
             </>
           )}
         </div>
@@ -418,7 +418,7 @@ function ImageConverter() {
           <div className='mb-4'>
             <label className='block text-sm font-medium mb-2'>Output Format</label>
             <div className='flex flex-wrap gap-2'>
-              {(['jpeg', 'png', 'webp', 'avif'] as const).map((fmt) => (
+              {(['jpeg', 'png', 'webp'] as const).map((fmt) => (
                 <button
                   key={fmt}
                   onClick={() => setOutputFormat(fmt)}
@@ -435,7 +435,7 @@ function ImageConverter() {
           </div>
 
           {/* Quality slider (for lossy formats) */}
-          {(outputFormat === 'jpeg' || outputFormat === 'webp' || outputFormat === 'avif') && (
+          {(outputFormat === 'jpeg' || outputFormat === 'webp') && (
             <div className='mb-4'>
               <label className='block text-sm font-medium mb-2'>
                 Quality: <span className='font-mono'>{quality}%</span>

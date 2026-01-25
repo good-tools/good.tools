@@ -22,7 +22,7 @@ export interface VipsWorkerResponse {
   status?: string
 }
 
-export type OutputFormat = 'jpeg' | 'png' | 'webp' | 'avif'
+export type OutputFormat = 'jpeg' | 'png' | 'webp'
 
 export type ResizeMode = 'none' | 'percentage' | 'width' | 'height' | 'dimensions'
 
@@ -67,7 +67,12 @@ async function initVips(): Promise<typeof Vips> {
 
     // Dynamic import for vips
     const vips = await import('wasm-vips')
-    const instance = await vips.default()
+    // Configure wasm-vips to not load optional dynamic modules (vips-jxl, vips-heif)
+    // These modules require additional WASM files that may not be bundled
+    const instance = await vips.default({
+      // Disable dynamic module loading to prevent 404 errors for vips-jxl.wasm and vips-heif.wasm
+      dynamicLibraries: [],
+    } as Parameters<typeof vips.default>[0])
 
     vipsInstance = instance
     postMessage({ type: 'status', status: 'Ready' } as VipsWorkerResponse)
@@ -145,8 +150,6 @@ function convertFormat(
       return image.pngsaveBuffer({ compression: options.compressionLevel || 6 })
     case 'webp':
       return image.webpsaveBuffer({ Q: options.quality || 85 })
-    case 'avif':
-      return image.heifsaveBuffer({ Q: options.quality || 50, compression: 'av1' })
     default: {
       const _exhaustiveCheck: never = format
       throw new Error(`Unsupported format: ${String(_exhaustiveCheck)}`)

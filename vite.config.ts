@@ -88,10 +88,20 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
+    headers: {
+      // Required for SharedArrayBuffer (wasm-vips multi-threading)
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+    },
   },
 
   // Preview server configuration
   preview: {
     port: 3000,
+    headers: {
+      // Required for SharedArrayBuffer (wasm-vips multi-threading)
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+    },
   },
 });
