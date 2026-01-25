@@ -88,19 +88,10 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
-    // Enable SharedArrayBuffer for wasm-vips (requires cross-origin isolation)
-    headers: {
-      'Cross-Origin-Opener-Policy': 'same-origin',
-      'Cross-Origin-Embedder-Policy': 'require-corp',
-    },
   },
 
   // Preview server configuration
   preview: {
     port: 3000,
-    headers: {
-      'Cross-Origin-Opener-Policy': 'same-origin',
-      'Cross-Origin-Embedder-Policy': 'require-corp',
-    },
   },
 });

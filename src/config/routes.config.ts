@@ -24,7 +24,6 @@ export const ROUTES = {
   'image-converter': '/image-converter',
   'image-transform': '/image-transform',
   'image-compress': '/image-compress',
-  'create-transparent': '/create-transparent',
 } as const
 
 export type ToolKey = keyof typeof ROUTES
