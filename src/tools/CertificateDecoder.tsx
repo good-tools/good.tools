@@ -50,7 +50,7 @@ interface DecodedCert {
   serialNumber: string
   publicKeyAlgorithm: string
   publicKeyPem: string
-  extensions: Array<{ name: string; critical: boolean; details: Record<string, string | boolean> }>
+  extensions: Array<{ name: string; oid: string; critical: boolean; details: Record<string, string | boolean> }>
   subjectAltNames: string[]
 }
 
@@ -170,6 +170,7 @@ function parseCertificate(pem: string): DecodedCert {
   // Parse extensions with full details
   const extensions = cert.extensions.map((ext) => ({
     name: EXTENSION_NAMES[ext.type] || ext.type,
+    oid: ext.type,
     critical: ext.critical,
     details: parseExtensionDetails(ext),
   }))
@@ -312,7 +313,9 @@ function CertificateDecoder() {
                 <dd className='mt-1 text-sm'>
                   {decoded.extensions.map((ext, i) => (
                     <div key={`ex-${i}`} className='mb-3'>
-                      <span className='font-bold'>{ext.name}</span>
+                      <span className='font-bold'>
+                        {ext.name} {ext.name !== ext.oid && <span className='text-gray-500'>({ext.oid})</span>}
+                      </span>
                       <ul className='ml-4 text-gray-600 dark:text-gray-400'>
                         <li>critical = {String(ext.critical)}</li>
                         {Object.entries(ext.details).map(([key, value]) => (
