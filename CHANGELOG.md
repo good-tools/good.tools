@@ -1,3 +1,10 @@
+## [1.23.1](https://github.com/good-tools/good.tools/compare/v1.23.0...v1.23.1) (2026-01-25)
+
+
+### Bug Fixes
+
+* support non-RSA certificates in decoder (EC, Ed25519, etc.) ([#7](https://github.com/good-tools/good.tools/issues/7)) ([3c44b17](https://github.com/good-tools/good.tools/commit/3c44b1793ffcdc121ca7316f4b6d95b7b1d9f9a8))
+
 # [1.23.0](https://github.com/good-tools/good.tools/compare/v1.22.0...v1.23.0) (2026-01-19)
 
 
