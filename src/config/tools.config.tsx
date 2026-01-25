@@ -69,8 +69,8 @@ export const tools: Tool[] = [
     online: false,
     dependencies: [
       {
-        name: 'node-forge',
-        url: 'https://www.npmjs.com/package/node-forge',
+        name: '@peculiar/x509',
+        url: 'https://www.npmjs.com/package/@peculiar/x509',
       },
     ],
   },
