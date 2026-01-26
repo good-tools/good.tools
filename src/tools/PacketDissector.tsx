@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import FileButton from '@/components/FileButton'
 import TextInput from '@/components/TextInput'
 import { Buffer } from 'buffer'
@@ -198,16 +198,7 @@ const applyPreferencesToWorker = (worker: Worker): Promise<void> =>
   })
 
 function PacketDissector() {
-  const worker = useMemo(() => {
-    const w = new Worker(new URL('../workers/wiregasm.worker.js', import.meta.url), {
-      type: 'module',
-    })
-
-    // Good practice: Add an error listener immediately
-    w.onerror = (e) => console.error('Worker Load Error:', e)
-
-    return w
-  }, [])
+  const workerRef = useRef<Worker | null>(null)
 
   const queryClient = new QueryClient()
   const [version, setVersion] = useState<string | null>(null)
@@ -251,9 +242,9 @@ function PacketDissector() {
       clear()
       setSummary(null)
       setFinishedProcessing(false)
-      worker.postMessage({ type: 'process-data', name: name, data: data })
+      workerRef.current?.postMessage({ type: 'process-data', name: name, data: data })
     },
-    [clear, worker],
+    [clear],
   )
 
   const loadExample = useMemo(
@@ -324,34 +315,41 @@ function PacketDissector() {
   )
 
   useEffect(() => {
-    if (!initialized) {
+    if (!initialized || !workerRef.current) {
       return
     }
 
-    checkFilter(worker, filter)
+    checkFilter(workerRef.current, filter)
       .then(() => {
         setFilterError(null)
       })
       .catch((e) => {
         setFilterError(String(e))
       })
-  }, [filter, worker, initialized])
+  }, [filter, initialized])
 
   useEffect(() => {
-    if (!initialized) {
+    if (!initialized || !workerRef.current) {
       return
     }
 
-    getVersion(worker)
+    getVersion(workerRef.current)
       .then((version) => {
         setVersion(version)
       })
       .catch((_e) => {
         // Silent error
       })
-  }, [worker, initialized])
+  }, [initialized])
 
   useEffect(() => {
+    // Create worker inside effect so React Strict Mode re-creates it on double-invoke
+    const worker = new Worker(new URL('../workers/wiregasm.worker.js', import.meta.url), {
+      type: 'module',
+    })
+    worker.onerror = (e) => console.error('Worker Load Error:', e)
+    workerRef.current = worker
+
     clear()
     if (window.Worker) {
       worker.onmessage = (e: MessageEvent<WorkerMessageData>) => {
@@ -391,35 +389,36 @@ function PacketDissector() {
 
     return () => {
       worker.terminate()
+      workerRef.current = null
     }
-  }, [worker, preparePositions, clear])
+  }, [preparePositions, clear])
 
   useEffect(() => {
-    if (finishedProcessing && selectedFrame >= 1 && selectedFrame <= totalFrames) {
-      worker.postMessage({ type: 'select', number: selectedFrame })
+    if (finishedProcessing && selectedFrame >= 1 && selectedFrame <= totalFrames && workerRef.current) {
+      workerRef.current.postMessage({ type: 'select', number: selectedFrame })
     }
-  }, [selectedFrame, totalFrames, worker, finishedProcessing, dissectionNonce])
+  }, [selectedFrame, totalFrames, finishedProcessing, dissectionNonce])
 
   const process = useMemo(
     () => (f: File) => {
       clear()
       setFinishedProcessing(false)
-      worker.postMessage({ type: 'process', file: f })
+      workerRef.current?.postMessage({ type: 'process', file: f })
     },
-    [worker, clear],
+    [clear],
   )
 
   const fetchPackets = useMemo(
     () => async (filter: string, skip: number, limit: number) => {
-      if (initialized && finishedProcessing) {
-        const res = await getFrames(worker, filter, skip, limit)
+      if (initialized && finishedProcessing && workerRef.current) {
+        const res = await getFrames(workerRef.current, filter, skip, limit)
         setMatchedFrames(res.matched)
         return res.frames
       }
 
       return []
     },
-    [worker, initialized, finishedProcessing],
+    [initialized, finishedProcessing],
   )
 
   const loadFile = useMemo(
@@ -437,39 +436,44 @@ function PacketDissector() {
 
   const loadModuleTree = useMemo(
     () => async () => {
-      return await loadModuleTreeFromWorker(worker)
+      if (!workerRef.current) throw new Error('Worker not initialized')
+      return await loadModuleTreeFromWorker(workerRef.current)
     },
-    [worker],
+    [],
   )
 
   const loadPreferences = useMemo(
     () => async (name: string) => {
-      return await loadPreferencesFromWorker(worker, name)
+      if (!workerRef.current) throw new Error('Worker not initialized')
+      return await loadPreferencesFromWorker(workerRef.current, name)
     },
-    [worker],
+    [],
   )
 
   const uploadFile = useMemo(
     () => async (file: File) => {
-      return await uploadFileToWorker(worker, file)
+      if (!workerRef.current) throw new Error('Worker not initialized')
+      return await uploadFileToWorker(workerRef.current, file)
     },
-    [worker],
+    [],
   )
 
   const updatePreference = useMemo(
     () => async (module: string, key: string, value: string) => {
-      return await updatePreferenceToWorker(worker, module, key, value)
+      if (!workerRef.current) throw new Error('Worker not initialized')
+      return await updatePreferenceToWorker(workerRef.current, module, key, value)
     },
-    [worker],
+    [],
   )
 
   const applyPreferences = useMemo(
     () => async () => {
-      const res = await applyPreferencesToWorker(worker)
-      worker.postMessage({ type: 'reload-quick', name: fileName })
+      if (!workerRef.current) throw new Error('Worker not initialized')
+      const res = await applyPreferencesToWorker(workerRef.current)
+      workerRef.current.postMessage({ type: 'reload-quick', name: fileName })
       return res
     },
-    [worker, fileName],
+    [fileName],
   )
 
   return (

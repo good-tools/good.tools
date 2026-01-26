@@ -1,4 +1,4 @@
-import { Layers, Code, Binary, Shield, Globe, Box, type LucideIcon } from 'lucide-react'
+import { Layers, Code, Binary, Shield, Globe, Box, Image, type LucideIcon } from 'lucide-react'
 import { CATEGORIES, type CategoryName, type Tool, type ToolCategory } from '@/types/tool.types'
 
 // Re-export for convenience
@@ -14,6 +14,7 @@ export const categories: ToolCategory[] = [
   { name: CATEGORIES.SECURITY, icon: Shield },
   { name: CATEGORIES.NETWORK, icon: Globe },
   { name: CATEGORIES['3D'], icon: Box },
+  { name: CATEGORIES.IMAGE, icon: Image },
 ]
 
 /**
