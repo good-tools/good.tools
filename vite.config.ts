@@ -2,6 +2,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
+import wasm from 'vite-plugin-wasm'
+import topLevelAwait from 'vite-plugin-top-level-await'
 
 
 
@@ -9,6 +11,8 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 export default defineConfig({
   plugins: [
     // mockWsPlugin,
+    wasm(),
+    topLevelAwait(),
     nodePolyfills(),
     react()
   ],
@@ -76,16 +80,28 @@ export default defineConfig({
       "pako",
       "buffer"
     ],
+    // Exclude wasm-vips so it can load its WASM file correctly
+    exclude: ["wasm-vips"],
   },
 
   // Server configuration
   server: {
     port: 3000,
     open: true,
+    headers: {
+      // Required for SharedArrayBuffer (wasm-vips multi-threading)
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+    },
   },
 
   // Preview server configuration
   preview: {
     port: 3000,
+    headers: {
+      // Required for SharedArrayBuffer (wasm-vips multi-threading)
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+    },
   },
 });

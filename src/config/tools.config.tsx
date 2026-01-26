@@ -16,6 +16,7 @@ import {
   Code2,
   Quote,
   Box,
+  ImageIcon,
 } from 'lucide-react'
 import { ROUTES } from './routes.config'
 import { CATEGORIES, type Tool } from '@/types/tool.types'
@@ -314,6 +315,22 @@ export const tools: Tool[] = [
       {
         name: 'react-inspector',
         url: 'https://www.npmjs.com/package/react-inspector',
+      },
+    ],
+  },
+  {
+    title: 'Image Converter',
+    href: ROUTES['image-converter'],
+    description: 'Convert images between formats: JPEG, PNG, WebP, AVIF with quality control',
+    icon: ImageIcon,
+    categories: [CATEGORIES.IMAGE],
+    searchTags: ['image', 'convert', 'jpeg', 'png', 'webp', 'avif', 'format', 'photo'],
+    component: React.lazy(() => import('@/tools/ImageConverter')),
+    online: false,
+    dependencies: [
+      {
+        name: 'wasm-vips',
+        url: 'https://www.npmjs.com/package/wasm-vips',
       },
     ],
   },
