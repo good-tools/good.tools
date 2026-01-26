@@ -1,3 +1,10 @@
+## [1.23.2](https://github.com/good-tools/good.tools/compare/v1.23.1...v1.23.2) (2026-01-26)
+
+
+### Bug Fixes
+
+* add image converter ([#8](https://github.com/good-tools/good.tools/issues/8)) ([828cf69](https://github.com/good-tools/good.tools/commit/828cf69c832516b95f3733a8399b52e0b79000fa))
+
 ## [1.23.1](https://github.com/good-tools/good.tools/compare/v1.23.0...v1.23.1) (2026-01-25)
 
 
