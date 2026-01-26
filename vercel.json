@@ -1,7 +1,7 @@
 {
   "headers": [
     {
-      "source": "/assets/vips(.*)",
+      "source": "/(.*)",
       "headers": [
         {
           "key": "Cross-Origin-Opener-Policy",
