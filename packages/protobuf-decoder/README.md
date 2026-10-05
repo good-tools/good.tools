@@ -33,7 +33,7 @@ const buf = Buffer.from([
 
 const decoded = decode(buf);
 const simplified = simplify(decoded);
-const serialized = JSON.stringify(val);
+const serialized = JSON.stringify(simplified);
 console.log(serialized)
 ```
 

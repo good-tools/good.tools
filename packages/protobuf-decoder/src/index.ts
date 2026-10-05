@@ -50,12 +50,13 @@ class Decoder {
     return this.data.readUInt8(this.idx++)
   }
 
+  // bigint ops: Number(x) >> 3 truncates to 32 bits and turns tags >= 2^31 negative
   getFieldNumber(value: bigint): number {
-    return Number(value) >> 3
+    return Number(value >> 3n)
   }
 
   getWireType(value: bigint): WireType {
-    return Number(value) & 7
+    return Number(value & 7n)
   }
 
   nextVarInt(): bigint {
@@ -230,6 +231,12 @@ export function possibleValues(value: Decoded): ValueRepresentation[] {
         })
         break
       case 'fixed64':
+        res.push({
+          type: t,
+          value: (value.value as Buffer).readBigUInt64LE(0),
+        })
+        break
+      case 'sfixed64':
         res.push({
           type: t,
           value: (value.value as Buffer).readBigInt64LE(0),
