@@ -1,7 +1,9 @@
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
+import { gzipSync } from 'node:zlib'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import pkg from './package.json' with { type: 'json' }
 
@@ -11,8 +13,34 @@ const crossOriginIsolation = {
   'Cross-Origin-Embedder-Policy': 'require-corp',
 }
 
+/**
+ * `import url from 'x.wasm?gzip'` emits the file gzipped (Cloudflare rejects assets over 25 MiB) and returns its URL.
+ * The page inflates it (see fetchInflated). The dev server serves it as is.
+ */
+function gzipAsset(): Plugin {
+  let dev = false
+  return {
+    name: 'gzip-asset',
+    enforce: 'pre',
+    configResolved: (config) => {
+      dev = config.command === 'serve'
+    },
+    load(id) {
+      if (!id.endsWith('?gzip')) return
+      const file = id.slice(0, -'?gzip'.length)
+      if (dev) return `export default ${JSON.stringify(`/@fs${file}`)}`
+      const ref = this.emitFile({
+        type: 'asset',
+        name: `${path.basename(file)}.gz`,
+        source: gzipSync(readFileSync(file), { level: 9 }),
+      })
+      return `export default import.meta.ROLLUP_FILE_URL_${ref}`
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [tailwindcss(), nodePolyfills({ include: ['buffer'], globals: { Buffer: true } }), react()],
+  plugins: [gzipAsset(), tailwindcss(), nodePolyfills({ include: ['buffer'], globals: { Buffer: true } }), react()],
 
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
@@ -53,7 +81,8 @@ export default defineConfig({
 
   optimizeDeps: {
     // wasm-vips must load its own .wasm next to the JS file
-    exclude: ['wasm-vips'],
+    // ffmpeg.wasm spawns its worker from its own files
+    exclude: ['wasm-vips', '@ffmpeg/ffmpeg'],
   },
 
   server: { port: 3000, headers: crossOriginIsolation },

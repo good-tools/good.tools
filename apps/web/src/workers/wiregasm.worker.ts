@@ -11,20 +11,11 @@ import { vectorToArray, Wiregasm, type WiregasmLoader } from '@goodtools/wiregas
 import loadWiregasm from '@goodtools/wiregasm/dist/wiregasm'
 import dataPath from '@goodtools/wiregasm/dist/wiregasm.data.gz?url'
 import wasmPath from '@goodtools/wiregasm/dist/wiregasm.wasm.gz?url'
+import { fetchInflated } from '@/lib/utils'
 
 declare const self: DedicatedWorkerGlobalScope
 
 const wg = new Wiregasm()
-
-/** Fetches a .gz asset, inflating it unless the server already did (Content-Encoding: gzip). */
-async function fetchInflated(path: string): Promise<ArrayBuffer> {
-  const res = await fetch(new URL(path, self.location.href))
-  if (!res.ok) throw new Error(`Failed to download ${path}: HTTP ${res.status}`)
-  const buf = await res.arrayBuffer()
-  const head = new Uint8Array(buf, 0, 2)
-  if (head[0] !== 0x1f || head[1] !== 0x8b) return buf
-  return new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer()
-}
 
 const status = (message: string) => self.postMessage({ event: 'status', message })
 

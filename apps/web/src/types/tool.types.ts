@@ -8,6 +8,7 @@ export const CATEGORIES = {
   NETWORK: 'Network',
   '3D': '3D & CAD',
   IMAGE: 'Image',
+  MEDIA: 'Media',
   PDF: 'PDF',
 } as const
 
