@@ -9,6 +9,13 @@ on:
     workflows: [Test]
     branches: [master]
     types: [completed]
+  # Recovery / manual redeploy of an existing release (e.g. if release-please
+  # created the release but the run failed before deploying it).
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to deploy (e.g. v1.24.0)
+        required: true
 
 concurrency:
   group: release
@@ -52,12 +59,21 @@ jobs:
 
   deploy:
     needs: release-please
-    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    if: ${{ always() && (needs.release-please.outputs.release_created == 'true' || github.event_name == 'workflow_dispatch') }}
     runs-on: ubuntu-24.04
     permissions:
       contents: write # upload the release asset
+    env:
+      TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || needs.release-please.outputs.tag_name }}
     steps:
+      - name: Check the release exists
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release view "$TAG" -R "$GITHUB_REPOSITORY" > /dev/null
+
       - name: Check release commit matches the Test run
+        if: github.event_name != 'workflow_dispatch'
         env:
           RELEASE_SHA: ${{ needs.release-please.outputs.sha }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
@@ -69,7 +85,7 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.workflow_run.head_sha }}
           persist-credentials: false
 
       - name: Configure Node.js
@@ -87,7 +103,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           tar -czf dist.tar.gz dist/
-          gh release upload "${{ needs.release-please.outputs.tag_name }}" dist.tar.gz --clobber
+          gh release upload "$TAG" dist.tar.gz --clobber -R "$GITHUB_REPOSITORY"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@13d241b293754004c80624b5567555c4a39ffbe3
