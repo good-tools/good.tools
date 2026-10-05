@@ -20,18 +20,20 @@ bun run dev        # http://localhost:3000
 | `bun run check`        | Type-check, lint + format check (Biome) and tests (CI runs this) |
 | `bun run format`       | Format, organise imports and apply safe lint fixes (Biome) |
 | `bun run lint`         | Lint only                                              |
-| `bun run test:watch`   | Vitest in watch mode                                   |
+| `bun run --cwd apps/web test:watch` | Vitest in watch mode                         |
 | `bun run build`        | Sitemap, type-check and production build into `dist/`  |
 | `bun run preview`      | Serve the production build                             |
 
 [Biome](https://biomejs.dev) does linting and formatting in one fast pass; its configuration is in `biome.json`. Install the Biome editor extension and turn on format-on-save, and you'll rarely think about it. If a rule is wrong for a specific line, suppress it with `// biome-ignore <rule>: <reason>`. The reason is required.
 
-Online tools (DNS, WHOIS, IP, Docker Browser) call `https://internet-tools.fly.dev` and `https://image-browser.fly.dev` in dev. See `.env.example` to point them elsewhere.
+Online tools (DNS, WHOIS, IP, Docker Browser) call `https://internet-tools.fly.dev` and `https://image-browser.fly.dev` in dev. See `apps/web/.env.example` to point them elsewhere.
 
 ## Project layout
 
+This is a Bun workspaces + Turborepo monorepo. Run commands from the repository root; Turborepo runs them in every package (and caches the results). The web app lives in `apps/web`:
+
 ```
-src/
+apps/web/src/
   config/tools.config.ts   # the tool registry: the single list of every tool
   tools/                   # one component per tool (lazy-loaded)
   workers/                 # web workers (Wireshark, libvips, mesh repair)
@@ -43,8 +45,8 @@ src/
 
 ## Adding a tool
 
-1. **Create `src/tools/MyTool.tsx`** with a default-exported component. `src/tools/Base64.tsx` is the reference implementation.
-2. **Register it** in `src/config/tools.config.ts`:
+1. **Create `apps/web/src/tools/MyTool.tsx`** with a default-exported component. `apps/web/src/tools/Base64.tsx` is the reference implementation.
+2. **Register it** in `apps/web/src/config/tools.config.ts`:
 
    ```ts
    {
@@ -72,7 +74,7 @@ src/
 - **State.** Use `useToolState('mytool:field', initial)` instead of `useState` for anything the user typed or produced, so it survives navigating between tools. It's in-memory only: never persist tool input to `localStorage` or send it anywhere it doesn't need to go.
 - **Design.** It's dense and monochrome. Use the theme tokens (`bg-background`, `text-muted-foreground`, `border`, …), not palette colours. Colour is reserved for status (`success`, `warning`, `destructive`), and it must look right in both light and dark mode.
 - **Accessibility.** Every input needs a label (`<Label htmlFor>` or `aria-label`), and anything clickable must be a real `<button>` or `<a>`.
-- **Heavy work goes in a Web Worker** (see `src/workers/`). Large WebAssembly payloads should be loaded lazily and announced with a `notice` in the registry entry.
+- **Heavy work goes in a Web Worker** (see `apps/web/src/workers/`). Large WebAssembly payloads should be loaded lazily and announced with a `notice` in the registry entry.
 
 ## Pull requests
 

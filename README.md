@@ -27,7 +27,12 @@ bun run dev        # http://localhost:3000
 bun run check      # type-check, Biome lint + format, tests
 ```
 
-Stack: React 19, React Router, Vite, Tailwind CSS 4, TanStack Query, zustand, Biome, Vitest.
+Stack: React 19, React Router, Vite, Tailwind CSS 4, TanStack Query, zustand, Biome, Vitest; a Bun workspaces + Turborepo monorepo.
+
+| Path | What |
+| --- | --- |
+| `apps/web` | the good.tools web app |
+| `packages/*` | npm libraries used by the app |
 
 To add a tool, read [CONTRIBUTING.md](CONTRIBUTING.md). It covers the project layout, the tool registry, the UI guidelines and the PR process.
 
@@ -39,7 +44,7 @@ Every release is published to the GitHub Container Registry for `linux/amd64` an
 docker run -p 3000:80 ghcr.io/good-tools/good.tools:latest
 ```
 
-In production, pin a release version tag (`ghcr.io/good-tools/good.tools:<version>`) rather than `latest`; see [Releases](https://github.com/good-tools/good.tools/releases). To build it yourself instead, run `docker build -t good-tools .`.
+In production, pin a release version tag (`ghcr.io/good-tools/good.tools:<version>`) rather than `latest`; see [Releases](https://github.com/good-tools/good.tools/releases). To build it yourself instead, run `docker build -f apps/web/Dockerfile -t good-tools .` from the repository root.
 
 By default, self-hosted instances send no telemetry and hide online tools. To enable the online tools, run the backend services and point the image at them:
 
