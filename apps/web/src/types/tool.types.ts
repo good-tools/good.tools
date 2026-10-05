@@ -35,8 +35,3 @@ export interface Tool {
   /** Shown before the tool loads; the user must click through */
   notice?: string
 }
-
-export interface ToolCategory {
-  name: CategoryName | 'All'
-  icon: LucideIcon
-}

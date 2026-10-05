@@ -11,7 +11,7 @@ import { useLayoutStore } from '@/stores/useLayoutStore'
 
 const groups = groupByCategory(availableTools)
 
-function NavList({ compact = false }: { compact?: boolean }) {
+export function NavList({ compact = false }: { compact?: boolean }) {
   return (
     <nav aria-label='Tools' className={cn('flex flex-col gap-3 p-1.5', compact && 'items-center gap-1')}>
       {groups.map(([category, tools]) => (

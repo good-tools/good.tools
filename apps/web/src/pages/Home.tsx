@@ -1,151 +1,45 @@
-import { Search, X } from 'lucide-react'
-import { useMemo } from 'react'
-import { Link, useSearchParams } from 'react-router'
-import { GITHUB_URL } from '@/config/app.config'
+import { NavList } from '@/components/shell/Sidebar'
+import { isMac, Kbd } from '@/components/ui/kbd'
 import { availableTools } from '@/config/tools.config'
-import { type CategoryName, categories, getToolsByCategory, groupByCategory, searchTools } from '@/lib/categories'
-import { cn } from '@/lib/utils'
-import type { Tool } from '@/types/tool.types'
-
-function ToolRow({ tool }: { tool: Tool }) {
-  const Icon = tool.icon
-  return (
-    <Link
-      to={tool.path}
-      className='group flex items-start gap-2.5 rounded-md px-2 py-2 transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:outline-none'
-    >
-      <Icon className='mt-0.5 size-4 shrink-0 text-muted-foreground group-hover:text-foreground' />
-      <span className='min-w-0'>
-        <span className='flex items-center gap-1.5 font-medium'>
-          {tool.title}
-          {tool.online && (
-            <span className='size-1.5 rounded-full bg-warning' title='Online: data is sent to a server' />
-          )}
-        </span>
-        <span className='line-clamp-1 text-xs text-muted-foreground' title={tool.description}>
-          {tool.description}
-        </span>
-      </span>
-    </Link>
-  )
-}
+import { useLayoutStore } from '@/stores/useLayoutStore'
 
 export default function Home() {
-  const [params, setParams] = useSearchParams()
-  const query = params.get('q') ?? ''
-  const category = (params.get('category') ?? 'All') as CategoryName | 'All'
-
-  function update(next: { q?: string; category?: string }) {
-    const merged = { q: query, category, ...next }
-    const p = new URLSearchParams()
-    if (merged.q) p.set('q', merged.q)
-    if (merged.category !== 'All') p.set('category', merged.category)
-    setParams(p, { replace: true })
-  }
-
-  const results = useMemo(() => searchTools(getToolsByCategory(availableTools, category), query), [query, category])
-  const filtering = query !== '' || category !== 'All'
+  const setPaletteOpen = useLayoutStore((s) => s.setPaletteOpen)
 
   return (
-    <div className='mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-10'>
+    <div className='flex min-h-full flex-col'>
       <title>good.tools · Developer tools that run in your browser</title>
       <meta
         name='description'
         content='Free, fast, privacy-focused developer tools that run entirely in your browser.'
       />
 
-      <h1 className='text-lg font-semibold tracking-tight'>Developer tools that run in your browser</h1>
-      <p className='mt-1 text-[13px] text-muted-foreground'>
-        Free, fast and private: most tools never send your data anywhere.
-      </p>
-
-      <div className='mt-5 flex flex-col gap-2'>
-        <div className='relative'>
-          <Search className='pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground' />
-          <input
-            type='search'
-            value={query}
-            onChange={(e) => update({ q: e.target.value })}
-            placeholder={`Filter ${availableTools.length} tools…`}
-            aria-label='Filter tools'
-            autoFocus
-            className='h-8 w-full rounded-md border border-input bg-background pr-8 pl-8 text-[13px] placeholder:text-muted-foreground/70 focus:border-ring focus:ring-2 focus:ring-ring/20 focus:outline-none [&::-webkit-search-cancel-button]:hidden'
+      <div className='flex flex-col items-center px-6 pt-10 pb-4 text-center md:flex-1 md:justify-center md:pb-24'>
+        <h1 className='text-[13px] font-semibold'>Developer tools that run in your browser</h1>
+        <p className='mt-1 max-w-sm text-xs text-muted-foreground'>
+          {availableTools.length} free tools. Most never send your data anywhere; online ones are marked{' '}
+          <span
+            className='inline-block size-1.5 rounded-full bg-warning align-middle'
+            role='img'
+            aria-label='orange dot'
           />
-          {query && (
-            <button
-              type='button'
-              onClick={() => update({ q: '' })}
-              aria-label='Clear filter'
-              className='absolute top-1/2 right-2 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:text-foreground'
-            >
-              <X className='size-3.5' />
-            </button>
-          )}
-        </div>
-        <div className='flex flex-wrap gap-1' role='group' aria-label='Category'>
-          {categories.map(({ name, icon: Icon }) => (
-            <button
-              key={name}
-              type='button'
-              aria-pressed={category === name}
-              onClick={() => update({ category: name })}
-              className={cn(
-                'inline-flex h-6 items-center gap-1 rounded-md border px-2 text-xs transition-colors',
-                category === name
-                  ? 'border-foreground bg-foreground text-background'
-                  : 'text-muted-foreground hover:bg-accent hover:text-foreground',
-              )}
-            >
-              <Icon className='size-3' />
-              {name}
-            </button>
-          ))}
-        </div>
+          .
+        </p>
+        <button
+          type='button'
+          onClick={() => setPaletteOpen(true)}
+          className='mt-4 hidden items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground md:inline-flex'
+        >
+          Pick a tool from the sidebar, or search
+          <Kbd>{isMac ? '⌘' : 'Ctrl'}</Kbd>
+          <Kbd>K</Kbd>
+        </button>
       </div>
 
-      <div className='mt-6'>
-        {results.length === 0 ? (
-          <div className='rounded-md border border-dashed py-10 text-center text-muted-foreground'>
-            No tools match your filter.{' '}
-            <button
-              type='button'
-              className='font-medium text-foreground underline underline-offset-4'
-              onClick={() => setParams({})}
-            >
-              Clear filters
-            </button>
-          </div>
-        ) : filtering ? (
-          <div className='grid gap-x-2 sm:grid-cols-2 lg:grid-cols-3'>
-            {results.map((tool) => (
-              <ToolRow key={tool.path} tool={tool} />
-            ))}
-          </div>
-        ) : (
-          <div className='flex flex-col gap-5'>
-            {groupByCategory(results).map(([name, tools]) => (
-              <section key={name}>
-                <h2 className='mb-1 border-b px-2 pb-1.5 text-[11px] font-medium tracking-wider text-muted-foreground uppercase'>
-                  {name}
-                </h2>
-                <div className='grid gap-x-2 sm:grid-cols-2 lg:grid-cols-3'>
-                  {tools.map((tool) => (
-                    <ToolRow key={tool.path} tool={tool} />
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
-        )}
+      {/* The sidebar is a drawer on small screens, so list the tools here instead */}
+      <div className='border-t md:hidden'>
+        <NavList />
       </div>
-
-      <footer className='mt-12 border-t pt-4 text-xs text-muted-foreground'>
-        Open source on{' '}
-        <a href={GITHUB_URL} className='underline-offset-4 hover:text-foreground hover:underline'>
-          GitHub
-        </a>
-        . Self-host it with Docker.
-      </footer>
     </div>
   )
 }
