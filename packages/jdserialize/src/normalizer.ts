@@ -62,7 +62,8 @@ class MapNormalizer extends ObjectNormalizer {
       })
     })
 
-    const result: Record<string, unknown> = {}
+    // null prototype: keys from the stream (e.g. "__proto__") must become ordinary own properties
+    const result: Record<string, unknown> = Object.create(null)
 
     // [ k1, v1, k2, v2, ... , kn, vn ]
     for (let i = 0; i < data.length; i += 2) {
@@ -160,7 +161,7 @@ class Normalizer {
       }
     }
 
-    const fieldData: Record<string, unknown> = {}
+    const fieldData: Record<string, unknown> = Object.create(null)
 
     instance.fieldData.forEach((fields) => {
       fields.forEach((v, k) => {
