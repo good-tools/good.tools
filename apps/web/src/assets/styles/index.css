@@ -125,3 +125,126 @@
 @utility h-tool {
   height: max(28rem, calc(100dvh - 6.5rem));
 }
+
+/* Rendered markdown (Markdown Notes preview), GitHub-like but in the site's monochrome palette */
+.md-preview {
+  line-height: 1.6;
+  font-size: 14px;
+  overflow-wrap: break-word;
+
+  & > :first-child {
+    margin-top: 0;
+  }
+  & :is(p, ul, ol, blockquote, pre, table, hr) {
+    margin: 0 0 0.85em;
+  }
+  & :is(h1, h2, h3, h4, h5, h6) {
+    margin: 1.4em 0 0.6em;
+    font-weight: 600;
+    line-height: 1.25;
+    scroll-margin-top: 0.5rem;
+  }
+  & h1 {
+    font-size: 1.75em;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid var(--border);
+  }
+  & h2 {
+    font-size: 1.4em;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid var(--border);
+  }
+  & h3 {
+    font-size: 1.2em;
+  }
+  & h4 {
+    font-size: 1em;
+  }
+  & :is(h5, h6) {
+    font-size: 0.9em;
+    color: var(--muted-foreground);
+  }
+  & a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: color-mix(in oklch, var(--foreground) 35%, transparent);
+  }
+  & a:hover {
+    text-decoration-color: var(--foreground);
+  }
+  & ul {
+    list-style: disc;
+    padding-left: 1.6em;
+  }
+  & ol {
+    list-style: decimal;
+    padding-left: 1.6em;
+  }
+  & li > :is(ul, ol) {
+    margin: 0;
+  }
+  & li:has(> input[type="checkbox"]) {
+    list-style: none;
+    margin-left: -1.3em;
+  }
+  & input[type="checkbox"] {
+    margin: 0 0.4em 0.15em 0;
+    border-radius: 3px;
+  }
+  & blockquote {
+    padding-left: 1em;
+    border-left: 3px solid var(--border);
+    color: var(--muted-foreground);
+  }
+  & hr {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 1.5em 0;
+  }
+  & img {
+    max-width: 100%;
+  }
+  & :is(code, pre) {
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 0.86em;
+  }
+  & :not(pre) > code {
+    padding: 0.15em 0.35em;
+    border-radius: 4px;
+    background: var(--muted);
+  }
+  & pre {
+    padding: 0.8em 1em;
+    border-radius: var(--radius);
+    background: var(--muted);
+    overflow-x: auto;
+    line-height: 1.45;
+  }
+  & pre.mermaid {
+    background: transparent;
+    text-align: center;
+  }
+  & pre.mermaid[data-error]::after {
+    content: "Diagram error: " attr(data-error);
+    display: block;
+    margin-top: 0.5em;
+    color: var(--destructive);
+    white-space: pre-wrap;
+    text-align: left;
+  }
+  & table {
+    border-collapse: collapse;
+    display: block;
+    width: max-content;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  & :is(th, td) {
+    padding: 0.35em 0.8em;
+    border: 1px solid var(--border);
+  }
+  & th {
+    font-weight: 600;
+    background: var(--muted);
+  }
+}
