@@ -57,6 +57,7 @@ export default function SqlQuery() {
       await fn()
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
+      setResult(null)
     } finally {
       setBusy('')
     }
@@ -171,7 +172,8 @@ export default function SqlQuery() {
               onChange={(v) => setQuery(v ?? '')}
               options={{ ariaLabel: 'SQL query' }}
               onMount={(editor, monaco) => {
-                editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => runRef.current())
+                // Read the editor itself: `query` state can lag a keystroke typed just before Ctrl+Enter
+                editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => runRef.current(editor.getValue()))
               }}
             />
           </Panel>
