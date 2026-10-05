@@ -1,27 +1,22 @@
-import { Dialog, Transition } from '@headlessui/react'
-import { Allotment } from 'allotment'
-import { Fragment, useEffect, useRef, useState } from 'react'
-import WiregasmPreferenceTree, { type ModuleNode } from '@/components/WiregasmPreferenceTree'
+import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
+import { useEffect, useMemo, useState } from 'react'
+import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import WiregasmModulePreferences, { type Preference } from '@/components/WiregasmModulePreferences'
+import WiregasmPreferenceTree, { type ModuleNode } from '@/components/WiregasmPreferenceTree'
 
-function recursiveFilter(tree: ModuleNode[], filter: string): ModuleNode[] {
-  const filtered: ModuleNode[] = []
+const errorMessage = (e: unknown) => (e instanceof Error ? e.message : String(e))
 
-  for (const node of tree) {
-    if (node.submodules && node.submodules.length > 0) {
-      const filteredChildren = recursiveFilter(node.submodules, filter)
-      if (filteredChildren.length > 0) {
-        filtered.push({
-          ...node,
-          submodules: filteredChildren,
-        })
-      }
-    } else if (node.name.toLowerCase().includes(filter) || node.title.toLowerCase().includes(filter)) {
-      filtered.push(node)
-    }
-  }
-
-  return filtered
+/** Keeps modules whose name/title matches, plus ancestors of matches. A matching parent keeps all its children. */
+export function filterModules(tree: ModuleNode[], filter: string): ModuleNode[] {
+  const q = filter.trim().toLowerCase()
+  if (!q) return tree
+  return tree.flatMap((node) => {
+    if (node.name.toLowerCase().includes(q) || node.title.toLowerCase().includes(q)) return [node]
+    const submodules = filterModules(node.submodules, q)
+    return submodules.length > 0 ? [{ ...node, submodules }] : []
+  })
 }
 
 interface WiregasmPreferencesModalProps {
@@ -45,151 +40,113 @@ function WiregasmPreferencesModal({
   updatePreference,
   applyPreferences,
 }: WiregasmPreferencesModalProps) {
-  const cancelButtonRef = useRef(null)
   const [moduleTree, setModuleTree] = useState<ModuleNode[]>([])
   const [selectedModule, setSelectedModule] = useState<ModuleNode | null>(null)
   const [modulePreferences, setModulePreferences] = useState<Preference[] | null>(null)
   const [updatedNonce, setUpdatedNonce] = useState(0)
   const [filter, setFilter] = useState('')
-  const [filteredTree, setFilteredTree] = useState<ModuleNode[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const [applying, setApplying] = useState(false)
+
+  const filteredTree = useMemo(() => filterModules(moduleTree, filter), [moduleTree, filter])
 
   useEffect(() => {
-    if (!moduleTree) {
-      return
-    }
-
-    if (!filter || filter === '') {
-      setFilteredTree(moduleTree)
-      return
-    }
-
-    const filtered = recursiveFilter(moduleTree, filter.toLowerCase())
-
-    setFilteredTree(filtered)
-  }, [moduleTree, filter])
-
-  useEffect(() => {
-    if (!initialized) {
-      return
-    }
-    void loadModuleTree().then((data) => {
-      setModuleTree(data)
-    })
+    if (!initialized) return
+    loadModuleTree().then(setModuleTree, (e: unknown) => setError(errorMessage(e)))
   }, [loadModuleTree, initialized])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: updatedNonce re-fetches the prefs after an update
   useEffect(() => {
     setModulePreferences(null)
-
-    if (!selectedModule) {
-      return
+    if (!selectedModule) return
+    let cancelled = false
+    loadPreferences(selectedModule.name).then(
+      (data) => !cancelled && setModulePreferences(data),
+      (e: unknown) => !cancelled && setError(errorMessage(e)),
+    )
+    return () => {
+      cancelled = true
     }
-
-    void loadPreferences(selectedModule.name).then((data) => {
-      setModulePreferences(data)
-    })
   }, [loadPreferences, selectedModule, updatedNonce])
 
   const updatePreferenceValue = (key: string, value: string) => {
-    if (!selectedModule) {
-      return Promise.reject(new Error('No module selected'))
-    }
+    if (!selectedModule) return Promise.reject(new Error('No module selected'))
     return updatePreference(selectedModule.name, key, value)
   }
 
-  const applyPreferenceValues = () => {
-    setUpdatedNonce(updatedNonce + 1)
-    void applyPreferences().then(() => {
-      setOpen(false)
-    })
+  const apply = () => {
+    setError(null)
+    setApplying(true)
+    applyPreferences()
+      .then(() => {
+        setUpdatedNonce((n) => n + 1)
+        setOpen(false)
+      })
+      .catch((e: unknown) => setError(errorMessage(e)))
+      .finally(() => setApplying(false))
   }
 
   return (
-    <Transition.Root show={open} as={Fragment}>
-      <Dialog as='div' className='relative z-50' initialFocus={cancelButtonRef} onClose={setOpen}>
-        <Transition.Child
-          as={Fragment}
-          enter='ease-out duration-300'
-          enterFrom='opacity-0'
-          enterTo='opacity-100'
-          leave='ease-in duration-200'
-          leaveFrom='opacity-100'
-          leaveTo='opacity-0'
+    <Dialog open={open} onClose={setOpen} className='relative z-50'>
+      <DialogBackdrop
+        transition
+        className='fixed inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity duration-150 data-closed:opacity-0'
+      />
+      <div className='fixed inset-0 flex items-center justify-center p-4'>
+        <DialogPanel
+          transition
+          className='flex h-[min(36rem,90dvh)] w-full max-w-5xl flex-col rounded-xl border bg-popover text-popover-foreground shadow-2xl transition duration-150 data-closed:scale-[0.98] data-closed:opacity-0'
         >
-          <div className='fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity' />
-        </Transition.Child>
-
-        <div className='fixed inset-0 z-10 overflow-y-auto'>
-          <div className='flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0'>
-            <Transition.Child
-              as={Fragment}
-              enter='ease-out duration-300'
-              enterFrom='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
-              enterTo='opacity-100 translate-y-0 sm:scale-100'
-              leave='ease-in duration-200'
-              leaveFrom='opacity-100 translate-y-0 sm:scale-100'
-              leaveTo='opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
-            >
-              <Dialog.Panel className='relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-5xl sm:p-6'>
-                <div className='h-96'>
-                  <Allotment defaultSizes={[80, 250]}>
-                    <Allotment.Pane minSize={80}>
-                      <div className='overflow-auto h-full pr-5'>
-                        <input
-                          type='text'
-                          value={filter}
-                          onChange={(e) => setFilter(e.target.value)}
-                          placeholder='Filter preferences...'
-                          className='text-sm border-gray-300 w-full p-1 pl-2 rounded focus:ring-zinc-500'
-                        />
-                        <hr className='my-2' />
-                        <WiregasmPreferenceTree
-                          tree={filteredTree}
-                          select={(n) => setSelectedModule(n)}
-                          selected={selectedModule}
-                        />
-                      </div>
-                    </Allotment.Pane>
-                    <Allotment.Pane>
-                      <div className='pl-3 overflow-auto h-full'>
-                        {selectedModule ? (
-                          <div>
-                            <div className='text-lg font-bold'>{selectedModule.description}</div>
-                            <WiregasmModulePreferences
-                              preferences={modulePreferences}
-                              uploadFile={uploadFile}
-                              updatePreferenceValue={updatePreferenceValue}
-                            />
-                          </div>
-                        ) : (
-                          <div className='pl-4 text-sm'>Select a module to view and edit its preferences.</div>
-                        )}
-                      </div>
-                    </Allotment.Pane>
-                  </Allotment>
-                </div>
-                <div className='mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3'>
-                  <button
-                    type='button'
-                    className='inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm'
-                    onClick={() => setOpen(false)}
-                    ref={cancelButtonRef}
-                  >
-                    Close
-                  </button>
-                  <button
-                    type='button'
-                    className='inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm'
-                    onClick={applyPreferenceValues}
-                  >
-                    Apply
-                  </button>
-                </div>
-              </Dialog.Panel>
-            </Transition.Child>
+          <DialogTitle className='border-b px-4 py-3 text-sm font-semibold'>Wireshark preferences</DialogTitle>
+          <div className='flex min-h-0 flex-1'>
+            <div className='flex w-72 shrink-0 flex-col border-r'>
+              <div className='p-3'>
+                <Input
+                  type='search'
+                  aria-label='Filter modules'
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value)}
+                  placeholder='e.g. tls'
+                  className='h-8'
+                />
+              </div>
+              <div className='min-h-0 flex-1 overflow-auto px-3 pb-3'>
+                <WiregasmPreferenceTree
+                  nodes={filteredTree}
+                  select={setSelectedModule}
+                  selected={selectedModule}
+                  expandAll={filter.trim() !== ''}
+                />
+              </div>
+            </div>
+            <div className='min-w-0 flex-1 overflow-auto p-4'>
+              {selectedModule ? (
+                <>
+                  <h3 className='mb-3 text-sm font-semibold'>{selectedModule.description}</h3>
+                  <WiregasmModulePreferences
+                    key={`${selectedModule.name}-${updatedNonce}`}
+                    preferences={modulePreferences}
+                    uploadFile={uploadFile}
+                    updatePreferenceValue={updatePreferenceValue}
+                  />
+                </>
+              ) : (
+                <p className='text-sm text-muted-foreground'>Select a module to view and edit its preferences.</p>
+              )}
+            </div>
           </div>
-        </div>
-      </Dialog>
-    </Transition.Root>
+          <div className='flex items-center gap-2 border-t px-4 py-3'>
+            <Alert className='mr-auto py-1'>{error}</Alert>
+            <Button size='sm' variant='outline' className='ml-auto' onClick={() => setOpen(false)}>
+              Close
+            </Button>
+            <Button size='sm' onClick={apply} disabled={applying}>
+              Apply
+            </Button>
+          </div>
+        </DialogPanel>
+      </div>
+    </Dialog>
   )
 }
 

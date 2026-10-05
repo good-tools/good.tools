@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 
 interface HighlightedTextProps {
   text: string
@@ -21,10 +21,19 @@ function HighlightedText({ text, start, size, onOffsetClicked }: HighlightedText
 
   return (
     <>
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: pointer shortcut for byte selection; the dissection tree is the keyboard path */}
+      {/* biome-ignore lint/a11y/useKeyWithClickEvents: pointer shortcut for byte selection; the dissection tree is the keyboard path */}
       <span onClick={(e) => handleClickWithOffset(e, 0)}>{before}</span>
-      <span onClick={(e) => handleClickWithOffset(e, before.length)} className='bg-gray-600 text-white'>
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: pointer shortcut for byte selection; the dissection tree is the keyboard path */}
+      {/* biome-ignore lint/a11y/useKeyWithClickEvents: pointer shortcut for byte selection; the dissection tree is the keyboard path */}
+      <span
+        onClick={(e) => handleClickWithOffset(e, before.length)}
+        className='rounded-xs bg-primary text-primary-foreground'
+      >
         {hl}
       </span>
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: pointer shortcut for byte selection; the dissection tree is the keyboard path */}
+      {/* biome-ignore lint/a11y/useKeyWithClickEvents: pointer shortcut for byte selection; the dissection tree is the keyboard path */}
       <span onClick={(e) => handleClickWithOffset(e, before.length + hl.length)}>{end}</span>
     </>
   )
@@ -37,56 +46,24 @@ interface DissectionDumpProps {
 }
 
 function DissectionDump({ buffer, selected, select }: DissectionDumpProps) {
-  const [addrLines, setAddrLines] = useState<string[]>([])
-  const [hexLines, setHexLines] = useState<string[]>([])
-  const [asciiLines, setAsciiLines] = useState<string[]>([])
+  const [start, size] = selected
+  // hex: 3 chars per byte; ascii: 16 chars + newline per line
+  const asciiStart = start + Math.floor(start / 16)
+  const asciiSize = size > 0 ? start + size + Math.floor((start + size) / 16) - asciiStart : 0
 
-  const [asciiHighlight, setAsciiHighlight] = useState<[number, number]>([0, 0])
-  const [hexHighlight, setHexHighlight] = useState<[number, number]>([0, 0])
-
-  useEffect(() => {
-    const start = selected[0]
-    const size = selected[1]
-
-    const hexSize = size * 2 + size - 1
-    const hexPos = start * 2 + start
-    const asciiPos = start + Math.floor(start / 16)
-    const asciiSize = start + size + Math.floor((start + size) / 16) - asciiPos
-
-    setAsciiHighlight([asciiPos, size > 0 ? asciiSize : 0])
-    setHexHighlight([hexPos, size > 0 ? hexSize : 0])
-  }, [selected])
-
-  useEffect(() => {
-    const addr_lines: string[] = []
-    const hex_lines: string[] = []
-    const ascii_lines: string[] = []
-
+  const { addrLines, hexLines, asciiLines } = useMemo(() => {
+    const addrLines: string[] = []
+    const hexLines: string[] = []
+    const asciiLines: string[] = []
     for (let i = 0; i < buffer.length; i += 16) {
-      const address = i.toString(16).padStart(8, '0') // address
-      const block = buffer.slice(i, i + 16) // cut buffer into blocks of 16
-      const hexArray: string[] = []
-      const asciiArray: string[] = []
-
-      for (const value of block) {
-        hexArray.push(value.toString(16).padStart(2, '0'))
-        asciiArray.push(value >= 0x20 && value < 0x7f ? String.fromCharCode(value) : '.')
-      }
-
-      const hexString =
-        hexArray.length > 8 ? hexArray.slice(0, 8).join(' ') + '　' + hexArray.slice(8).join(' ') : hexArray.join(' ')
-
-      const asciiString = asciiArray.join('')
-
-      addr_lines.push(address)
-      hex_lines.push(hexString)
-
-      ascii_lines.push(asciiString)
+      const block = [...buffer.subarray(i, i + 16)]
+      const hex = block.map((v) => v.toString(16).padStart(2, '0'))
+      addrLines.push(i.toString(16).padStart(8, '0'))
+      // the full-width space keeps every byte 3 chars wide, so offsets stay computable
+      hexLines.push(hex.length > 8 ? `${hex.slice(0, 8).join(' ')}\u3000${hex.slice(8).join(' ')}` : hex.join(' '))
+      asciiLines.push(block.map((v) => (v >= 0x20 && v < 0x7f ? String.fromCharCode(v) : '.')).join(''))
     }
-
-    setAddrLines(addr_lines)
-    setAsciiLines(ascii_lines)
-    setHexLines(hex_lines)
+    return { addrLines, hexLines, asciiLines }
   }, [buffer])
 
   const onHexClick = (offset: number) => {
@@ -99,21 +76,21 @@ function DissectionDump({ buffer, selected, select }: DissectionDumpProps) {
 
   return (
     <div className='flex font-mono text-xs whitespace-pre break-all'>
-      <div className='tbd-offset select-none text-gray-500'>{addrLines.join('\n')}</div>
+      <div className='select-none text-muted-foreground'>{addrLines.join('\n')}</div>
       <div className='ml-4 cursor-pointer'>
         <HighlightedText
           onOffsetClicked={onHexClick}
           text={hexLines.join('\n')}
-          start={hexHighlight[0]}
-          size={hexHighlight[1]}
+          start={start * 3}
+          size={size > 0 ? size * 3 - 1 : 0}
         />
       </div>
       <div className='ml-4 cursor-pointer'>
         <HighlightedText
           onOffsetClicked={onAsciiClick}
           text={asciiLines.join('\n')}
-          start={asciiHighlight[0]}
-          size={asciiHighlight[1]}
+          start={asciiStart}
+          size={asciiSize}
         />
       </div>
     </div>

@@ -1,4 +1,5 @@
 export { useBase64Store } from './base64.store'
-export { useURLStore } from './url.store'
-export { useJSONFormatterStore } from './json-formatter.store'
 export { useJsonEscapeStore } from './json-escape.store'
+export { useJSONFormatterStore } from './json-formatter.store'
+export { useIsDark, useThemeStore } from './theme.store'
+export { useURLStore } from './url.store'

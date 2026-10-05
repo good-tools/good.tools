@@ -1,16 +1,12 @@
 import { PrefType } from '@goodtools/wiregasm'
-import CheckBox from '@/components/CheckBox'
+import { FolderOpen } from 'lucide-react'
 import { useId, useState } from 'react'
-import FileButton from '@/components/FileButton'
-
-const PREF_CATEGORIES = {
-  boolean: [PrefType.PREF_BOOL],
-  enum: [PrefType.PREF_ENUM],
-  string: [PrefType.PREF_STRING, PrefType.PREF_DIRNAME, PrefType.PREF_PASSWORD],
-  file: [PrefType.PREF_OPEN_FILENAME],
-  number: [PrefType.PREF_UINT],
-  range: [PrefType.PREF_RANGE, PrefType.PREF_DECODE_AS_RANGE],
-}
+import { Checkbox } from '@/components/ui/checkbox'
+import { FileButton } from '@/components/ui/file-button'
+import { fieldClass, Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Spinner } from '@/components/ui/spinner'
+import { cn } from '@/lib/utils'
 
 interface EnumOption {
   name: string
@@ -30,323 +26,183 @@ interface Preference {
   range_value?: string
 }
 
-interface BooleanPreferenceProps {
+type Update = (name: string, value: string) => Promise<void>
+
+const errorMessage = (e: unknown) => (e instanceof Error ? e.message : String(e))
+
+function Field({
+  pref,
+  id,
+  error,
+  children,
+}: {
   pref: Preference
-  updatePreferenceValue: (name: string, value: string) => Promise<void>
-}
-
-function BooleanPreference({ pref, updatePreferenceValue }: BooleanPreferenceProps) {
-  const [checked, setChecked] = useState(pref.bool_value ?? false)
-
-  const toggle = () => {
-    const value = !checked
-    void updatePreferenceValue(pref.name, value.toString()).then(() => {
-      setChecked(value)
-    })
-  }
-
-  return <CheckBox title={pref.title} description={pref.description} checked={checked} onChange={toggle} />
-}
-
-interface EnumPreferenceProps {
-  pref: Preference
-  updatePreferenceValue: (name: string, value: string) => Promise<void>
-}
-
-function EnumPreference({ pref, updatePreferenceValue }: EnumPreferenceProps) {
-  const [value, setValue] = useState(pref.enum_value?.filter((opt) => opt.selected)[0]?.name ?? '')
-
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value
-    void updatePreferenceValue(pref.name, value).then(() => {
-      setValue(value)
-    })
-  }
-
-  const id = useId()
+  id: string
+  error: string | null
+  children: React.ReactNode
+}) {
   return (
-    <div className='mb-2'>
-      <div className='text-sm'>
-        <label htmlFor={id} title={pref.description} className='text-zinc-700 dark:text-zinc-300'>
-          {pref.title}
-        </label>
-      </div>
-      <div className='w-full h-6 items-center'>
-        <select
-          id={id}
-          name={id}
-          onChange={handleChange}
-          value={value}
-          className='w-full text-sm p-0 pl-1 rounded border-gray-300 text-zinc-600 focus:ring-zinc-500'
-        >
-          {pref.enum_value?.map((option, idx) => (
-            <option key={`opt-${idx}`} value={option.name}>
-              {option.description}
-            </option>
-          ))}
-        </select>
-      </div>
+    <div className='space-y-1'>
+      <Label htmlFor={id} title={pref.description} className='text-foreground/90'>
+        {pref.title}
+      </Label>
+      {children}
+      {error && <p className='text-xs text-destructive'>{error}</p>}
     </div>
   )
 }
 
-interface FilePreferenceProps {
-  pref: Preference
-  uploadFile: (file: File) => Promise<string>
-  updatePreferenceValue: (name: string, value: string) => Promise<void>
+/** String / number / range prefs: edited as text, committed on blur or Enter. */
+function TextPreference({ pref, initial, update }: { pref: Preference; initial: string; update: Update }) {
+  const id = useId()
+  const [value, setValue] = useState(initial)
+  const [error, setError] = useState<string | null>(null)
+  const commit = () => {
+    setError(null)
+    update(pref.name, value).catch((e: unknown) => setError(errorMessage(e)))
+  }
+  return (
+    <Field pref={pref} id={id} error={error}>
+      <Input
+        id={id}
+        type={pref.type === PrefType.PREF_PASSWORD ? 'password' : 'text'}
+        inputMode={pref.type === PrefType.PREF_UINT ? 'numeric' : undefined}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={commit}
+        onEnter={commit}
+        aria-invalid={error != null}
+        className='h-8 font-mono'
+      />
+    </Field>
+  )
 }
 
-function FilePreference({ pref, uploadFile, updatePreferenceValue }: FilePreferenceProps) {
+function EnumPreference({ pref, update }: { pref: Preference; update: Update }) {
+  const id = useId()
+  const [value, setValue] = useState(pref.enum_value?.find((o) => o.selected)?.name ?? '')
+  const [error, setError] = useState<string | null>(null)
+  const onChange = (next: string) => {
+    setError(null)
+    update(pref.name, next).then(
+      () => setValue(next),
+      (e: unknown) => setError(errorMessage(e)),
+    )
+  }
+  return (
+    <Field pref={pref} id={id} error={error}>
+      <select id={id} value={value} onChange={(e) => onChange(e.target.value)} className={cn(fieldClass, 'h-8')}>
+        {pref.enum_value?.map((o) => (
+          <option key={o.name} value={o.name}>
+            {o.description}
+          </option>
+        ))}
+      </select>
+    </Field>
+  )
+}
+
+function FilePreference({
+  pref,
+  uploadFile,
+  update,
+}: {
+  pref: Preference
+  uploadFile: (f: File) => Promise<string>
+  update: Update
+}) {
+  const id = useId()
   const [value, setValue] = useState(pref.string_value ?? '')
   const [error, setError] = useState<string | null>(null)
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setError(null)
-
-    if (!e.target.files) {
-      return
-    }
-
-    if (e.target.files.length === 0) {
-      return
-    }
-
-    const f = e.target.files[0]
+  const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]
     if (!f) return
-
-    void uploadFile(f).then((path) => {
-      updatePreferenceValue(pref.name, path)
-        .then(() => {
-          setValue(path)
-        })
-        .catch((err) => {
-          setError(err instanceof Error ? err.message : String(err))
-        })
-    })
+    setError(null)
+    uploadFile(f)
+      .then(async (path) => {
+        await update(pref.name, path)
+        setValue(path)
+      })
+      .catch((err: unknown) => setError(errorMessage(err)))
   }
-
-  const id = useId()
   return (
-    <div className=''>
-      <div className='text-sm'>
-        <label htmlFor={id} title={pref.description} className='text-zinc-700 dark:text-zinc-300'>
-          {pref.title}
-        </label>
-      </div>
-      <div className='w-full h-6 items-center'>
-        <input
-          id={id}
-          name={id}
-          type='text'
-          value={value}
-          readOnly
-          className='h-6 rounded border-gray-300 text-zinc-600 focus:ring-zinc-500'
-        />
-        <FileButton variant='outline' className='ml-2 py-0' onFileSelected={handleChange}>
-          Browse...
+    <Field pref={pref} id={id} error={error}>
+      <div className='flex gap-2'>
+        <Input id={id} value={value} readOnly className='h-8 font-mono' />
+        <FileButton size='sm' variant='outline' onFileSelected={onFile}>
+          <FolderOpen /> Browse
         </FileButton>
       </div>
-      {error && <div className='text-xs text-red-500'>{error}</div>}
-    </div>
+    </Field>
   )
 }
 
-interface RangePreferenceProps {
-  pref: Preference
-  updatePreferenceValue: (name: string, value: string) => Promise<void>
-}
-
-function RangePreference({ pref, updatePreferenceValue }: RangePreferenceProps) {
-  const [value, setValue] = useState(pref.range_value ?? '')
+function BooleanPreference({ pref, update }: { pref: Preference; update: Update }) {
+  const [checked, setChecked] = useState(pref.bool_value ?? false)
   const [error, setError] = useState<string | null>(null)
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const toggle = () => {
     setError(null)
-    setValue(e.target.value)
+    update(pref.name, String(!checked)).then(
+      () => setChecked(!checked),
+      (e: unknown) => setError(errorMessage(e)),
+    )
   }
-
-  const applyValue = () => {
-    setError(null)
-    updatePreferenceValue(pref.name, value)
-      .then(() => {})
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : String(err))
-      })
-  }
-
-  const id = useId()
   return (
-    <div className=''>
-      <div className='text-sm'>
-        <label htmlFor={id} title={pref.description} className='text-zinc-700 dark:text-zinc-300'>
-          {pref.title}
-        </label>
-      </div>
-      <div className='w-full h-6 items-center'>
-        <input
-          id={id}
-          name={id}
-          type='text'
-          value={value}
-          onChange={handleChange}
-          onBlur={applyValue}
-          className='h-6 w-full rounded border-gray-300 text-zinc-600 focus:ring-zinc-500'
-        />
-      </div>
-      {error && <div className='text-xs text-red-500'>{error}</div>}
+    <div>
+      <Checkbox title={pref.title} description={pref.description} checked={checked} onChange={toggle} />
+      {error && <p className='text-xs text-destructive'>{error}</p>}
     </div>
   )
 }
 
-interface NumberPreferenceProps {
+function PreferenceItem({
+  pref,
+  uploadFile,
+  update,
+}: {
   pref: Preference
-  updatePreferenceValue: (name: string, value: string) => Promise<void>
-}
-
-function NumberPreference({ pref, updatePreferenceValue }: NumberPreferenceProps) {
-  const [value, setValue] = useState(pref.uint_value ?? 0)
-  const [error, setError] = useState<string | null>(null)
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setError(null)
-    setValue(parseInt(e.target.value, 10) || 0)
+  uploadFile: (f: File) => Promise<string>
+  update: Update
+}) {
+  switch (pref.type) {
+    case PrefType.PREF_BOOL:
+      return <BooleanPreference pref={pref} update={update} />
+    case PrefType.PREF_ENUM:
+      return <EnumPreference pref={pref} update={update} />
+    case PrefType.PREF_OPEN_FILENAME:
+      return <FilePreference pref={pref} uploadFile={uploadFile} update={update} />
+    case PrefType.PREF_UINT:
+      return <TextPreference pref={pref} initial={String(pref.uint_value ?? 0)} update={update} />
+    case PrefType.PREF_RANGE:
+    case PrefType.PREF_DECODE_AS_RANGE:
+      return <TextPreference pref={pref} initial={pref.range_value ?? ''} update={update} />
+    case PrefType.PREF_STRING:
+    case PrefType.PREF_DIRNAME:
+    case PrefType.PREF_PASSWORD:
+      return <TextPreference pref={pref} initial={pref.string_value ?? ''} update={update} />
+    default:
+      return null
   }
-
-  const applyValue = () => {
-    setError(null)
-    updatePreferenceValue(pref.name, value.toString())
-      .then(() => {})
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : String(err))
-      })
-  }
-
-  const id = useId()
-  return (
-    <div className='relative flex items-start'>
-      <div className='text-sm'>
-        <label htmlFor={id} className='text-zinc-700 dark:text-zinc-300'>
-          {pref.title}
-        </label>
-      </div>
-      <div className='ml-3 flex h-6 items-center'>
-        <input
-          id={id}
-          name={id}
-          type='text'
-          value={value}
-          onChange={handleChange}
-          onBlur={applyValue}
-          className='h-6 rounded border-gray-300 text-zinc-600 focus:ring-zinc-500'
-        />
-      </div>
-      {error && <div className='text-xs text-red-500'>{error}</div>}
-    </div>
-  )
-}
-
-interface StringPreferenceProps {
-  pref: Preference
-  updatePreferenceValue: (name: string, value: string) => Promise<void>
-}
-
-function StringPreference({ pref, updatePreferenceValue }: StringPreferenceProps) {
-  const [value, setValue] = useState(pref.string_value ?? '')
-  const [error, setError] = useState<string | null>(null)
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setError(null)
-    setValue(e.target.value)
-  }
-
-  const applyValue = () => {
-    setError(null)
-    updatePreferenceValue(pref.name, value)
-      .then(() => {})
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : String(err))
-      })
-  }
-
-  const id = useId()
-  return (
-    <div className=''>
-      <div className='text-sm'>
-        <label htmlFor={id} title={pref.description} className='text-zinc-700 dark:text-zinc-300'>
-          {pref.title}
-        </label>
-      </div>
-      <div className='w-full h-6 items-center'>
-        <input
-          id={id}
-          name={id}
-          type='text'
-          value={value}
-          onChange={handleChange}
-          onBlur={applyValue}
-          className='h-6 w-full rounded border-gray-300 text-zinc-600 focus:ring-zinc-500'
-        />
-      </div>
-      {error && <div className='text-xs text-red-500'>{error}</div>}
-    </div>
-  )
-}
-
-interface PreferenceItemProps {
-  pref: Preference
-  uploadFile: (file: File) => Promise<string>
-  updatePreferenceValue: (name: string, value: string) => Promise<void>
-}
-
-function PreferenceItem({ pref, uploadFile, updatePreferenceValue }: PreferenceItemProps) {
-  if (PREF_CATEGORIES['boolean'].includes(pref.type)) {
-    return <BooleanPreference pref={pref} updatePreferenceValue={updatePreferenceValue} />
-  }
-
-  if (PREF_CATEGORIES['file'].includes(pref.type)) {
-    return <FilePreference pref={pref} uploadFile={uploadFile} updatePreferenceValue={updatePreferenceValue} />
-  }
-
-  if (PREF_CATEGORIES['range'].includes(pref.type)) {
-    return <RangePreference pref={pref} updatePreferenceValue={updatePreferenceValue} />
-  }
-
-  if (PREF_CATEGORIES['number'].includes(pref.type)) {
-    return <NumberPreference pref={pref} updatePreferenceValue={updatePreferenceValue} />
-  }
-
-  if (PREF_CATEGORIES['string'].includes(pref.type)) {
-    return <StringPreference pref={pref} updatePreferenceValue={updatePreferenceValue} />
-  }
-
-  if (PREF_CATEGORIES['enum'].includes(pref.type)) {
-    return <EnumPreference pref={pref} updatePreferenceValue={updatePreferenceValue} />
-  }
-
-  return <></>
 }
 
 interface WiregasmModulePreferencesProps {
   preferences: Preference[] | null
   uploadFile: (file: File) => Promise<string>
-  updatePreferenceValue: (name: string, value: string) => Promise<void>
+  updatePreferenceValue: Update
 }
 
 function WiregasmModulePreferences({ preferences, uploadFile, updatePreferenceValue }: WiregasmModulePreferencesProps) {
-  if (!preferences) {
-    return <div>Loading...</div>
-  }
+  if (!preferences) return <Spinner label='Loading preferences…' />
+  if (preferences.length === 0) return <p className='text-sm text-muted-foreground'>This module has no preferences.</p>
 
   return (
-    <div className='text-sm'>
-      <ul>
-        {preferences.map((preference, idx) => (
-          <li key={`pi-${idx}`}>
-            <PreferenceItem pref={preference} uploadFile={uploadFile} updatePreferenceValue={updatePreferenceValue} />
-          </li>
-        ))}
-      </ul>
-    </div>
+    <ul className='max-w-xl space-y-3'>
+      {preferences.map((pref) => (
+        <li key={pref.name}>
+          <PreferenceItem pref={pref} uploadFile={uploadFile} update={updatePreferenceValue} />
+        </li>
+      ))}
+    </ul>
   )
 }
 

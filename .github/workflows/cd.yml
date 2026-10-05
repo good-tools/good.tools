@@ -2,8 +2,8 @@ name: Release & Deploy
 
 # Runs after Test succeeds on a push to master. release-please keeps a
 # release PR open with the next version and changelog; merging it creates
-# the release, and the deploy job builds that commit and ships it to S3 +
-# CloudFront.
+# the release, and the deploy job builds that commit, ships it to S3 +
+# CloudFront and publishes the Docker image to ghcr.io.
 on:
   workflow_run:
     workflows: [Test]
@@ -63,6 +63,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write # upload the release asset
+      packages: write # push the Docker image to ghcr.io
     env:
       TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || needs.release-please.outputs.tag_name }}
     steps:
@@ -88,15 +89,9 @@ jobs:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.workflow_run.head_sha }}
           persist-credentials: false
 
-      - name: Configure Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 22
-          cache: npm
-
-      - run: npm ci
-      - run: npm run build-sitemap
-      - run: npm run build
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+      - run: bun install --frozen-lockfile
+      - run: bun run build # also generates sitemap.xml
 
       - name: Upload release asset
         env:
@@ -104,6 +99,41 @@ jobs:
         run: |
           tar -czf dist.tar.gz dist/
           gh release upload "$TAG" dist.tar.gz --clobber -R "$GITHUB_REPOSITORY"
+
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image tags
+        id: image
+        env:
+          IMAGE: ghcr.io/${{ github.repository }}
+          IS_NEW_RELEASE: ${{ github.event_name != 'workflow_dispatch' }}
+        run: |
+          {
+            echo "version=${TAG#v}"
+            echo "tags<<EOF"
+            echo "$IMAGE:${TAG#v}"
+            # a manual redeploy of an older release must not move :latest
+            if [ "$IS_NEW_RELEASE" = "true" ]; then echo "$IMAGE:latest"; fi
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Publish Docker image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.image.outputs.tags }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.version=${{ steps.image.outputs.version }}
+            org.opencontainers.image.licenses=MIT
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@13d241b293754004c80624b5567555c4a39ffbe3
