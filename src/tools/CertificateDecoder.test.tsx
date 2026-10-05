@@ -1,5 +1,8 @@
-import { describe, it, expect } from 'vitest'
 import * as x509 from '@peculiar/x509'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { describe, expect, it } from 'vitest'
+import CertificateDecoder, { validityStatus } from './CertificateDecoder'
 
 const RSA_CERT = `-----BEGIN CERTIFICATE-----
 MIIFzjCCBLagAwIBAgIQCAID3TIok1it+qMlOD7pcTANBgkqhkiG9w0BAQsFADA8
@@ -53,7 +56,7 @@ describe('CertificateDecoder', () => {
 
       expect(cert.subject).toContain('good.tools')
       expect(cert.publicKey.algorithm.name).toBe('RSASSA-PKCS1-v1_5')
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+
       expect(cert.publicKey.toString('pem')).toContain('-----BEGIN PUBLIC KEY-----')
     })
 
@@ -62,13 +65,13 @@ describe('CertificateDecoder', () => {
 
       expect(cert.subject).toContain('os:admin')
       expect(cert.publicKey.algorithm.name).toBe('Ed25519')
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+
       expect(cert.publicKey.toString('pem')).toContain('-----BEGIN PUBLIC KEY-----')
     })
 
     it('should extract public key PEM from Ed25519 certificate', () => {
       const cert = new x509.X509Certificate(ED25519_CERT)
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+
       const publicKeyPem = cert.publicKey.toString('pem')
 
       expect(publicKeyPem).toContain('-----BEGIN PUBLIC KEY-----')
@@ -89,6 +92,48 @@ describe('CertificateDecoder', () => {
       expect(cert.notBefore).toBeInstanceOf(Date)
       expect(cert.notAfter).toBeInstanceOf(Date)
       expect(cert.notAfter.getTime()).toBeGreaterThan(cert.notBefore.getTime())
+    })
+  })
+
+  describe('validityStatus', () => {
+    const from = new Date('2024-01-01'),
+      to = new Date('2025-01-01')
+    it.each([
+      [Date.parse('2023-06-01'), 'Not yet valid'],
+      [Date.parse('2024-06-01'), 'Valid'],
+      [Date.parse('2025-06-01'), 'Expired'],
+    ])('at %s is %s', (now, label) => expect(validityStatus(from, to, now).label).toBe(label))
+  })
+
+  describe('component', () => {
+    const upload = async (file: File) => {
+      const user = userEvent.setup()
+      const { container } = render(<CertificateDecoder />)
+      await user.upload(container.querySelector<HTMLInputElement>('input[type=file]')!, file)
+      return user
+    }
+
+    it('loads a binary DER file and decodes it live, with SANs and fingerprints', async () => {
+      const der = new x509.X509Certificate(RSA_CERT).rawData
+      await upload(new File([der], 'cert.der'))
+      await waitFor(() => expect(screen.getByLabelText(/certificate/i)).toHaveDisplayValue(/BEGIN CERTIFICATE/))
+      expect(screen.getByText('good.tools, *.good.tools')).toBeInTheDocument()
+      expect(screen.getByText('altNames = good.tools, *.good.tools')).toBeInTheDocument()
+      expect(screen.getByText('Expired')).toBeInTheDocument()
+      expect(await screen.findByText(/^([0-9A-F]{2}:){31}[0-9A-F]{2}$/)).toBeInTheDocument()
+    })
+
+    it('loads a PEM file as text', async () => {
+      await upload(new File([ED25519_CERT], 'cert.pem'))
+      await waitFor(() => expect(screen.getByLabelText(/certificate/i)).toHaveValue(ED25519_CERT))
+      expect(screen.getByText('Ed25519')).toBeInTheDocument()
+    })
+
+    it('shows an alert for invalid input', async () => {
+      const user = userEvent.setup()
+      render(<CertificateDecoder />)
+      await user.type(screen.getByLabelText(/certificate/i), 'garbage')
+      expect(screen.getByRole('alert')).toBeInTheDocument()
     })
   })
 })

@@ -1,6 +1,6 @@
 /**
- * Runtime configuration interface
- * These values are injected at container startup from environment variables
+ * Runtime configuration, injected at container startup (see docker/entrypoint.sh → /config.js).
+ * In dev, values come from VITE_* env vars instead.
  */
 export interface RuntimeConfig {
   ENABLE_TELEMETRY: boolean
@@ -16,32 +16,27 @@ declare global {
   }
 }
 
-/**
- * Get runtime configuration with defaults for development
- */
+const defaults: RuntimeConfig = {
+  ENABLE_TELEMETRY: false,
+  GA_TRACKING_ID: '',
+  DISABLE_ONLINE_TOOLS: true,
+  INTERNET_TOOLS_URL: '',
+  IMAGE_BROWSER_URL: '',
+}
+
 export function getRuntimeConfig(): RuntimeConfig {
-  // In development, use Vite env vars or defaults
-  if (import.meta.env.DEV) {
+  const env = import.meta.env
+  if (env?.DEV) {
     return {
-      ENABLE_TELEMETRY: import.meta.env.VITE_ENABLE_TELEMETRY === 'true',
-      GA_TRACKING_ID: import.meta.env.VITE_GA_TRACKING_ID || '',
-      DISABLE_ONLINE_TOOLS: import.meta.env.VITE_DISABLE_ONLINE_TOOLS === 'true',
-      INTERNET_TOOLS_URL: import.meta.env.VITE_INTERNET_TOOLS_URL || 'https://internet-tools.fly.dev',
-      IMAGE_BROWSER_URL: import.meta.env.VITE_IMAGE_BROWSER_URL || 'https://image-browser.fly.dev',
+      ENABLE_TELEMETRY: env.VITE_ENABLE_TELEMETRY === 'true',
+      GA_TRACKING_ID: env.VITE_GA_TRACKING_ID || '',
+      DISABLE_ONLINE_TOOLS: env.VITE_DISABLE_ONLINE_TOOLS === 'true',
+      INTERNET_TOOLS_URL: env.VITE_INTERNET_TOOLS_URL || 'https://internet-tools.fly.dev',
+      IMAGE_BROWSER_URL: env.VITE_IMAGE_BROWSER_URL || 'https://image-browser.fly.dev',
     }
   }
-
-  // In production, use runtime config injected by Docker entrypoint
-  // Default: no telemetry, online tools disabled, empty API URLs
-  return (
-    window.__RUNTIME_CONFIG__ ?? {
-      ENABLE_TELEMETRY: false,
-      GA_TRACKING_ID: '',
-      DISABLE_ONLINE_TOOLS: true,
-      INTERNET_TOOLS_URL: '',
-      IMAGE_BROWSER_URL: '',
-    }
-  )
+  // globalThis.window: this module is also imported by the sitemap script outside the browser
+  return { ...defaults, ...globalThis.window?.__RUNTIME_CONFIG__ }
 }
 
 export const runtimeConfig = getRuntimeConfig()
