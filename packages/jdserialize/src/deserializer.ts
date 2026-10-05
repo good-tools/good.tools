@@ -10,6 +10,7 @@ export enum Constants {
   STREAM_VERSION = 0x05,
 
   TC_BASE = 0x70,
+  // biome-ignore lint/suspicious/noDuplicateEnumValues: the Java serialization spec defines TC_NULL = TC_BASE
   TC_NULL = 0x70,
   TC_REFERENCE = 0x71,
   TC_CLASSDESC = 0x72,
@@ -37,27 +38,27 @@ export enum Constants {
 }
 
 export abstract class Content {
-  readonly handle: number;
-  readonly contentType: string;
-  isExceptionObject: boolean;
+  readonly handle: number
+  readonly contentType: string
+  isExceptionObject: boolean
   constructor(handle: number, contentType: string) {
-    this.handle = handle;
-    this.contentType = contentType;
-    this.isExceptionObject = false;
+    this.handle = handle
+    this.contentType = contentType
+    this.isExceptionObject = false
   }
 }
 
 export enum FieldType {
-  BYTE = "B",
-  CHAR = "C",
-  DOUBLE = "D",
-  FLOAT = "F",
-  INTEGER = "I",
-  LONG = "J",
-  SHORT = "S",
-  BOOLEAN = "Z",
-  ARRAY = "[",
-  OBJECT = "L",
+  BYTE = 'B',
+  CHAR = 'C',
+  DOUBLE = 'D',
+  FLOAT = 'F',
+  INTEGER = 'I',
+  LONG = 'J',
+  SHORT = 'S',
+  BOOLEAN = 'Z',
+  ARRAY = '[',
+  OBJECT = 'L',
 }
 
 const PRIMITIVE_TYPES = [
@@ -69,791 +70,740 @@ const PRIMITIVE_TYPES = [
   FieldType.LONG,
   FieldType.SHORT,
   FieldType.BOOLEAN,
-];
+]
 
 const invertedType: Map<FieldType, string> = new Map([
-  [FieldType.BYTE, "byte"],
-  [FieldType.CHAR, "char"],
-  [FieldType.DOUBLE, "double"],
-  [FieldType.FLOAT, "float"],
-  [FieldType.INTEGER, "int"],
-  [FieldType.LONG, "long"],
-  [FieldType.SHORT, "short"],
-  [FieldType.BOOLEAN, "boolean"],
-]);
+  [FieldType.BYTE, 'byte'],
+  [FieldType.CHAR, 'char'],
+  [FieldType.DOUBLE, 'double'],
+  [FieldType.FLOAT, 'float'],
+  [FieldType.INTEGER, 'int'],
+  [FieldType.LONG, 'long'],
+  [FieldType.SHORT, 'short'],
+  [FieldType.BOOLEAN, 'boolean'],
+])
 
 export const invertType = (type: FieldType): string => {
   if (invertedType.has(type)) {
-    return invertedType.get(type);
+    return invertedType.get(type)
   }
-  return "unknown";
-};
+  return 'unknown'
+}
 
 function decodeClassName(name: string, convertSlashes = true) {
-  name = name.substring(1, name.length - 1);
-  if (convertSlashes) name = name.replace(/\//g, ".");
-  return name;
+  name = name.substring(1, name.length - 1)
+  if (convertSlashes) name = name.replace(/\//g, '.')
+  return name
 }
 
 export function resolveJavaType(type: string, className: string) {
-  if (type == "L") {
-    return decodeClassName(className);
-  } else if (type == "[") {
-    let suffix = "";
+  if (type === 'L') {
+    return decodeClassName(className)
+  } else if (type === '[') {
+    let suffix = ''
     for (let i = 0; i < className.length; i++) {
-      const ch = className[i];
+      const ch = className[i]
       switch (ch) {
-        case "[":
-          suffix += "[]";
-          continue;
-        case "L":
-          return decodeClassName(className.substring(i)) + suffix;
+        case '[':
+          suffix += '[]'
+          continue
+        case 'L':
+          return decodeClassName(className.substring(i)) + suffix
         default:
-          return invertType(ch as FieldType) + suffix;
+          return invertType(ch as FieldType) + suffix
       }
     }
 
-    return className;
+    return className
   }
-  return invertType(type as FieldType);
+  return invertType(type as FieldType)
 }
 
 class Field {
-  name: string;
-  type: FieldType;
-  className: string;
+  name: string
+  type: FieldType
+  className: string
 
-  isInnerClassReference: boolean;
+  isInnerClassReference: boolean
 
   constructor(name: string, type: FieldType, className: string) {
-    this.name = name;
-    this.type = type;
-    this.className = className;
-    this.isInnerClassReference = false;
+    this.name = name
+    this.type = type
+    this.className = className
+    this.isInnerClassReference = false
   }
 
   setReferenceTypeName(newname: string) {
-    if (this.type != FieldType.OBJECT) {
-      throw new Error("can't fix up a non-reference field!");
+    if (this.type !== FieldType.OBJECT) {
+      throw new Error("can't fix up a non-reference field!")
     }
-    const nname = "L" + newname.replace(/\./g, "/") + ";";
-    this.className = nname;
+    const nname = `L${newname.replace(/\./g, '/')};`
+    this.className = nname
   }
 
   getJavaType(): string {
-    return resolveJavaType(this.type, this.className);
+    return resolveJavaType(this.type, this.className)
   }
 }
 
 export class BlockData extends Content {
-  readonly data: Buffer;
+  readonly data: Buffer
   constructor(handle: number, data: Buffer) {
-    super(handle, "block");
-    this.data = data;
+    super(handle, 'block')
+    this.data = data
   }
 }
 
 export class Instance extends Content {
-  classDescription: ClassDescription;
-  fieldData: Map<string, Map<string, unknown>>;
-  annotations: Map<string, Content[]>;
+  classDescription: ClassDescription
+  fieldData: Map<string, Map<string, unknown>>
+  annotations: Map<string, Content[]>
   constructor(handle: number) {
-    super(handle, "instance");
-    this.fieldData = new Map<string, Map<string, unknown>>();
-    this.annotations = new Map<string, Content[]>();
+    super(handle, 'instance')
+    this.fieldData = new Map<string, Map<string, unknown>>()
+    this.annotations = new Map<string, Content[]>()
   }
   addFieldData(className: string, fieldName: string, value: unknown) {
     if (!this.fieldData.has(className)) {
-      this.fieldData.set(className, new Map<string, unknown>());
+      this.fieldData.set(className, new Map<string, unknown>())
     }
 
-    this.fieldData.get(className).set(fieldName, value);
+    this.fieldData.get(className).set(fieldName, value)
   }
 }
 
 export class StringContent extends Content {
-  readonly data: string;
+  readonly data: string
   constructor(handle: number, data: string) {
-    super(handle, "string");
-    this.data = data;
+    super(handle, 'string')
+    this.data = data
   }
 }
 
 export class ArrayContent extends Content {
-  data: unknown[];
-  className: string;
+  data: unknown[]
+  className: string
 
   constructor(handle: number, className: string, data: unknown[]) {
-    super(handle, "array");
-    this.className = className;
-    this.data = data;
+    super(handle, 'array')
+    this.className = className
+    this.data = data
   }
 }
 
 export class EnumContent extends Content {
-  classDescription: ClassDescription;
-  value: string;
+  classDescription: ClassDescription
+  value: string
 
-  constructor(
-    handle: number,
-    classDescription: ClassDescription,
-    value: string
-  ) {
-    super(handle, "enum");
-    this.classDescription = classDescription;
-    this.value = value;
+  constructor(handle: number, classDescription: ClassDescription, value: string) {
+    super(handle, 'enum')
+    this.classDescription = classDescription
+    this.value = value
   }
 }
 
 export class ClassDescription extends Content {
-  type: ClassDescriptionType;
-  name: string;
-  serialVersionUID: bigint;
-  flags: number;
-  fields: Field[];
-  innerClasses: ClassDescription[];
-  annotations: Content[];
-  superClass: ClassDescription;
-  interfaces: string[];
-  enumConstants: Set<string>;
-  isInnerClass: boolean;
-  isLocalInnerClass: boolean;
-  isStaticMemberClass: boolean;
+  type: ClassDescriptionType
+  name: string
+  serialVersionUID: bigint
+  flags: number
+  fields: Field[]
+  innerClasses: ClassDescription[]
+  annotations: Content[]
+  superClass: ClassDescription
+  interfaces: string[]
+  enumConstants: Set<string>
+  isInnerClass: boolean
+  isLocalInnerClass: boolean
+  isStaticMemberClass: boolean
 
   constructor(handle: number, type: ClassDescriptionType) {
-    super(handle, "class");
-    this.type = type;
-    this.enumConstants = new Set<string>();
-    this.innerClasses = [];
-    this.annotations = [];
-    this.interfaces = [];
-    this.fields = [];
-    this.isInnerClass = false;
-    this.isLocalInnerClass = false;
-    this.isStaticMemberClass = false;
+    super(handle, 'class')
+    this.type = type
+    this.enumConstants = new Set<string>()
+    this.innerClasses = []
+    this.annotations = []
+    this.interfaces = []
+    this.fields = []
+    this.isInnerClass = false
+    this.isLocalInnerClass = false
+    this.isStaticMemberClass = false
   }
 
   addEnum(data: string) {
-    this.enumConstants.add(data);
+    this.enumConstants.add(data)
   }
 
   isArrayClass(): boolean {
-    if (this.name != null && this.name.length > 1 && this.name[0] == "[") {
-      return true;
+    if (this.name != null && this.name.length > 1 && this.name[0] === '[') {
+      return true
     } else {
-      return false;
+      return false
     }
   }
 
   addInnerClass(cd: ClassDescription) {
-    this.innerClasses.push(cd);
+    this.innerClasses.push(cd)
   }
 
   getHierarchy(): ClassDescription[] {
-    let result: ClassDescription[] = [];
+    let result: ClassDescription[] = []
 
-    if (
-      this.superClass != null &&
-      this.superClass.type !== ClassDescriptionType.PROXYCLASS
-    ) {
-      result = result.concat(this.superClass.getHierarchy());
+    if (this.superClass != null && this.superClass.type !== ClassDescriptionType.PROXYCLASS) {
+      result = result.concat(this.superClass.getHierarchy())
     }
 
-    result.push(this);
+    result.push(this)
 
-    return result;
+    return result
   }
 }
 
 class Deserializer {
-  readonly data: Buffer;
-  idx: number;
-  currentHandle: number;
-  handles: Map<number, Content>;
-  classDescriptions: ClassDescription[];
+  readonly data: Buffer
+  idx: number
+  currentHandle: number
+  handles: Map<number, Content>
+  classDescriptions: ClassDescription[]
 
   constructor(data: Buffer) {
-    this.data = data;
-    this.idx = 0;
-    this.currentHandle = Constants.BASE_WIRE_HANDLE;
-    this.handles = new Map<number, Content>();
-    this.classDescriptions = [];
+    this.data = data
+    this.idx = 0
+    this.currentHandle = Constants.BASE_WIRE_HANDLE
+    this.handles = new Map<number, Content>()
+    this.classDescriptions = []
   }
 
   hasMoreContent(): boolean {
-    return this.idx < this.data.length;
+    return this.idx < this.data.length
   }
 
   readByte(): number {
-    const val = this.data.readUInt8(this.idx);
-    this.idx += 1;
-    return val;
+    const val = this.data.readUInt8(this.idx)
+    this.idx += 1
+    return val
   }
 
   readChar(): string {
-    return String.fromCharCode(this.readShort());
+    return String.fromCharCode(this.readShort())
   }
 
   readBoolean(): boolean {
-    return this.readByte() != 0;
+    return this.readByte() !== 0
   }
 
   readDouble(): number {
-    const val = this.data.readDoubleBE(this.idx);
-    this.idx += 8;
-    return val;
+    const val = this.data.readDoubleBE(this.idx)
+    this.idx += 8
+    return val
   }
 
   readFloat(): number {
-    const val = this.data.readFloatBE(this.idx);
-    this.idx += 4;
-    return val;
+    const val = this.data.readFloatBE(this.idx)
+    this.idx += 4
+    return val
   }
 
   readShort(): number {
-    const val = this.data.readUint16BE(this.idx);
-    this.idx += 2;
-    return val;
+    const val = this.data.readUint16BE(this.idx)
+    this.idx += 2
+    return val
   }
 
   readInt(): number {
-    const val = this.data.readUInt32BE(this.idx);
-    this.idx += 4;
-    return val;
+    const val = this.data.readUInt32BE(this.idx)
+    this.idx += 4
+    return val
   }
 
   readBlockData(tc: number): BlockData {
-    let size = -1;
-    if (tc == Constants.TC_BLOCKDATA) {
-      size = this.readByte();
-    } else if (tc == Constants.TC_BLOCKDATALONG) {
-      size = this.readInt();
+    let size = -1
+    if (tc === Constants.TC_BLOCKDATA) {
+      size = this.readByte()
+    } else if (tc === Constants.TC_BLOCKDATALONG) {
+      size = this.readInt()
     }
 
-    if (size < 0) throw new Error("Invalid value for blockdata size: size");
+    if (size < 0) throw new Error('Invalid value for blockdata size: size')
 
-    const value = this.data.subarray(this.idx, this.idx + size);
-    this.idx += size;
-    return new BlockData(null, value);
+    const value = this.data.subarray(this.idx, this.idx + size)
+    this.idx += size
+    return new BlockData(null, value)
   }
 
   newHandle() {
-    return this.currentHandle++;
+    return this.currentHandle++
   }
 
   saveHandle(handle: number, content: Content) {
-    this.handles.set(handle, content);
+    this.handles.set(handle, content)
   }
 
   readClassDesc(): ClassDescription {
-    const tc = this.readByte();
-    return this.handleClassDesc(tc, false);
+    const tc = this.readByte()
+    return this.handleClassDesc(tc, false)
   }
 
   readString() {
-    const length = this.readShort();
-    const value = this.data
-      .subarray(this.idx, this.idx + length)
-      .toString("utf8");
-    this.idx += length;
-    return value;
+    const length = this.readShort()
+    const value = this.data.subarray(this.idx, this.idx + length).toString('utf8')
+    this.idx += length
+    return value
   }
 
   readLong() {
-    const value = this.data.readBigInt64BE(this.idx);
-    this.idx += 8;
-    return value;
+    const value = this.data.readBigInt64BE(this.idx)
+    this.idx += 8
+    return value
   }
 
   readPrevObject(): Content {
-    const handle = this.readInt();
+    const handle = this.readInt()
     if (!this.handles.has(handle)) {
-      throw new Error("Failure finding an entry for handle: " + handle);
+      throw new Error(`Failure finding an entry for handle: ${handle}`)
     }
-    return this.handles.get(handle);
+    return this.handles.get(handle)
   }
 
-  readNewString(tc): StringContent {
+  readNewString(tc: number): StringContent {
     if (tc === Constants.TC_REFERENCE) {
-      return this.readPrevObject() as StringContent;
+      return this.readPrevObject() as StringContent
     }
 
-    const handle = this.newHandle();
-    let length = 0;
+    const handle = this.newHandle()
+    let length = 0
 
     if (tc === Constants.TC_STRING) {
-      length = this.readShort();
+      length = this.readShort()
     } else if (tc === Constants.TC_LONGSTRING) {
-      throw new Error("readNewString TC_LONGSTRING not implemented");
+      throw new Error('readNewString TC_LONGSTRING not implemented')
     } else if (tc === Constants.TC_NULL) {
-      throw new Error("stream signaled TC_NULL when string type expected!");
+      throw new Error('stream signaled TC_NULL when string type expected!')
     } else {
-      throw new Error("invalid tc byte in string: " + tc);
+      throw new Error(`invalid tc byte in string: ${tc}`)
     }
 
-    const content = this.data.subarray(this.idx, this.idx + length);
-    this.idx += length;
+    const content = this.data.subarray(this.idx, this.idx + length)
+    this.idx += length
 
-    const stringContent = new StringContent(handle, content.toString("utf8"));
-    this.saveHandle(handle, stringContent);
+    const stringContent = new StringContent(handle, content.toString('utf8'))
+    this.saveHandle(handle, stringContent)
 
-    return stringContent;
+    return stringContent
   }
 
   reset() {
     if (this.handles != null && this.handles.size > 0) {
       // put them somewhere
     }
-    this.handles.clear();
-    this.currentHandle = Constants.BASE_WIRE_HANDLE;
+    this.handles.clear()
+    this.currentHandle = Constants.BASE_WIRE_HANDLE
   }
 
   readClassAnnotation() {
-    const annotations: Content[] = [];
+    const annotations: Content[] = []
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      const tc = this.readByte();
+      const tc = this.readByte()
       if (tc === Constants.TC_ENDBLOCKDATA) {
-        return annotations;
+        return annotations
       }
       if (tc === Constants.TC_RESET) {
-        this.reset();
-        continue;
+        this.reset()
+        continue
       }
-      const c = this.readContent(tc, true);
-      annotations.push(c);
+      const c = this.readContent(tc, true)
+      annotations.push(c)
     }
   }
 
   handleClassDesc(tc: number, mustBeNew = true): ClassDescription {
     if (tc === Constants.TC_CLASSDESC) {
-      const name = this.readString();
-      const serialVersionUID = this.readLong();
-      const handle = this.newHandle();
-      const flags = this.readByte();
-      const numberOfFields = this.readShort();
+      const name = this.readString()
+      const serialVersionUID = this.readLong()
+      const handle = this.newHandle()
+      const flags = this.readByte()
+      const numberOfFields = this.readShort()
 
-      if (numberOfFields < 0)
-        throw new Error("Invalid number of fields: " + numberOfFields);
+      if (numberOfFields < 0) throw new Error(`Invalid number of fields: ${numberOfFields}`)
 
-      const fields: Field[] = [];
+      const fields: Field[] = []
 
       for (let i = 0; i < numberOfFields; i++) {
-        const ftype = String.fromCharCode(this.readByte());
+        const ftype = String.fromCharCode(this.readByte())
 
         if (PRIMITIVE_TYPES.includes(ftype as FieldType)) {
-          const fname = this.readString();
-          fields.push(new Field(fname, ftype as FieldType, null));
-        } else if (
-          [FieldType.OBJECT, FieldType.ARRAY].includes(ftype as FieldType)
-        ) {
-          const fname = this.readString();
-          const stc = this.readByte();
-          const className = this.readNewString(stc);
+          const fname = this.readString()
+          fields.push(new Field(fname, ftype as FieldType, null))
+        } else if ([FieldType.OBJECT, FieldType.ARRAY].includes(ftype as FieldType)) {
+          const fname = this.readString()
+          const stc = this.readByte()
+          const className = this.readNewString(stc)
 
-          fields.push(new Field(fname, ftype as FieldType, className.data));
+          fields.push(new Field(fname, ftype as FieldType, className.data))
         } else {
-          throw new Error("invalid field type: " + ftype);
+          throw new Error(`invalid field type: ${ftype}`)
         }
       }
 
-      const classdesc = new ClassDescription(
-        handle,
-        ClassDescriptionType.NORMALCLASS
-      );
-      classdesc.name = name;
-      classdesc.serialVersionUID = serialVersionUID;
-      classdesc.flags = flags;
-      classdesc.fields = fields;
-      classdesc.annotations = this.readClassAnnotation();
-      classdesc.superClass = this.readClassDesc();
+      const classdesc = new ClassDescription(handle, ClassDescriptionType.NORMALCLASS)
+      classdesc.name = name
+      classdesc.serialVersionUID = serialVersionUID
+      classdesc.flags = flags
+      classdesc.fields = fields
+      classdesc.annotations = this.readClassAnnotation()
+      classdesc.superClass = this.readClassDesc()
 
-      this.saveHandle(handle, classdesc);
-      this.classDescriptions.push(classdesc);
-      return classdesc;
+      this.saveHandle(handle, classdesc)
+      this.classDescriptions.push(classdesc)
+      return classdesc
     } else if (tc === Constants.TC_NULL) {
       if (mustBeNew) {
-        throw new Error("Expected new class description, got null!");
+        throw new Error('Expected new class description, got null!')
       }
-      return null;
+      return null
     } else if (tc === Constants.TC_REFERENCE) {
       if (mustBeNew) {
-        throw new Error("Expected new class description, got a reference!");
+        throw new Error('Expected new class description, got a reference!')
       }
-      const classdesc = this.readPrevObject() as ClassDescription;
-      return classdesc;
+      const classdesc = this.readPrevObject() as ClassDescription
+      return classdesc
     } else if (tc === Constants.TC_PROXYCLASSDESC) {
-      const handle = this.newHandle();
-      const icount = this.readInt();
+      const handle = this.newHandle()
+      const icount = this.readInt()
 
       if (icount < 0) {
-        throw new Error("Invalid proxy interface count: " + icount);
+        throw new Error(`Invalid proxy interface count: ${icount}`)
       }
 
-      const interfaces: string[] = [];
-      for (let i = 0; i < icount; i++) interfaces.push(this.readString());
+      const interfaces: string[] = []
+      for (let i = 0; i < icount; i++) interfaces.push(this.readString())
 
-      const classdesc = new ClassDescription(
-        handle,
-        ClassDescriptionType.PROXYCLASS
-      );
-      classdesc.name = "(proxy class; no name)";
-      classdesc.interfaces = interfaces;
-      classdesc.superClass = this.readClassDesc();
+      const classdesc = new ClassDescription(handle, ClassDescriptionType.PROXYCLASS)
+      classdesc.name = '(proxy class; no name)'
+      classdesc.interfaces = interfaces
+      classdesc.superClass = this.readClassDesc()
 
-      this.saveHandle(handle, classdesc);
-      return classdesc;
+      this.saveHandle(handle, classdesc)
+      return classdesc
     } else {
-      throw new Error("Expected a valid class description starter, got: " + tc);
+      throw new Error(`Expected a valid class description starter, got: ${tc}`)
     }
   }
 
   readNewEnum(): EnumContent {
-    const cd = this.readClassDesc();
-    const handle = this.newHandle();
+    const cd = this.readClassDesc()
+    const handle = this.newHandle()
 
-    const tc = this.readByte();
-    const so = this.readNewString(tc);
+    const tc = this.readByte()
+    const so = this.readNewString(tc)
 
-    this.saveHandle(handle, so);
+    this.saveHandle(handle, so)
 
-    cd.addEnum(so.data);
-    return new EnumContent(handle, cd, so.data);
+    cd.addEnum(so.data)
+    return new EnumContent(handle, cd, so.data)
   }
 
   readFieldValue(type: string) {
     switch (type) {
       case FieldType.BYTE:
-        return this.readByte();
+        return this.readByte()
       case FieldType.CHAR:
-        return this.readChar();
+        return this.readChar()
       case FieldType.DOUBLE:
-        return this.readDouble();
+        return this.readDouble()
       case FieldType.FLOAT:
-        return this.readFloat();
+        return this.readFloat()
       case FieldType.INTEGER:
-        return this.readInt();
+        return this.readInt()
       case FieldType.LONG:
-        return this.readLong();
+        return this.readLong()
       case FieldType.SHORT:
-        return this.readShort();
+        return this.readShort()
       case FieldType.BOOLEAN:
-        return this.readBoolean();
+        return this.readBoolean()
       case FieldType.ARRAY:
       case FieldType.OBJECT: {
-        const stc = this.readByte();
-        return this.readContent(stc, false);
+        const stc = this.readByte()
+        return this.readContent(stc, false)
       }
       default:
-        throw new Error("readFieldValue: Cannot process type: " + type);
+        throw new Error(`readFieldValue: Cannot process type: ${type}`)
     }
   }
 
   readClassData(instance: Instance) {
     instance.classDescription.getHierarchy().forEach((clazz) => {
-      if ((clazz.flags & Constants.SC_SERIALIZABLE) != 0) {
+      if ((clazz.flags & Constants.SC_SERIALIZABLE) !== 0) {
         clazz.fields.forEach((field) => {
-          const value = this.readFieldValue(field.type);
-          instance.addFieldData(clazz.name, field.name, value);
-        });
+          const value = this.readFieldValue(field.type)
+          instance.addFieldData(clazz.name, field.name, value)
+        })
 
-        if ((clazz.flags & Constants.SC_WRITE_METHOD) != 0) {
-          if ((clazz.flags & Constants.SC_ENUM) != 0) {
-            throw new Error("SC_ENUM & SC_WRITE_METHOD encountered!");
+        if ((clazz.flags & Constants.SC_WRITE_METHOD) !== 0) {
+          if ((clazz.flags & Constants.SC_ENUM) !== 0) {
+            throw new Error('SC_ENUM & SC_WRITE_METHOD encountered!')
           }
 
-          instance.annotations.set(clazz.name, this.readClassAnnotation());
+          instance.annotations.set(clazz.name, this.readClassAnnotation())
         }
-      } else if ((clazz.flags & Constants.SC_EXTERNALIZABLE) != 0) {
-        if ((clazz.flags & Constants.SC_BLOCK_DATA) != 0) {
-          throw new Error(
-            "hit externalizable with nonzero SC_BLOCK_DATA; can't interpret data"
-          );
+      } else if ((clazz.flags & Constants.SC_EXTERNALIZABLE) !== 0) {
+        if ((clazz.flags & Constants.SC_BLOCK_DATA) !== 0) {
+          throw new Error("hit externalizable with nonzero SC_BLOCK_DATA; can't interpret data")
         } else {
-          instance.annotations.set(clazz.name, this.readClassAnnotation());
+          instance.annotations.set(clazz.name, this.readClassAnnotation())
         }
       }
-    });
+    })
   }
 
   readNewObject(): Instance {
-    const description = this.readClassDesc();
-    const handle = this.newHandle();
+    const description = this.readClassDesc()
+    const handle = this.newHandle()
 
-    const instance = new Instance(handle);
-    instance.classDescription = description;
+    const instance = new Instance(handle)
+    instance.classDescription = description
 
-    this.saveHandle(handle, instance);
-    this.readClassData(instance);
+    this.saveHandle(handle, instance)
+    this.readClassData(instance)
 
-    return instance;
+    return instance
   }
 
-  readArrayValues(type): unknown[] {
-    const size = this.readInt();
-    const values = [];
+  readArrayValues(type: string): unknown[] {
+    const size = this.readInt()
+    const values = []
     for (let i = 0; i < size; i++) {
-      values.push(this.readFieldValue(type));
+      values.push(this.readFieldValue(type))
     }
-    return values;
+    return values
   }
 
   readNewArray(): ArrayContent {
-    const cd = this.readClassDesc();
-    const handle = this.newHandle();
-    const values = this.readArrayValues(cd.name.substring(1, 2));
-    const ac = new ArrayContent(handle, cd.name, values);
-    this.saveHandle(handle, ac);
-    return ac;
+    const cd = this.readClassDesc()
+    const handle = this.newHandle()
+    const values = this.readArrayValues(cd.name.substring(1, 2))
+    const ac = new ArrayContent(handle, cd.name, values)
+    this.saveHandle(handle, ac)
+    return ac
   }
 
   readNewClass(): ClassDescription {
-    const tc = this.readByte();
-    return this.handleClassDesc(tc, true);
+    const tc = this.readByte()
+    return this.handleClassDesc(tc, true)
   }
 
   readException(): Content {
-    this.reset();
-    const tc = this.readByte();
-    if (tc == Constants.TC_RESET) {
-      throw new Error(
-        "TC_RESET for object while reading exception: what should we do?"
-      );
+    this.reset()
+    const tc = this.readByte()
+    if (tc === Constants.TC_RESET) {
+      throw new Error('TC_RESET for object while reading exception: what should we do?')
     }
-    const c = this.readContent(tc, false);
+    const c = this.readContent(tc, false)
     if (c == null) {
-      throw new Error(
-        "stream signaled for an exception, but exception object was null!"
-      );
+      throw new Error('stream signaled for an exception, but exception object was null!')
     }
     if (!(c instanceof Instance)) {
-      throw new Error(
-        "stream signaled for an exception, but content is not an object!"
-      );
+      throw new Error('stream signaled for an exception, but content is not an object!')
     }
 
     if (c.isExceptionObject) {
-      throw new Error("serialized exception read during stream");
+      throw new Error('serialized exception read during stream')
     }
-    c.isExceptionObject = true;
-    this.reset();
-    return c;
+    c.isExceptionObject = true
+    this.reset()
+    return c
   }
 
   readContent(tc: number, blockData: boolean): Content | null {
     switch (tc) {
       case Constants.TC_NULL:
-        return null;
+        return null
       case Constants.TC_CLASS:
-        return this.readNewClass();
+        return this.readNewClass()
       case Constants.TC_OBJECT:
-        return this.readNewObject();
+        return this.readNewObject()
       case Constants.TC_ARRAY:
-        return this.readNewArray();
+        return this.readNewArray()
       case Constants.TC_ENUM:
-        return this.readNewEnum();
+        return this.readNewEnum()
       case Constants.TC_STRING:
       case Constants.TC_LONGSTRING:
-        return this.readNewString(tc);
+        return this.readNewString(tc)
       case Constants.TC_REFERENCE:
-        return this.readPrevObject();
+        return this.readPrevObject()
       case Constants.TC_BLOCKDATA:
       case Constants.TC_BLOCKDATALONG:
-        if (blockData == false) {
-          throw new Error("got a blockdata TC_*, but not allowed here: " + tc);
+        if (blockData === false) {
+          throw new Error(`got a blockdata TC_*, but not allowed here: ${tc}`)
         }
-        return this.readBlockData(tc);
+        return this.readBlockData(tc)
       case Constants.TC_EXCEPTION:
-        return this.readException();
+        return this.readException()
       case Constants.TC_CLASSDESC:
       case Constants.TC_PROXYCLASSDESC:
-        return this.handleClassDesc(tc);
+        return this.handleClassDesc(tc)
       default:
-        throw new Error("Unknown content tc byte in stream: " + tc);
+        throw new Error(`Unknown content tc byte in stream: ${tc}`)
     }
   }
 
   deserialize(): Content[] {
-    const magic = this.readShort();
+    const magic = this.readShort()
 
     if (magic !== Constants.STREAM_MAGIC)
-      throw new Error(
-        "Magic mismatch! expected " + Constants.STREAM_MAGIC + ", got " + magic
-      );
+      throw new Error(`Magic mismatch! expected ${Constants.STREAM_MAGIC}, got ${magic}`)
 
-    const version = this.readShort();
+    const version = this.readShort()
 
     if (version !== Constants.STREAM_VERSION)
-      throw new Error(
-        "Version mismatch! expected " +
-          Constants.STREAM_VERSION +
-          ", got " +
-          version
-      );
+      throw new Error(`Version mismatch! expected ${Constants.STREAM_VERSION}, got ${version}`)
 
-    const objects: Content[] = [];
+    const objects: Content[] = []
 
     while (this.hasMoreContent()) {
-      const tc = this.readByte();
-      const content = this.readContent(tc, true);
+      const tc = this.readByte()
+      const content = this.readContent(tc, true)
 
       if (content != null) {
-        objects.push(content);
+        objects.push(content)
       }
     }
 
-    return objects;
+    return objects
   }
 
   connectMemberClasses() {
-    const newnames = new Map<ClassDescription, string>();
-    const classes = new Map<string, ClassDescription>();
-    const classnames = new Set<string>();
+    const newnames = new Map<ClassDescription, string>()
+    const classes = new Map<string, ClassDescription>()
+    const classnames = new Set<string>()
 
     this.handles.forEach((c) => {
       if (!(c instanceof ClassDescription)) {
-        return;
+        return
       }
-      const cd = c as ClassDescription;
-      classes.set(cd.name, cd);
-      classnames.add(cd.name);
-    });
+      const cd = c as ClassDescription
+      classes.set(cd.name, cd)
+      classnames.add(cd.name)
+    })
 
-    const fpat = new RegExp("^this\\$(\\d+)$");
-    const clpat = new RegExp("^((?:[^\\$]+\\$)*[^\\$]+)\\$([^\\$]+)$");
+    const fpat = /^this\$(\d+)$/
+    const clpat = /^((?:[^$]+\$)*[^$]+)\$([^$]+)$/
 
     classes.forEach((cd) => {
-      if (cd.type == ClassDescriptionType.PROXYCLASS) {
-        return;
+      if (cd.type === ClassDescriptionType.PROXYCLASS) {
+        return
       }
 
       cd.fields.forEach((f) => {
-        if (f.type != "L") {
-          return;
+        if (f.type !== 'L') {
+          return
         }
 
         if (!fpat.test(f.name)) {
-          return;
+          return
         }
-        const islocal = false;
-        const clmat = cd.name.match(clpat);
+        const islocal = false
+        const clmat = cd.name.match(clpat)
         if (clmat === null) {
           throw new Error(
             "inner class enclosing-class reference field exists, but class name doesn't match expected pattern: class " +
               cd.name +
-              " field " +
-              f.name
-          );
+              ' field ' +
+              f.name,
+          )
         }
         const outer = clmat[1],
-          inner = clmat[2];
-        const outercd = classes.get(outer);
+          inner = clmat[2]
+        const outercd = classes.get(outer)
         if (outercd == null) {
-          throw new Error(
-            "couldn't connect inner classes: outer class not found for field name " +
-              f.name
-          );
+          throw new Error(`couldn't connect inner classes: outer class not found for field name ${f.name}`)
         }
         if (outercd.name !== f.getJavaType()) {
           throw new Error(
             "outer class field type doesn't match field type name: " +
               f.className +
-              " outer class name " +
-              outercd.name
-          );
+              ' outer class name ' +
+              outercd.name,
+          )
         }
-        outercd.addInnerClass(cd);
-        cd.isLocalInnerClass = islocal;
-        cd.isInnerClass = true;
-        f.isInnerClassReference = true;
-        newnames.set(cd, inner);
-      });
-    });
+        outercd.addInnerClass(cd)
+        cd.isLocalInnerClass = islocal
+        cd.isInnerClass = true
+        f.isInnerClassReference = true
+        newnames.set(cd, inner)
+      })
+    })
 
     classes.forEach((cd) => {
-      if (cd.type == ClassDescriptionType.PROXYCLASS) {
-        return;
+      if (cd.type === ClassDescriptionType.PROXYCLASS) {
+        return
       }
       if (cd.isInnerClass) {
-        return;
+        return
       }
 
-      const clmat = cd.name.match(clpat);
+      const clmat = cd.name.match(clpat)
       if (clmat === null) {
-        return;
+        return
       }
       const outer = clmat[1],
-        inner = clmat[2];
-      const outercd = classes.get(outer);
+        inner = clmat[2]
+      const outercd = classes.get(outer)
       if (outercd != null) {
-        outercd.addInnerClass(cd);
-        cd.isStaticMemberClass = true;
-        newnames.set(cd, inner);
+        outercd.addInnerClass(cd)
+        cd.isStaticMemberClass = true
+        newnames.set(cd, inner)
       }
-    });
+    })
 
     newnames.forEach((newname, ncd) => {
       if (classnames.has(newname)) {
-        throw new Error(
-          "can't rename class from " +
-            ncd.name +
-            " to " +
-            newname +
-            " -- class already exists!"
-        );
+        throw new Error(`can't rename class from ${ncd.name} to ${newname} -- class already exists!`)
       }
 
       classes.forEach((cd) => {
-        if (cd.type == ClassDescriptionType.PROXYCLASS) {
-          return;
+        if (cd.type === ClassDescriptionType.PROXYCLASS) {
+          return
         }
 
         cd.fields.forEach((f) => {
           if (f.getJavaType() === ncd.name) {
-            f.setReferenceTypeName(newname);
+            f.setReferenceTypeName(newname)
           }
-        });
-      });
+        })
+      })
 
-      if (classnames.delete(ncd.name) == false) {
-        throw new Error(
-          "tried to remove " +
-            ncd.name +
-            " from classnames cache, but couldn't find it!"
-        );
+      if (classnames.delete(ncd.name) === false) {
+        throw new Error(`tried to remove ${ncd.name} from classnames cache, but couldn't find it!`)
       }
-      ncd.name = newname;
+      ncd.name = newname
 
       if (classnames.has(newname)) {
-        throw new Error(
-          "can't rename class to " + newname + " -- class already exists!"
-        );
+        throw new Error(`can't rename class to ${newname} -- class already exists!`)
       }
 
-      classnames.add(newname);
-    });
+      classnames.add(newname)
+    })
   }
 }
 
 type DeserializationResult = {
-  objects: Content[];
-  classes: ClassDescription[];
-};
+  objects: Content[]
+  classes: ClassDescription[]
+}
 
-export function deserialize(
-  data: Buffer,
-  connect = true
-): DeserializationResult {
-  const d = new Deserializer(data);
-  const objects = d.deserialize();
+export function deserialize(data: Buffer, connect = true): DeserializationResult {
+  const d = new Deserializer(data)
+  const objects = d.deserialize()
 
   if (connect) {
-    d.connectMemberClasses();
+    d.connectMemberClasses()
   }
 
   return {
     objects: objects,
     classes: d.classDescriptions,
-  };
+  }
 }
