@@ -32,7 +32,7 @@ Stack: React 19, React Router, Vite, Tailwind CSS 4, TanStack Query, zustand, Bi
 | Path | What |
 | --- | --- |
 | `apps/web` | the good.tools web app |
-| `packages/*` | npm libraries used by the app (moving in; see [docs/monorepo-plan.md](docs/monorepo-plan.md)) |
+| `packages/*` | npm libraries used by the app |
 
 To add a tool, read [CONTRIBUTING.md](CONTRIBUTING.md). It covers the project layout, the tool registry, the UI guidelines and the PR process.
 
