@@ -1,41 +1,111 @@
 name: Release & Deploy
 
+# Runs after Test succeeds on a push to master. release-please keeps a
+# release PR open with the next version and changelog; merging it creates
+# the release, and the deploy job builds that commit and ships it to S3 +
+# CloudFront.
 on:
   workflow_run:
     workflows: [Test]
-    branches: master
-    types: completed
+    branches: [master]
+    types: [completed]
+  # Recovery / manual redeploy of an existing release (e.g. if release-please
+  # created the release but the run failed before deploying it).
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to deploy (e.g. v1.24.0)
+        required: true
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.repository == 'good-tools/good.tools' }}
+  release-please:
+    runs-on: ubuntu-24.04
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.repository == 'good-tools/good.tools' }}
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      sha: ${{ steps.release.outputs.sha }}
     steps:
-      - uses: actions/checkout@v3
+      # release-please always acts on the current master tip, so only run it
+      # for the Test run of that tip.
+      - name: Check run is for master tip
+        id: tip
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          tip=$(gh api "repos/${GITHUB_REPOSITORY}/commits/master" --jq .sha)
+          if [ "$tip" = "$HEAD_SHA" ]; then
+            echo "latest=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Skipping: run is for $HEAD_SHA, master is at $tip"
+          fi
+
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        id: release
+        if: steps.tip.outputs.latest == 'true'
+        with:
+          # PAT so the release PR triggers Test (GITHUB_TOKEN events don't).
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          config-file: .github/release-please-config.json
+          manifest-file: .github/.release-please-manifest.json
+
+  deploy:
+    needs: release-please
+    if: ${{ always() && (needs.release-please.outputs.release_created == 'true' || github.event_name == 'workflow_dispatch') }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write # upload the release asset
+    env:
+      TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || needs.release-please.outputs.tag_name }}
+    steps:
+      - name: Check the release exists
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release view "$TAG" -R "$GITHUB_REPOSITORY" > /dev/null
+
+      - name: Check release commit matches the Test run
+        if: github.event_name != 'workflow_dispatch'
+        env:
+          RELEASE_SHA: ${{ needs.release-please.outputs.sha }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          if [ "$RELEASE_SHA" != "$HEAD_SHA" ]; then
+            echo "::error::Release commit $RELEASE_SHA != Test run commit $HEAD_SHA"
+            exit 1
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.workflow_run.head_sha }}
+          persist-credentials: false
 
       - name: Configure Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 22.x
-          cache: "npm"
+          node-version: 22
+          cache: npm
 
-      - name: Load Dependencies
-        run: npm ci
+      - run: npm ci
+      - run: npm run build-sitemap
+      - run: npm run build
 
-      - name: Build Sitemap
-        run: npm run build-sitemap
-
-      - name: Build Application
-        run: npm run build
-
-      - name: Release
-        id: release
+      - name: Upload release asset
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tar -czf dist.tar.gz dist/
+          gh release upload "$TAG" dist.tar.gz --clobber -R "$GITHUB_REPOSITORY"
 
       - name: Configure AWS credentials
-        if: steps.release.outputs.released == '1'
         uses: aws-actions/configure-aws-credentials@13d241b293754004c80624b5567555c4a39ffbe3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -43,9 +113,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Deploy
-        if: steps.release.outputs.released == '1'
         run: aws s3 sync ./dist/ s3://${{ secrets.S3_BUCKET }} --delete
 
-      - name: CF Invalidation
-        if: steps.release.outputs.released == '1'
+      - name: CloudFront invalidation
         run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CF_DISTRIBUTION_ID }} --paths "/*"
