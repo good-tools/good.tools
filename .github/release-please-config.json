@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
-  "bootstrap-sha": "c0884d3a412c65da8026544587b208c74f0e227b",
+  "bootstrap-sha": "a05629dedee7c89ffda00d29d0129cb937fbfcf0",
   "packages": {
     "apps/web": {
       "release-type": "node",
@@ -34,7 +34,8 @@
       "package-name": "@goodtools/wasmpatch",
       "component": "wasmpatch",
       "include-component-in-tag": true,
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "initial-version": "0.1.0"
     }
   }
 }
