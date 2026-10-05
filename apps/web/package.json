@@ -36,6 +36,7 @@
     "marked": "^18.1.0",
     "mermaid": "^12.1.0",
     "node-forge": "^1.4.0",
+    "onnxruntime-web": "^1.30.0",
     "pdfjs-dist": "^6.4.299",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
