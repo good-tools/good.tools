@@ -5,6 +5,7 @@
     "apps/web": {
       "release-type": "node",
       "package-name": "good.tools",
+      "component": "web",
       "include-component-in-tag": true,
       "changelog-path": "CHANGELOG.md"
     },
