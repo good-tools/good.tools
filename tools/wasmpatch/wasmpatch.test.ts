@@ -84,6 +84,24 @@ test('apply → edit → export → apply round-trips, keeping patch rationale',
   expect(run('status').out).toContain('lib: 1 patches, 1 overlay files, prepared')
 })
 
+test('apply protects new files that were never git-added', () => {
+  writeConfig(tarball('1.0', { 'a.c': 'int a;\n' }))
+  run('apply')
+  fs.writeFileSync(path.join(work, 'build/src/lib/new.h'), 'int n;\n')
+  const res = run('apply')
+  expect(res.code).toBe(1)
+  expect(res.out).toContain('new.h')
+  expect(fs.existsSync(path.join(work, 'build/src/lib/new.h'))).toBe(true)
+})
+
+test('--help anywhere prints usage instead of running the command', () => {
+  writeConfig(tarball('1.0', { 'a.c': 'int a;\n' }))
+  const res = run('apply', '--help')
+  expect(res.code).toBe(0)
+  expect(res.out).toContain('usage: wasmpatch')
+  expect(fs.existsSync(path.join(work, 'build'))).toBe(false)
+})
+
 test('check reports patches that no longer apply', () => {
   writeConfig(tarball('1.0', { 'a.c': 'int a = 1;\n' }))
   fs.mkdirSync(path.join(work, 'patches/lib'), { recursive: true })
