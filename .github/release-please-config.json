@@ -21,6 +21,20 @@
       "component": "protobuf-decoder",
       "include-component-in-tag": true,
       "changelog-path": "CHANGELOG.md"
+    },
+    "packages/meshrepair": {
+      "release-type": "node",
+      "package-name": "@goodtools/meshrepair",
+      "component": "meshrepair",
+      "include-component-in-tag": true,
+      "changelog-path": "CHANGELOG.md"
+    },
+    "tools/wasmpatch": {
+      "release-type": "node",
+      "package-name": "@goodtools/wasmpatch",
+      "component": "wasmpatch",
+      "include-component-in-tag": true,
+      "changelog-path": "CHANGELOG.md"
     }
   }
 }

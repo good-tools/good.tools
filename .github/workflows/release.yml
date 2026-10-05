@@ -140,6 +140,9 @@ jobs:
         with:
           context: .
           file: apps/web/Dockerfile
+          # the WebAssembly built by `bun run build` above (no Docker inside the image build)
+          build-contexts: |
+            wasm-meshrepair=packages/meshrepair/wasm
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.image.outputs.tags }}

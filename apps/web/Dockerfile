@@ -1,6 +1,12 @@
 # Self-hostable good.tools image. Build from the repository root:
 #   docker build -f apps/web/Dockerfile -t good-tools .
 
+# WebAssembly built outside this build (CI passes
+#   --build-context wasm-meshrepair=packages/meshrepair/wasm).
+# Empty by default: the build then reuses the published binaries when the C++ inputs
+# match a release (see packages/meshrepair/scripts/build-wasm.mjs).
+FROM scratch AS wasm-meshrepair
+
 # Static output, so build once on the native platform even for multi-arch images
 FROM --platform=$BUILDPLATFORM oven/bun:1-alpine AS base
 WORKDIR /app
@@ -14,6 +20,7 @@ FROM base AS builder
 COPY --from=prune /app/out/json/ .
 RUN bun install --frozen-lockfile
 COPY --from=prune /app/out/full/ .
+COPY --from=wasm-meshrepair / packages/meshrepair/wasm/
 RUN bunx turbo@^2 run build --filter=@good-tools/web
 
 # Runtime stage
