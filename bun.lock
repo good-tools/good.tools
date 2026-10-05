@@ -15,9 +15,9 @@
       "dependencies": {
         "@fontsource-variable/inter": "^5.3.0",
         "@fontsource-variable/jetbrains-mono": "^5.3.0",
-        "@goodtools/jdserialize": "^1.0.0",
-        "@goodtools/meshrepair": "^0.1.1",
-        "@goodtools/protobuf-decoder": "^1.0.0",
+        "@goodtools/jdserialize": "workspace:*",
+        "@goodtools/meshrepair": "workspace:*",
+        "@goodtools/protobuf-decoder": "workspace:*",
         "@goodtools/wiregasm": "^2.0.0",
         "@headlessui/react": "^2.2.10",
         "@modelcontextprotocol/sdk": "^1.32.0",
@@ -83,6 +83,17 @@
         "vitest": "^5.0.3",
       },
     },
+    "packages/meshrepair": {
+      "name": "@goodtools/meshrepair",
+      "version": "0.1.1",
+      "devDependencies": {
+        "@goodtools/wasmpatch": "workspace:*",
+        "@types/node": "^26.6.4",
+        "tsdown": "^0.23.0",
+        "typescript": "~6.0",
+        "vitest": "^5.0.3",
+      },
+    },
     "packages/protobuf-decoder": {
       "name": "@goodtools/protobuf-decoder",
       "version": "1.0.0",
@@ -90,6 +101,17 @@
         "@types/node": "^26.6.4",
         "tsdown": "^0.23.0",
         "typescript": "~6.0",
+        "vitest": "^5.0.3",
+      },
+    },
+    "tools/wasmpatch": {
+      "name": "@goodtools/wasmpatch",
+      "version": "0.0.0",
+      "bin": {
+        "wasmpatch": "./wasmpatch.mjs",
+      },
+      "devDependencies": {
+        "@types/node": "^26.6.4",
         "vitest": "^5.0.3",
       },
     },
@@ -207,9 +229,11 @@
 
     "@goodtools/jdserialize": ["@goodtools/jdserialize@workspace:packages/jdserialize"],
 
-    "@goodtools/meshrepair": ["@goodtools/meshrepair@0.1.1", "", {}, "sha512-HhFHvpdUyVinRvA/TA8tZmR9WeIPx/hQ96nYEuKiEzBQhI1LS39Itowl5V7//Lrvj9/Lz3i/uxa384+WBLIcuA=="],
+    "@goodtools/meshrepair": ["@goodtools/meshrepair@workspace:packages/meshrepair"],
 
     "@goodtools/protobuf-decoder": ["@goodtools/protobuf-decoder@workspace:packages/protobuf-decoder"],
+
+    "@goodtools/wasmpatch": ["@goodtools/wasmpatch@workspace:tools/wasmpatch"],
 
     "@goodtools/wiregasm": ["@goodtools/wiregasm@2.0.0", "", {}, "sha512-pAt6nckRGu8A1EDO0c0n6sXDtIZGLAWDdeeKiQDwtFxOP1RvKmyNE3okFKJkC9ex0/x2afuvYYMGWJCxepku/w=="],
 

@@ -28,6 +28,12 @@ bun run dev        # http://localhost:3000
 
 Online tools (DNS, WHOIS, IP, Docker Browser) call `https://internet-tools.fly.dev` and `https://image-browser.fly.dev` in dev. See `apps/web/.env.example` to point them elsewhere.
 
+## Native code (WebAssembly)
+
+Some packages compile C/C++ to WebAssembly (today `packages/meshrepair`). You don't need Emscripten to work on the app: their build step reuses binaries whenever the native inputs are unchanged. It checks, in order, the local `wasm/` folder, Turborepo's cache, and the published release built from the same inputs, and only compiles when none of those match. Compiling uses Emscripten from `PATH` or, with only Docker installed, the pinned image in `tools/wasmpatch/Dockerfile.emsdk`.
+
+Upstream C/C++ sources are pinned and patched with [`wasmpatch`](tools/wasmpatch): edit `build/src/<source>`, run `wasmpatch export <source>`, and commit the generated `patches/` and `overlay/` files with a short "Why:" line above each diff.
+
 ## Project layout
 
 This is a Bun workspaces + Turborepo monorepo. Run commands from the repository root; Turborepo runs them in every package (and caches the results). The web app lives in `apps/web`:
@@ -41,6 +47,8 @@ apps/web/src/
   components/shell/        # header, sidebar, command palette
   hooks/                   # useToolState, API hooks
   pages/                   # home, tool page wrapper, 404
+packages/                  # npm libraries (jdserialize, protobuf-decoder, meshrepair)
+tools/wasmpatch/           # pinned upstream sources + patches for WebAssembly builds
 ```
 
 ## Adding a tool

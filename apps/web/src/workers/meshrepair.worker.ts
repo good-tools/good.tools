@@ -1,6 +1,5 @@
 /** Runs @goodtools/meshrepair off the main thread so repairs don't freeze the UI. */
 import { MeshRepair, type RepairOptions, type RepairResult } from '@goodtools/meshrepair'
-// @ts-expect-error - No type declarations for WASM loader subpath export
 import loadMeshRepair from '@goodtools/meshrepair/dist/meshrepair.js'
 import wasmPath from '@goodtools/meshrepair/dist/meshrepair.wasm?url'
 
