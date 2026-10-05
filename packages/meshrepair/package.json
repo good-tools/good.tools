@@ -1,0 +1,73 @@
+{
+  "name": "@goodtools/meshrepair",
+  "version": "0.1.1",
+  "description": "WebAssembly-powered STL mesh repair using VCGlib",
+  "keywords": [
+    "stl",
+    "mesh",
+    "repair",
+    "3d-printing",
+    "wasm",
+    "vcglib",
+    "meshlab",
+    "webassembly"
+  ],
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/good-tools/good.tools.git",
+    "directory": "packages/meshrepair"
+  },
+  "homepage": "https://github.com/good-tools/good.tools/tree/master/packages/meshrepair#readme",
+  "bugs": "https://github.com/good-tools/good.tools/issues",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./wasm": {
+      "types": "./dist/meshrepair.d.ts",
+      "default": "./dist/meshrepair.js"
+    },
+    "./dist/meshrepair.js": {
+      "types": "./dist/meshrepair.d.ts",
+      "default": "./dist/meshrepair.js"
+    },
+    "./dist/meshrepair.wasm": "./dist/meshrepair.wasm",
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build:wasm": "node scripts/build-wasm.mjs",
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@goodtools/wasmpatch": "workspace:*",
+    "@types/node": "^26.6.4",
+    "tsdown": "^0.23.0",
+    "typescript": "~6.0",
+    "vitest": "^5.0.3"
+  }
+}

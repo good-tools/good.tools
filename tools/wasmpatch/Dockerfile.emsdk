@@ -1,0 +1,21 @@
+# Reproducible Emscripten build environment for good.tools WebAssembly libraries.
+# The versions come from the library's upstream.json (see wasmpatch `print`):
+#
+#   docker build -f tools/wasmpatch/Dockerfile.emsdk \
+#     --build-arg EMSDK_VERSION=$(wasmpatch print toolchain.emsdk) \
+#     --build-arg MESON_VERSION=$(wasmpatch print toolchain.meson) \
+#     -t good-tools/emsdk:<emsdk>-<meson> .
+# The defaults only keep `docker build` happy; the library's upstream.json decides.
+ARG EMSDK_VERSION=4.0.23
+FROM emscripten/emsdk:${EMSDK_VERSION}
+
+ARG MESON_VERSION=1.9.1
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ninja-build python3-pip git curl xz-utils \
+ && (pip3 install --no-cache-dir --break-system-packages "meson==${MESON_VERSION}" \
+     || pip3 install --no-cache-dir "meson==${MESON_VERSION}") \
+ && rm -rf /var/lib/apt/lists/*
+
+# emsdk's image runs as root; builds run with the caller's uid (`docker run --user`),
+# so give Emscripten's cache a writable location
+ENV EM_CACHE=/tmp/emscripten-cache

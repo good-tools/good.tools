@@ -32,7 +32,9 @@ Stack: React 19, React Router, Vite, Tailwind CSS 4, TanStack Query, zustand, Bi
 | Path | What |
 | --- | --- |
 | `apps/web` | the good.tools web app |
-| `packages/*` | npm libraries used by the app |
+| `packages/jdserialize`, `packages/protobuf-decoder` | npm libraries behind the Java and Protobuf decoders |
+| `packages/meshrepair` | STL mesh repair compiled to WebAssembly (C++/VCGlib) |
+| `tools/wasmpatch` | pinned upstream sources + patches for WebAssembly builds |
 
 To add a tool, read [CONTRIBUTING.md](CONTRIBUTING.md). It covers the project layout, the tool registry, the UI guidelines and the PR process.
 

@@ -31,3 +31,8 @@ biome.json
 # OS files
 .DS_Store
 Thumbs.db
+
+# Native/WebAssembly build state (CI passes prebuilt WASM via --build-context)
+packages/*/wasm
+packages/*/build
+packages/*/.cache

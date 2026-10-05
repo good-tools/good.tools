@@ -1,0 +1,5 @@
+# wasmpatch: patched upstream sources, downloads, and the native build
+build/
+.cache/
+# compiled WebAssembly (built by `bun run build:wasm`)
+wasm/

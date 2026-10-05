@@ -5,6 +5,12 @@ on: [push]
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      # Optional Turborepo remote cache (e.g. Vercel Remote Cache): with these set, CI shares
+      # task outputs with developers. Compiled WebAssembly reaches Vercel previews through the
+      # published prebuilt binaries instead (see packages/meshrepair/scripts/build-wasm.mjs).
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
@@ -13,6 +19,14 @@ jobs:
           path: .turbo/cache
           key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: turbo-${{ runner.os }}-
+      # Upstream sources pinned by wasmpatch (e.g. VCGlib), keyed on the pins
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: packages/*/.cache/tarballs
+          key: wasmpatch-tarballs-${{ hashFiles('packages/*/upstream.json') }}
       - run: bun install --frozen-lockfile
-      - run: bun run check
+      # Build first so the WebAssembly packages' tests run against real binaries. Turborepo
+      # skips anything whose inputs are unchanged; native code is only compiled (in the pinned
+      # emsdk Docker image) when its inputs changed.
       - run: bun run build
+      - run: bun run check

@@ -1,0 +1,12 @@
+{
+  "toolchain": {
+    "emsdk": "4.0.23",
+    "meson": "1.9.1"
+  },
+  "sources": {
+    "vcglib": {
+      "url": "https://github.com/cnr-isti-vclab/vcglib/archive/refs/tags/2025.07.tar.gz",
+      "sha256": "e49fc9342d5476b3e39a5e1939b965b57c91d7a17b4f97b8c5eaf01228b16cf0"
+    }
+  }
+}
