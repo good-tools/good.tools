@@ -3,10 +3,11 @@
 // whose hashes match. Cloudflare serves files up to 25 MiB: the model files above that are split into parts
 // that workers/whisper.worker.ts joins again, and the ONNX Runtime wasm is gzipped.
 import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname } from 'node:path'
 import { gzipSync } from 'node:zlib'
+import { TINY_PATH, TINY_REVISION } from './lib/whisper-tiny'
 
 export interface WhisperManifest {
   revision: string
@@ -15,7 +16,7 @@ export interface WhisperManifest {
 }
 
 const REPO = 'onnx-community/whisper-tiny'
-const REVISION = 'ff4177021cc41f7db950912b73ea4fdf7d01d8e7'
+const REVISION = TINY_REVISION
 /** SHA-256 of each file at REVISION; a download that doesn't match fails the build */
 const FILES: Record<string, string> = {
   'config.json': '46aeea0a406afbeb563fc8e59ca10609203df4299af6a83f73752fef369efd2d',
@@ -43,7 +44,10 @@ if (!existsSync(ortOut))
   write(ortOut, gzipSync(readFileSync(require.resolve('onnxruntime-web/ort-wasm-simd-threaded.asyncify.wasm'))))
 
 // The worker serves tiny from this site only when the manifest exists: it is written last, once every file checks out
-const dir = `${OUT}/tiny`
+const dir = `public${TINY_PATH}`
+// Drop other revisions' folders (and files from before the folders were revision-scoped)
+for (const entry of existsSync(`${OUT}/tiny`) ? readdirSync(`${OUT}/tiny`) : [])
+  if (`${OUT}/tiny/${entry}` !== dir) rmSync(`${OUT}/tiny/${entry}`, { recursive: true, force: true })
 const manifestPath = `${dir}/manifest.json`
 rmSync(manifestPath, { force: true })
 

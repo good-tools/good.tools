@@ -3,6 +3,7 @@ import { type AutomaticSpeechRecognitionPipeline, env, pipeline, type Tensor } f
 import ortMjs from 'onnxruntime-web/ort-wasm-simd-threaded.asyncify.mjs?url'
 import { fetchInflated } from '@/lib/fetch-inflated'
 import type { Cue } from '@/lib/subtitles'
+import { TINY_PATH } from '@/lib/whisper-tiny'
 import type { WhisperManifest } from '@/whisper-assets'
 
 export type WhisperModel = 'tiny' | 'base' | 'small'
@@ -35,7 +36,7 @@ const runtime = (async () => {
 // Transformers.js asks for Hugging Face URLs; answer those for whisper-tiny with the joined local files.
 // Without a manifest (the build was offline) tiny comes from Hugging Face like the other models.
 const TINY = 'https://huggingface.co/onnx-community/whisper-tiny/resolve/'
-const manifest: Promise<WhisperManifest | null> = fetch('/whisper/tiny/manifest.json')
+const manifest: Promise<WhisperManifest | null> = fetch(`${TINY_PATH}/manifest.json`)
   .then((r) => (r.ok ? r.json() : null))
   .catch(() => null) // includes an SPA fallback page that isn't JSON
 const hubFetch = env.fetch
@@ -46,7 +47,7 @@ env.fetch = async (input, init) => {
   const file = url.slice(TINY.length).replace(/^[^/]+\//, '') // drop the revision
   const entry = files[file]
   if (!entry) return new Response(null, { status: 404 })
-  const base = `/whisper/tiny/${file}`
+  const base = `${TINY_PATH}/${file}`
   const parts = entry.parts ? Array.from({ length: entry.parts }, (_, i) => `${base}.${i}`) : [base]
   let reader: ReadableStreamDefaultReader<Uint8Array> | undefined
   const body = new ReadableStream<Uint8Array>(
