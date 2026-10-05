@@ -1,0 +1,58 @@
+{
+  "name": "@goodtools/jdserialize",
+  "version": "1.0.0",
+  "description": "Interpret Java serialized objects",
+  "keywords": [
+    "java",
+    "deserialize",
+    "serialization",
+    "decoder",
+    "reverse engineering",
+    "security",
+    "analysis"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/good-tools/good.tools.git",
+    "directory": "packages/jdserialize"
+  },
+  "homepage": "https://github.com/good-tools/good.tools/tree/master/packages/jdserialize#readme",
+  "bugs": "https://github.com/good-tools/good.tools/issues",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "tsdown": "^0.23.0",
+    "typescript": "~6.0",
+    "vitest": "^5.0.3"
+  }
+}

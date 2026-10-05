@@ -7,6 +7,20 @@
       "package-name": "good.tools",
       "include-component-in-tag": false,
       "changelog-path": "CHANGELOG.md"
+    },
+    "packages/jdserialize": {
+      "release-type": "node",
+      "package-name": "@goodtools/jdserialize",
+      "component": "jdserialize",
+      "include-component-in-tag": true,
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/protobuf-decoder": {
+      "release-type": "node",
+      "package-name": "@goodtools/protobuf-decoder",
+      "component": "protobuf-decoder",
+      "include-component-in-tag": true,
+      "changelog-path": "CHANGELOG.md"
     }
   }
 }
