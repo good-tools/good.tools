@@ -1,4 +1,5 @@
 import {
+  ArrowLeftRight,
   Box,
   Braces,
   Code2,
@@ -454,6 +455,21 @@ export const tools: Tool[] = [
     component: lazy(() => import('@/tools/PdfPassword')),
     online: false,
     dependencies: [{ name: 'qpdf', url: 'https://qpdf.sourceforge.io' }],
+  },
+  {
+    title: 'YAML / JSON / TOML Converter',
+    path: '/data-converter',
+    description: 'Convert between YAML, JSON, TOML and CSV as you type, with errors pointing at the line and column',
+    icon: ArrowLeftRight,
+    categories: [CATEGORIES.DEVELOPMENT, CATEGORIES.ENCODING],
+    searchTags: ['yaml', 'yml', 'json', 'toml', 'csv', 'convert', 'converter', 'config', 'transform'],
+    component: lazy(() => import('@/tools/DataConverter')),
+    online: false,
+    dependencies: [
+      { name: 'yaml', url: 'https://www.npmjs.com/package/yaml' },
+      { name: 'smol-toml', url: 'https://www.npmjs.com/package/smol-toml' },
+      { name: 'papaparse', url: 'https://www.npmjs.com/package/papaparse' },
+    ],
   },
 ]
 
