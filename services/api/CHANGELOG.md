@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/good-tools/good.tools/compare/api-v0.1.0...api-v0.2.0) (2026-10-05)
+
+
+### Features
+
+* serve PR previews on pr-&lt;n&gt;.good.tools ([#37](https://github.com/good-tools/good.tools/issues/37)) ([e1dc72b](https://github.com/good-tools/good.tools/commit/e1dc72b8b761c9f0b420e7746c9b799093098225))
+
 ## 0.1.0 (2026-10-05)
 
 

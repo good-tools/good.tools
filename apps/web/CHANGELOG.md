@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.26.0](https://github.com/good-tools/good.tools/compare/v1.25.0...v1.26.0) (2026-10-05)
+
+
+### Features
+
+* serve PR previews on pr-&lt;n&gt;.good.tools ([#37](https://github.com/good-tools/good.tools/issues/37)) ([e1dc72b](https://github.com/good-tools/good.tools/commit/e1dc72b8b761c9f0b420e7746c9b799093098225))
+* **web:** add PDF tools (images to PDF, merge, text, protect/unlock) ([#28](https://github.com/good-tools/good.tools/issues/28)) ([7f23305](https://github.com/good-tools/good.tools/commit/7f23305bfff8502c7da7489e129062dc297b1c30))
+* **web:** compression, live PDF size and undo in Images to PDF ([#35](https://github.com/good-tools/good.tools/issues/35)) ([1204632](https://github.com/good-tools/good.tools/commit/1204632562250a49381fc0759f0ff316c006e8c4))
+* **web:** deploy the site to Cloudflare and split the release jobs ([#27](https://github.com/good-tools/good.tools/issues/27)) ([6988ba8](https://github.com/good-tools/good.tools/commit/6988ba8b82723c1c913eff47c99545aecb6796e6))
+* **web:** free image placement, OCR and locked PDFs in the PDF tools ([#30](https://github.com/good-tools/good.tools/issues/30)) ([4360286](https://github.com/good-tools/good.tools/commit/4360286aa3ca398ebbdc76ecab9dde7ce6e6458e))
+
+
+### Bug Fixes
+
+* **web:** accept dropped files after the first ones are loaded in the PDF tools ([#31](https://github.com/good-tools/good.tools/issues/31)) ([fca0a8b](https://github.com/good-tools/good.tools/commit/fca0a8b3991201303cc83901caba9d9a5f6f9f77))
+
 ## [1.25.0](https://github.com/good-tools/good.tools/compare/v1.24.0...v1.25.0) (2026-10-05)
 
 
