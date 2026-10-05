@@ -113,7 +113,8 @@ func TestErrorsAndAliases(t *testing.T) {
 func TestMyIP(t *testing.T) {
 	for trust, want := range map[string]string{"none": "192.0.2.1", "fly": "203.0.113.7", "xff": "198.51.100.2"} {
 		h := newServer(t, map[string]string{"TRUST_PROXY": trust})
-		w := get(h, "/my-ip", "Fly-Client-IP", "203.0.113.7", "X-Forwarded-For", "198.51.100.2, 10.0.0.1", "User-Agent", "ua/1")
+		// the client controls everything left of the proxy-appended (rightmost) X-Forwarded-For entry
+		w := get(h, "/my-ip", "Fly-Client-IP", "203.0.113.7", "X-Forwarded-For", "6.6.6.6, 198.51.100.2", "User-Agent", "ua/1")
 		var got map[string]string
 		_ = json.Unmarshal(w.Body.Bytes(), &got)
 		if got["ip"] != want || got["user_agent"] != "ua/1" {
@@ -297,5 +298,16 @@ func TestImageEndpoints(t *testing.T) {
 	limited := newServer(t, map[string]string{"IMAGE_ALLOW_PRIVATE_REGISTRIES": "true", "IMAGE_MAX_SIZE": "10"})
 	if w := get(limited, "/v1/image"+q); w.Code != 413 || !strings.Contains(message(t, w), "limit") {
 		t.Errorf("too large: %d %s", w.Code, w.Body)
+	}
+}
+
+// A private resolver would expose internal DNS (e.g. Fly's fdaa::3 answers *.internal).
+func TestDNSRejectsPrivateResolvers(t *testing.T) {
+	h := newServer(t, nil)
+	for _, r := range []string{"127.0.0.1", "10.0.0.53", "fdaa::3", "169.254.169.253"} {
+		w := get(h, "/v1/dns?domain=example.com&resolver="+r)
+		if w.Code != http.StatusBadRequest || !strings.Contains(w.Body.String(), "public IP") {
+			t.Errorf("resolver %s: %d %s", r, w.Code, w.Body.String())
+		}
 	}
 }

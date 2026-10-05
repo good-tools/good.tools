@@ -122,7 +122,9 @@ func clientIP(r *http.Request, trust string) string {
 	case "fly":
 		v = r.Header.Get("Fly-Client-IP")
 	case "xff":
-		v, _, _ = strings.Cut(r.Header.Get("X-Forwarded-For"), ",")
+		// the rightmost entry is the one our proxy appended; anything left of it is client-supplied
+		xff := r.Header.Get("X-Forwarded-For")
+		v = xff[strings.LastIndex(xff, ",")+1:]
 	}
 	if ip, err := netip.ParseAddr(strings.TrimSpace(v)); err == nil {
 		return ip.Unmap().String()

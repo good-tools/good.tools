@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/good-tools/good.tools/services/api/internal/netx"
 	"io"
 	"log/slog"
 	"maps"
@@ -94,12 +95,14 @@ type entry struct {
 	typ    byte
 	layer  int
 	source string // normalized tar path holding the bytes (link target for hard links)
+	sized  bool   // hard link whose size was resolved within its own layer
 }
 
 type image struct {
 	info     Info
 	repo     name.Repository
 	layers   []v1.Hash
+	sizes    []int64 // compressed layer sizes from the manifest
 	files    map[string]*entry
 	children map[string][]*entry
 }
@@ -150,7 +153,6 @@ func New(opts Options) (*Browser, error) {
 // publicOnlyTransport refuses to dial loopback, private, link-local and other
 // non-public addresses, so image refs can't be used to probe internal networks.
 func publicOnlyTransport() http.RoundTripper {
-	cgnat := netip.MustParsePrefix("100.64.0.0/10")
 	d := &net.Dialer{Timeout: 30 * time.Second, Control: func(_, address string, _ syscall.RawConn) error {
 		host, _, err := net.SplitHostPort(address)
 		if err != nil {
@@ -160,8 +162,7 @@ func publicOnlyTransport() http.RoundTripper {
 		if err != nil {
 			return err
 		}
-		ip = ip.Unmap()
-		if !ip.IsGlobalUnicast() || ip.IsPrivate() || cgnat.Contains(ip) {
+		if !netx.IsPublic(ip) {
 			return ErrForbiddenHost
 		}
 		return nil
@@ -219,7 +220,7 @@ func (b *Browser) Open(ctx context.Context, ref, p string) (*File, io.ReadCloser
 		return nil, nil, fmt.Errorf("%w: %s is not a regular file", ErrInvalid, p)
 	}
 
-	f, err := b.openBlob(ctx, img.repo, img.layers[e.layer])
+	f, err := b.openBlob(ctx, img.repo, img.layers[e.layer], img.sizes[e.layer])
 	if err != nil {
 		return nil, nil, err
 	}
@@ -311,11 +312,12 @@ func (b *Browser) build(ctx context.Context, r name.Reference, desc *remote.Desc
 		return nil, upstreamErr(err)
 	}
 	layers := make([]v1.Hash, len(m.Layers))
+	sizes := make([]int64, len(m.Layers))
 	for i, l := range m.Layers {
-		layers[i] = l.Digest
+		layers[i], sizes[i] = l.Digest, l.Size
 	}
 
-	out := &image{repo: r.Context(), layers: layers, files: map[string]*entry{}, children: map[string][]*entry{}}
+	out := &image{repo: r.Context(), layers: layers, sizes: sizes, files: map[string]*entry{}, children: map[string][]*entry{}}
 	out.info.Metadata.Name = r.Name()
 	out.info.Metadata.Digest = desc.Digest.String()
 	out.info.Metadata.Size = size
@@ -324,12 +326,18 @@ func (b *Browser) build(ctx context.Context, r name.Reference, desc *remote.Desc
 	hidden := map[string]bool{} // whited-out paths (and their subtrees) from newer layers
 	opaque := map[string]bool{} // directories whose lower-layer contents are hidden
 	for li := len(layers) - 1; li >= 0; li-- {
-		f, err := b.openBlob(ctx, out.repo, layers[li])
+		f, err := b.openBlob(ctx, out.repo, layers[li], sizes[li])
 		if err != nil {
 			return nil, err
 		}
 		var newHidden, newOpaque []string
+		// regular-file sizes in this layer: a hard link's bytes come from its own layer, so its
+		// size must too (a newer layer may replace or delete the target path)
+		layerSizes := map[string]int64{}
 		_, err = walkLayer(f, func(p string, h *tar.Header, r io.Reader) (bool, error) {
+			if h.Typeflag == tar.TypeReg {
+				layerSizes[p] = h.Size
+			}
 			dir, base := path.Split(p)
 			dir = path.Clean(dir)
 			switch {
@@ -357,6 +365,9 @@ func (b *Browser) build(ctx context.Context, r name.Reference, desc *remote.Desc
 			case tar.TypeLink:
 				e.source = cleanPath(h.Linkname)
 				e.MimeType = mimeType(base, nil)
+				if size, ok := layerSizes[e.source]; ok {
+					e.Size, e.sized = size, true
+				}
 			case tar.TypeReg:
 				var head [512]byte
 				n, _ := io.ReadFull(r, head[:])
@@ -379,8 +390,8 @@ func (b *Browser) build(ctx context.Context, r name.Reference, desc *remote.Desc
 	// collect first: synthesized parents are added to the map below
 	for _, p := range slices.Collect(maps.Keys(out.files)) {
 		e := out.files[p]
-		if e.typ == tar.TypeLink {
-			if t, ok := out.files[e.source]; ok {
+		if e.typ == tar.TypeLink && !e.sized {
+			if t, ok := out.files[e.source]; ok && t.layer == e.layer {
 				e.Size, e.MimeType = t.Size, t.MimeType
 			}
 		}
@@ -450,7 +461,7 @@ func pickPlatform(desc *remote.Descriptor) (v1.Image, error) {
 }
 
 // openBlob returns the cached compressed layer, downloading it first if needed.
-func (b *Browser) openBlob(ctx context.Context, repo name.Repository, d v1.Hash) (*os.File, error) {
+func (b *Browser) openBlob(ctx context.Context, repo name.Repository, d v1.Hash, size int64) (*os.File, error) {
 	for range 2 { // the file can be evicted between caching and opening
 		if p, ok := b.blobs.get(d.String()); ok {
 			if f, err := os.Open(p); err == nil { // #nosec G304 -- path built from a digest
@@ -460,7 +471,7 @@ func (b *Browser) openBlob(ctx context.Context, repo name.Repository, d v1.Hash)
 		_, err, _ := b.sf.Do("blob:"+d.String(), func() (any, error) {
 			ctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), BuildTimeout)
 			defer cancel()
-			return nil, b.download(ctx, repo, d)
+			return nil, b.download(ctx, repo, d, size)
 		})
 		if err != nil {
 			return nil, err
@@ -469,7 +480,9 @@ func (b *Browser) openBlob(ctx context.Context, repo name.Repository, d v1.Hash)
 	return nil, fmt.Errorf("%w: layer %s evicted from cache", ErrUpstream, d)
 }
 
-func (b *Browser) download(ctx context.Context, repo name.Repository, d v1.Hash) error {
+// download caches a layer blob. The registry chooses what it streams, so the copy is capped at
+// the size the manifest declared (which IMAGE_MAX_SIZE was checked against).
+func (b *Browser) download(ctx context.Context, repo name.Repository, d v1.Hash, size int64) error {
 	if _, ok := b.blobs.get(d.String()); ok {
 		return nil
 	}
@@ -494,9 +507,12 @@ func (b *Browser) download(ctx context.Context, repo name.Repository, d v1.Hash)
 	// stop copying when the build is cancelled or times out
 	stop := context.AfterFunc(ctx, func() { _ = rc.Close() })
 	defer stop()
-	n, err := io.Copy(tmp, rc)
+	n, err := io.Copy(tmp, io.LimitReader(rc, size+1))
 	if cerr := tmp.Close(); err == nil {
 		err = cerr
+	}
+	if err == nil && n != size {
+		err = fmt.Errorf("layer %s is %d bytes but the manifest declares %d", d, n, size)
 	}
 	if err != nil {
 		if ctx.Err() != nil {

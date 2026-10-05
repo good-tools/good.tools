@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/good-tools/good.tools/services/api/internal/netx"
 	"io"
 	"log/slog"
 	"mime"
@@ -125,6 +126,11 @@ func (s *Server) dns(w http.ResponseWriter, r *http.Request) {
 		ip, err := netip.ParseAddr(v)
 		if err != nil {
 			writeError(w, http.StatusBadRequest, "invalid resolver: must be an IP address")
+			return
+		}
+		// a private resolver would let callers query internal DNS (e.g. Fly's fdaa::3 for *.internal)
+		if !netx.IsPublic(ip) {
+			writeError(w, http.StatusBadRequest, "invalid resolver: must be a public IP address")
 			return
 		}
 		server = netip.AddrPortFrom(ip, 53).String()

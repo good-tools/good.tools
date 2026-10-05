@@ -339,3 +339,79 @@ func TestMultiArchAndEviction(t *testing.T) {
 		t.Errorf("blob GETs = %d, want 3", n)
 	}
 }
+
+// A registry can stream more bytes than the manifest declares; downloads must stop at the
+// declared size so IMAGE_MAX_SIZE can't be bypassed.
+func TestOversizedBlobIsRejected(t *testing.T) {
+	reg := registry.New(registry.Logger(log.New(io.Discard, "", 0)))
+	img := mustImage(t, layer(t, compression.GZip, tf{name: "a.txt", body: "hello"}))
+	ld, _ := mustLayers(t, img)[0].Digest()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet && strings.HasSuffix(r.URL.Path, "/blobs/"+ld.String()) {
+			rec := httptest.NewRecorder()
+			reg.ServeHTTP(rec, r)
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(rec.Body.Bytes())
+			_, _ = w.Write(bytes.Repeat([]byte{0}, 1<<20)) // more than declared
+			return
+		}
+		reg.ServeHTTP(w, r)
+	}))
+	t.Cleanup(srv.Close)
+	ref := strings.TrimPrefix(srv.URL, "http://") + "/test/big:latest"
+	push(t, ref, img)
+
+	dir := t.TempDir()
+	b := newBrowser(t, dir, Options{})
+	if _, err := b.List(context.Background(), ref, "/"); err == nil || !strings.Contains(err.Error(), "manifest declares") {
+		t.Fatalf("want a size error, got %v", err)
+	}
+	entries, _ := os.ReadDir(dir)
+	for _, e := range entries {
+		if !strings.HasPrefix(e.Name(), ".") {
+			t.Fatalf("oversized blob was cached: %s", e.Name())
+		}
+	}
+}
+
+// A hard link's bytes come from its own layer, so its size must too, even when a newer layer
+// replaces the link target.
+func TestHardLinkSizeComesFromItsLayer(t *testing.T) {
+	host, _ := startRegistry(t)
+	ref := host + "/test/hl:latest"
+	push(t, ref, mustImage(t,
+		layer(t, compression.GZip, tf{name: "a", body: "original contents"}, tf{name: "b", typ: tar.TypeLink, link: "a"}),
+		layer(t, compression.GZip, tf{name: "a", body: "new"}),
+	))
+	b := newBrowser(t, t.TempDir(), Options{})
+	files, err := b.List(context.Background(), ref, "/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, f := range files {
+		if f.Name == "b" && f.Size != int64(len("original contents")) {
+			t.Fatalf("hard link size %d, want %d", f.Size, len("original contents"))
+		}
+	}
+	if got := read(t, b, ref, "/b"); got != "original contents" {
+		t.Fatalf("hard link contents %q", got)
+	}
+}
+
+func mustImage(t *testing.T, layers ...v1.Layer) v1.Image {
+	t.Helper()
+	img, err := mutate.AppendLayers(empty.Image, layers...)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return img
+}
+
+func mustLayers(t *testing.T, img v1.Image) []v1.Layer {
+	t.Helper()
+	ls, err := img.Layers()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return ls
+}
