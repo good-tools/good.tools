@@ -2,6 +2,7 @@ import {
   ArrowLeftRight,
   Box,
   Braces,
+  CalendarClock,
   Code2,
   Coffee,
   Container,
@@ -381,6 +382,17 @@ export const tools: Tool[] = [
         url: 'https://www.npmjs.com/package/xml-formatter',
       },
     ],
+  },
+  {
+    title: 'Timestamp Converter',
+    path: '/timestamp',
+    description:
+      'Convert Unix timestamps (s, ms, µs, ns) to ISO 8601, RFC 2822, local and relative time in any time zone',
+    icon: CalendarClock,
+    categories: [CATEGORIES.DEVELOPMENT],
+    searchTags: ['timestamp', 'unix', 'epoch', 'time', 'date', 'iso 8601', 'rfc 2822', 'timezone', 'utc', 'converter'],
+    component: lazy(() => import('@/tools/TimestampConverter')),
+    online: false,
   },
   {
     title: 'Regex Tester',
