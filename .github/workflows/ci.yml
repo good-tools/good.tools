@@ -80,8 +80,9 @@ jobs:
         run: |
           pr=$(gh pr list -R "$GITHUB_REPOSITORY" --head "$BRANCH" --state open --json number --jq '.[0].number')
           [ -n "$pr" ] || { echo "No open PR for $BRANCH; preview at $URL"; exit 0; }
-          body="<!-- preview -->Preview: $URL (\`${GITHUB_SHA::7}\`)"
-          id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$pr/comments" --paginate --jq '.[] | select(.body | startswith("<!-- preview -->")) | .id' | head -1)
+          # The marker must be on its own line: GitHub renders a line that starts with HTML as raw HTML
+          body=$(printf '**Preview:** [%s](%s) for `%s`\n\n<!-- preview -->' "${URL#https://}" "$URL" "${GITHUB_SHA::7}")
+          id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$pr/comments" --paginate --jq '.[] | select(.body | contains("<!-- preview -->")) | .id' | head -1)
           if [ -n "$id" ]; then
             gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -f body="$body" > /dev/null
           else
