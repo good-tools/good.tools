@@ -1,9 +1,13 @@
 name: Release & Deploy
 
 # Runs after Test succeeds on a push to master. release-please keeps a
-# release PR open with the next version and changelog; merging it creates
-# the release, and the deploy job builds that commit, ships it to S3 +
-# CloudFront and publishes the Docker image to ghcr.io.
+# release PR open with the next versions and changelogs; merging it creates
+# the releases. Then:
+# - deploy: builds the web app, ships it to S3 + CloudFront and publishes the
+#   Docker image to ghcr.io (when apps/web was released)
+# - publish-npm: publishes every released npm package (packages/*, tools/*)
+#   with npm trusted publishing. npmjs.com trusts *this* workflow file
+#   (release.yml), so keep the name.
 on:
   workflow_run:
     workflows: [Test]
@@ -32,6 +36,7 @@ jobs:
       release_created: ${{ steps.release.outputs['apps/web--release_created'] }}
       tag_name: ${{ steps.release.outputs['apps/web--tag_name'] }}
       sha: ${{ steps.release.outputs['apps/web--sha'] }}
+      npm_paths: ${{ steps.npm.outputs.paths }}
     steps:
       # release-please always acts on the current master tip, so only run it
       # for the Test run of that tip.
@@ -56,6 +61,13 @@ jobs:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           config-file: .github/release-please-config.json
           manifest-file: .github/.release-please-manifest.json
+
+      - name: Released npm packages
+        id: npm
+        if: steps.tip.outputs.latest == 'true'
+        env:
+          RELEASED: ${{ steps.release.outputs.paths_released || '[]' }}
+        run: echo "paths=$(jq -c '[.[] | select(startswith("packages/") or startswith("tools/"))]' <<< "$RELEASED")" >> "$GITHUB_OUTPUT"
 
   deploy:
     needs: release-please
@@ -148,3 +160,35 @@ jobs:
 
       - name: CloudFront invalidation
         run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CF_DISTRIBUTION_ID }} --paths "/*"
+
+  publish-npm:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.npm_paths != '' && needs.release-please.outputs.npm_paths != '[]' }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing (OIDC) + provenance
+    strategy:
+      fail-fast: false
+      matrix:
+        path: ${{ fromJSON(needs.release-please.outputs.npm_paths) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      # trusted publishing needs npm >= 11.5.1
+      - run: npm install -g npm@^11.5.1
+      - run: bun install --frozen-lockfile
+      - run: bunx turbo run build --filter=./${{ matrix.path }}
+      - name: Pack and publish
+        working-directory: ${{ matrix.path }}
+        run: |
+          # bun pm pack resolves workspace:* ranges to real versions
+          bun pm pack --destination "$RUNNER_TEMP/pkg"
+          npm publish "$RUNNER_TEMP"/pkg/*.tgz --access public --provenance
