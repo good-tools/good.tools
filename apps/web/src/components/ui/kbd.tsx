@@ -1,6 +1,8 @@
 import type { HTMLAttributes } from 'react'
 import { cn } from '@/lib/utils'
 
+export const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent)
+
 export function Kbd({ className, ...props }: HTMLAttributes<HTMLElement>) {
   return (
     <kbd

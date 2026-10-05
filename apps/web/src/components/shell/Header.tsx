@@ -1,13 +1,11 @@
 import { Menu, Search } from 'lucide-react'
 import { Link } from 'react-router'
 import { Button } from '@/components/ui/button'
-import { Kbd } from '@/components/ui/kbd'
+import { isMac, Kbd } from '@/components/ui/kbd'
 import { GITHUB_URL, RELEASE_URL, VERSION } from '@/config/app.config'
 import { useLayoutStore } from '@/stores/useLayoutStore'
 import { GitHubIcon, LogoMark } from './icons'
 import { ThemeToggle } from './ThemeToggle'
-
-const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent)
 
 export function Header() {
   const setPaletteOpen = useLayoutStore((s) => s.setPaletteOpen)

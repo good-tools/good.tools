@@ -1,22 +1,6 @@
-import { Binary, Box, Code, FileText, Globe, Image, Layers, Shield } from 'lucide-react'
-import { CATEGORIES, type CategoryName, type Tool, type ToolCategory } from '@/types/tool.types'
+import { CATEGORIES, type CategoryName, type Tool } from '@/types/tool.types'
 
 export { CATEGORIES, type CategoryName } from '@/types/tool.types'
-
-export const categories: ToolCategory[] = [
-  { name: 'All', icon: Layers },
-  { name: CATEGORIES.DEVELOPMENT, icon: Code },
-  { name: CATEGORIES.ENCODING, icon: Binary },
-  { name: CATEGORIES.SECURITY, icon: Shield },
-  { name: CATEGORIES.NETWORK, icon: Globe },
-  { name: CATEGORIES['3D'], icon: Box },
-  { name: CATEGORIES.IMAGE, icon: Image },
-  { name: CATEGORIES.PDF, icon: FileText },
-]
-
-export function getToolsByCategory(tools: Tool[], category: CategoryName | 'All'): Tool[] {
-  return category === 'All' ? tools : tools.filter((tool) => tool.categories.includes(category))
-}
 
 /**
  * Case-insensitive match on title, description, tags and categories; every word in the query must match.
