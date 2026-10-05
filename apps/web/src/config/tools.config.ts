@@ -379,10 +379,25 @@ export const tools: Tool[] = [
   {
     title: 'Image Converter',
     path: '/image-converter',
-    description: 'Convert images between formats: JPEG, PNG, WebP, AVIF with quality control',
+    description:
+      'Convert and resize images to JPEG, PNG, WebP or AVIF with quality control, removing location metadata',
     icon: ImageIcon,
     categories: [CATEGORIES.IMAGE],
-    searchTags: ['image', 'convert', 'jpeg', 'png', 'webp', 'avif', 'format', 'photo'],
+    searchTags: [
+      'image',
+      'convert',
+      'jpeg',
+      'jpg',
+      'png',
+      'webp',
+      'avif',
+      'heic',
+      'resize',
+      'compress',
+      'exif',
+      'format',
+      'photo',
+    ],
     component: lazy(() => import('@/tools/ImageConverter')),
     online: false,
     dependencies: [
