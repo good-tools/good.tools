@@ -485,7 +485,7 @@ export const tools: Tool[] = [
       { name: 'Whisper (onnx-community)', url: 'https://huggingface.co/onnx-community/whisper-base' },
     ],
     notice:
-      'This tool downloads a speech recognition model the first time and keeps it in your browser: about 50 MB for the default Whisper tiny, served by good.tools. The larger base (75–200 MB) and small (240–560 MB) models download from Hugging Face. Your audio never leaves your device.',
+      'This tool downloads a speech recognition model the first time and keeps it in your browser: about 50 MB for the default Whisper tiny, served by good.tools (or by Hugging Face if this site does not host it). The larger base (75–200 MB) and small (240–560 MB) models download from Hugging Face. Your audio never leaves your device.',
   },
 ]
 

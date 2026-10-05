@@ -33,14 +33,18 @@ const runtime = (async () => {
 
 // The tiny model is served from this site too, its large files split in parts (see src/whisper-assets.ts).
 // Transformers.js asks for Hugging Face URLs; answer those for whisper-tiny with the joined local files.
+// Without a manifest (the build was offline) tiny comes from Hugging Face like the other models.
 const TINY = 'https://huggingface.co/onnx-community/whisper-tiny/resolve/'
-const manifest = fetch('/whisper/tiny/manifest.json').then((r) => r.json() as Promise<WhisperManifest>)
+const manifest: Promise<WhisperManifest | null> = fetch('/whisper/tiny/manifest.json')
+  .then((r) => (r.ok ? r.json() : null))
+  .catch(() => null) // includes an SPA fallback page that isn't JSON
 const hubFetch = env.fetch
 env.fetch = async (input, init) => {
   const url = String(input)
-  if (!url.startsWith(TINY)) return hubFetch(input, init)
+  const files = (await manifest)?.files
+  if (!files || !url.startsWith(TINY)) return hubFetch(input, init)
   const file = url.slice(TINY.length).replace(/^[^/]+\//, '') // drop the revision
-  const entry = (await manifest).files[file]
+  const entry = files[file]
   if (!entry) return new Response(null, { status: 404 })
   const base = `/whisper/tiny/${file}`
   const parts = entry.parts ? Array.from({ length: entry.parts }, (_, i) => `${base}.${i}`) : [base]
@@ -87,7 +91,7 @@ async function load(model: WhisperModel) {
   // Transformers.js' own WebGPU Whisper demo
   const gpu = model !== 'tiny' && (await webgpu)
   const pipe = pipeline('automatic-speech-recognition', `onnx-community/whisper-${model}`, {
-    revision: model === 'tiny' ? (await manifest).revision : 'main',
+    revision: (model === 'tiny' && (await manifest)?.revision) || 'main',
     device: gpu ? 'webgpu' : 'wasm',
     dtype: gpu ? { encoder_model: 'fp32', decoder_model_merged: 'q4' } : 'q8',
     progress_callback: (p) => {
