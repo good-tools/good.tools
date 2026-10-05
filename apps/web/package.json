@@ -26,6 +26,8 @@
     "allotment": "^1.20.5",
     "buffer": "^6.0.3",
     "clsx": "^2.1.1",
+    "croner": "^10.0.1",
+    "cronstrue": "^3.29.0",
     "dompurify": "^3.4.16",
     "fast-xml-parser": "^5.11.2",
     "filesize": "^11.0.25",
