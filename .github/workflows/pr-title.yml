@@ -9,8 +9,15 @@ on:
 permissions:
   pull-requests: read
 
+# One run per PR at a time; release-please pushes and then edits its PR in quick succession
+concurrency:
+  group: pr-title-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
-  lint:
+  pr-title:
+    # `edited` also fires for body and base changes; only a title change needs a recheck
+    if: github.event.action != 'edited' || github.event.changes.title
     runs-on: ubuntu-24.04
     steps:
       - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
