@@ -1,5 +1,5 @@
 {
-  "apps/web": "1.26.0",
+  "apps/web": "1.27.0",
   "packages/jdserialize": "2.0.0",
   "packages/protobuf-decoder": "2.0.0",
   "packages/meshrepair": "0.2.0",

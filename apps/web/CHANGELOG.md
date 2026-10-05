@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.27.0](https://github.com/good-tools/good.tools/compare/v1.26.0...v1.27.0) (2026-10-05)
+
+
+### Features
+
+* **web:** Markdown Notes tool ([#38](https://github.com/good-tools/good.tools/issues/38)) ([8a9c6c6](https://github.com/good-tools/good.tools/commit/8a9c6c672e13e9ed8613e932e4f60b47254a676a))
+* **web:** redesign JSON Formatter with a shared tree and editor ([#39](https://github.com/good-tools/good.tools/issues/39)) ([83cc238](https://github.com/good-tools/good.tools/commit/83cc238c778978fc84c8230f5a5fd7411c4483a1))
+
+
+### Bug Fixes
+
+* **web:** upright photos, metadata stripping and AVIF in Image Converter ([#40](https://github.com/good-tools/good.tools/issues/40)) ([2c0933e](https://github.com/good-tools/good.tools/commit/2c0933eeaaaf8f99f1f604b8a0b1a55159d002a3))
+
 ## [1.26.0](https://github.com/good-tools/good.tools/compare/v1.25.0...v1.26.0) (2026-10-05)
 
 
