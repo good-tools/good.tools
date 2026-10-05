@@ -40,12 +40,11 @@ interface Doc {
 const pagesOf = (count: number): Page[] =>
   Array.from({ length: count }, (_, index) => ({ id: crypto.randomUUID(), index, rotation: 0 }))
 
-/** Bumped per opened file so a slow render of the previous one stops writing thumbnails. */
+/** Bumped per open and clear, so a slower earlier open (or its thumbnails) stops writing state. */
 let generation = 0
 
 /** Renders every page small (pdf.js, which runs in its own worker), one at a time, as JPEG data URLs. */
-async function renderThumbs(bytes: Uint8Array, onThumb: (index: number, url: string) => void) {
-  const gen = ++generation
+async function renderThumbs(gen: number, bytes: Uint8Array, onThumb: (index: number, url: string) => void) {
   // pdf.js transfers the buffer to its worker; keep ours for saving
   const task = getDocument({ data: bytes.slice() })
   try {
@@ -78,16 +77,18 @@ function OrganizePdf() {
 
   const open = async ([file]: File[]) => {
     if (!file) return
+    const gen = ++generation
     setError('')
     setBusy(true)
     try {
       const bytes = new Uint8Array(await file.arrayBuffer())
       const count = (await openPdf(bytes)).getPageCount()
+      if (gen !== generation) return
       setDoc({ name: file.name, bytes, count })
       setPages(pagesOf(count))
       setThumbs([])
       setBusy(false)
-      await renderThumbs(bytes, (i, url) =>
+      await renderThumbs(gen, bytes, (i, url) =>
         setThumbs((t) => {
           const next = [...t]
           next[i] = url
@@ -95,6 +96,7 @@ function OrganizePdf() {
         }),
       )
     } catch (e) {
+      if (gen !== generation) return
       const msg = e instanceof Error ? e.message : String(e)
       setError(
         e instanceof Error && e.name === 'PasswordError' ? `${msg}. Remove it with Protect / Unlock PDF first.` : msg,
@@ -109,8 +111,9 @@ function OrganizePdf() {
     setBusy(true)
     setError('')
     try {
+      const src = await openPdf(doc.bytes) // parsed once, even for a split into hundreds of files
       for (const [name, which] of files) {
-        downloadBlob(await organizePdf(doc.bytes, which), name, 'application/pdf')
+        downloadBlob(await organizePdf(src, which), name, 'application/pdf')
         // Browsers drop downloads that start in the same instant
         if (files.length > 1) await new Promise((r) => setTimeout(r, 200))
       }
@@ -139,6 +142,7 @@ function OrganizePdf() {
     setPages([])
     setThumbs([])
     setError('')
+    setBusy(false)
   }
 
   if (!doc)

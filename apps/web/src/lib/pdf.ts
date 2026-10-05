@@ -210,9 +210,12 @@ export interface PageEdit {
   rotation: number
 }
 
-/** A new PDF of `pages` from `bytes`, in that order, each turned by its rotation. Covers reorder, delete and extract. */
-export async function organizePdf(bytes: Uint8Array, pages: PageEdit[]): Promise<Uint8Array> {
-  const src = await openPdf(bytes)
+/**
+ * A new PDF of `pages` from `source`, in that order, each turned by its rotation. Covers reorder, delete and extract.
+ * Pass an already opened document to make several PDFs from one source without parsing it each time.
+ */
+export async function organizePdf(source: Uint8Array | PDFDocument, pages: PageEdit[]): Promise<Uint8Array> {
+  const src = source instanceof PDFDocument ? source : await openPdf(source)
   const out = await PDFDocument.create()
   const copied = await out.copyPages(
     src,

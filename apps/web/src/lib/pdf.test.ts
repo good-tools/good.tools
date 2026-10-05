@@ -134,6 +134,13 @@ describe('organizePdf', () => {
     ])
   })
 
+  it('makes several PDFs from one opened source', async () => {
+    const src = await PDFDocument.load(await numbered(3))
+    const outs = await Promise.all([2, 0].map((index) => organizePdf(src, [{ index, rotation: 90 }])))
+    expect(await Promise.all(outs.map(summary))).toEqual([[[2, 90]], [[0, 90]]])
+    expect(src.getPageCount()).toBe(3)
+  })
+
   it('can repeat a page', async () => {
     expect(
       await summary(
