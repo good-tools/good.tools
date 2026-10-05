@@ -123,6 +123,22 @@ export function resizeRect(r: Rect, dw: number, page: Dims): Rect {
   return { x: r.x, y: top - width * ratio, width, height: width * ratio }
 }
 
+/** Image compression presets: downsample to `dpi` at the printed size, then JPEG at `quality`. */
+export const COMPRESSION = {
+  none: { label: 'Original quality', dpi: Number.POSITIVE_INFINITY, quality: 0.92 },
+  high: { label: 'High · 300 dpi', dpi: 300, quality: 0.85 },
+  medium: { label: 'Medium · 150 dpi', dpi: 150, quality: 0.75 },
+  low: { label: 'Low · 96 dpi', dpi: 96, quality: 0.6 },
+} as const
+
+export type Compression = keyof typeof COMPRESSION
+
+/** Pixels an image needs to print at `rect`'s size (points) and `dpi`. Never upscales. */
+export function targetPixels(img: Dims, rect: Rect, dpi: number): Dims {
+  const s = Math.min(1, ((rect.width / 72) * dpi) / img.width)
+  return { width: Math.max(1, Math.round(img.width * s)), height: Math.max(1, Math.round(img.height * s)) }
+}
+
 /** Draws the images where `pages` puts them (from `layoutPages`, possibly moved by the user). */
 export async function imagesToPdf(images: PdfImage[], pages: PageLayout[]): Promise<Uint8Array> {
   const doc = await PDFDocument.create()
