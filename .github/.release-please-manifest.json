@@ -1,8 +1,8 @@
 {
-  "apps/web": "1.25.0",
+  "apps/web": "1.26.0",
   "packages/jdserialize": "2.0.0",
   "packages/protobuf-decoder": "2.0.0",
   "packages/meshrepair": "0.2.0",
   "tools/wasmpatch": "0.1.0",
-  "services/api": "0.1.0"
+  "services/api": "0.2.0"
 }
