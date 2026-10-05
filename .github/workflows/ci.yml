@@ -7,7 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # Optional Turborepo remote cache (e.g. Vercel Remote Cache): with these set, CI shares
-      # task outputs (including compiled WebAssembly) with Vercel builds and developers.
+      # task outputs with developers. Compiled WebAssembly reaches Vercel previews through the
+      # published prebuilt binaries instead (see packages/meshrepair/scripts/build-wasm.mjs).
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ vars.TURBO_TEAM }}
     steps:
