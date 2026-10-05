@@ -2,6 +2,8 @@
 import { AsyncDuckDB, type AsyncDuckDBConnection, DuckDBDataProtocol, VoidLogger } from '@duckdb/duckdb-wasm'
 import workerUrl from '@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url'
 import { fetchInflated } from '@/lib/fetch-inflated'
+import { ident, schemaName } from '@/lib/sqlite'
+import type { SqliteRequest, SqliteResponse } from '@/workers/sqlite.worker'
 
 let ready: Promise<{ db: AsyncDuckDB; conn: AsyncDuckDBConnection }> | undefined
 
@@ -52,12 +54,48 @@ export function loadSql(fileName: string, name: string): string {
     case 'parquet':
       return view('read_parquet')
     default:
-      throw new Error(`${fileName}: unsupported file type (use CSV, TSV, JSON, NDJSON or Parquet)`)
+      throw new Error(`${fileName}: unsupported file type (use CSV, TSV, JSON, NDJSON, Parquet or SQLite)`)
   }
 }
 
-/** Registers `file` (read lazily, not copied) and creates its table; returns the table name. */
-export async function loadFile(file: File): Promise<string> {
+export const isSqlite = (fileName: string) => /\.(db|sqlite3?)$/i.test(fileName)
+
+/**
+ * Copies every table of a SQLite file into a DuckDB schema named after the file; returns the first table.
+ * (DuckDB's own sqlite extension can't read browser-registered files, so sql.js reads it in a worker.)
+ */
+async function loadSqlite(file: File, progress: (msg: string) => void): Promise<string> {
+  const { conn } = await duck()
+  const worker = new Worker(new URL('../workers/sqlite.worker.ts', import.meta.url), { type: 'module' })
+  const ask = <T extends SqliteResponse>(req: SqliteRequest) =>
+    new Promise<T>((resolve, reject) => {
+      worker.onmessage = ({ data }: MessageEvent<SqliteResponse>) =>
+        'error' in data ? reject(new Error(`${file.name}: ${data.error}`)) : resolve(data as T)
+      worker.onerror = (e) => reject(new Error(e.message || 'SQLite worker failed'))
+      worker.postMessage(req)
+    })
+  try {
+    progress(`Opening ${file.name}…`)
+    const { tables } = await ask<{ tables: string[] }>({ file })
+    if (!tables.length) throw new Error(`${file.name}: no tables`)
+    const schema = schemaName(file.name)
+    await conn.query(`DROP SCHEMA IF EXISTS ${ident(schema)} CASCADE; CREATE SCHEMA ${ident(schema)}`)
+    for (const [i, table] of tables.entries()) {
+      progress(`Importing ${table} (${i + 1}/${tables.length})…`)
+      const { columns, rows, ipc } = await ask<Extract<SqliteResponse, { ipc: Uint8Array }>>({ table })
+      const cols = columns.map((c) => `${ident(c.name)} ${c.type}`).join(', ')
+      await conn.query(`CREATE TABLE ${ident(schema)}.${ident(table)} (${cols})`)
+      if (rows) await conn.insertArrowFromIPCStream(ipc, { schema, name: table, create: false })
+    }
+    return `${ident(schema)}.${ident(tables[0]!)}`
+  } finally {
+    worker.terminate() // frees the sql.js database
+  }
+}
+
+/** Registers `file` (read lazily, not copied) and creates its table(s); returns the table to show first. */
+export async function loadFile(file: File, progress: (msg: string) => void = () => {}): Promise<string> {
+  if (isSqlite(file.name)) return loadSqlite(file, progress)
   const { db, conn } = await duck()
   const name = tableName(file.name)
   const sql = loadSql(file.name, name)
@@ -75,7 +113,7 @@ export interface TableInfo {
 export async function listTables(): Promise<TableInfo[]> {
   const { conn } = await duck()
   const res = await conn.query(`
-    SELECT table_name AS name,
+    SELECT if(table_schema = 'main', table_name, table_schema || '.' || table_name) AS name,
       list(column_name ORDER BY ordinal_position) AS names, list(data_type ORDER BY ordinal_position) AS types
     FROM information_schema.columns WHERE table_catalog = current_database() GROUP BY ALL ORDER BY name`)
   return res.toArray().map((r) => {

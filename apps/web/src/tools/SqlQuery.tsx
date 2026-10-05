@@ -14,7 +14,7 @@ import { useToolState } from '@/hooks/useToolState'
 import { cellText, listTables, loadFile, type Result, runQuery, type TableInfo, toCsv, toJson } from '@/lib/sql'
 import { downloadBlob } from '@/lib/utils'
 
-const ACCEPT = '.csv,.tsv,.txt,.json,.ndjson,.jsonl,.parquet'
+const ACCEPT = '.csv,.tsv,.txt,.json,.ndjson,.jsonl,.parquet,.db,.sqlite,.sqlite3'
 
 const EXAMPLE_CSV = `city,country,population,area_km2,founded
 Tokyo,Japan,13960000,2194,1457
@@ -78,7 +78,7 @@ export default function SqlQuery() {
   const load = (files: File[], then?: string) =>
     work('Loading…', async () => {
       const names: string[] = []
-      for (const f of files) names.push(await loadFile(f))
+      for (const f of files) names.push(await loadFile(f, setBusy))
       setTables(await listTables())
       const sql = then ?? (query.trim() ? null : `SELECT * FROM ${names[0]} LIMIT 100`)
       if (sql) {
@@ -158,7 +158,7 @@ export default function SqlQuery() {
               accept={ACCEPT}
               multiple
               disabled={!!busy}
-              hint='CSV, TSV, JSON, NDJSON or Parquet. Each file becomes a table named after it.'
+              hint='CSV, TSV, JSON, NDJSON, Parquet or SQLite. Each file becomes a table named after it; a SQLite database becomes a schema (file.table).'
             >
               Drop files here or click to browse
             </DropZone>
