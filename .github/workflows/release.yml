@@ -186,10 +186,11 @@ jobs:
           IS_NEW_RELEASE: ${{ github.event_name != 'workflow_dispatch' }}
         # Tags are web-vX.Y.Z (older ones vX.Y.Z); the image tag is the bare version
         run: |
+          version=$(sed -E 's/^(.*-)?v([0-9])/\2/' <<< "$TAG")
           {
-            echo "version=${TAG##*v}"
+            echo "version=$version"
             echo "tags<<EOF"
-            echo "$IMAGE:${TAG##*v}"
+            echo "$IMAGE:$version"
             # a manual redeploy of an older release must not move :latest
             if [ "$IS_NEW_RELEASE" = "true" ]; then echo "$IMAGE:latest"; fi
             echo "EOF"
