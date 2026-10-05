@@ -1,4 +1,5 @@
-# Self-hostable good.tools image. Build from the repository root:
+# Self-hostable good.tools image: the web app and the API (services/api) in one Go binary.
+# Build from the repository root:
 #   docker build -f apps/web/Dockerfile -t good-tools .
 
 # WebAssembly built outside this build (CI passes
@@ -16,29 +17,40 @@ FROM base AS prune
 COPY . .
 RUN bunx turbo@^2 prune @good-tools/web --docker
 
-FROM base AS builder
+FROM base AS web
 COPY --from=prune /app/out/json/ .
 RUN bun install --frozen-lockfile
 COPY --from=prune /app/out/full/ .
 COPY --from=wasm-meshrepair / packages/meshrepair/wasm/
 RUN bunx turbo@^2 run build --filter=@good-tools/web
 
-# Runtime stage
-FROM nginx:alpine
+# Cross-compiled for the target platform
+FROM --platform=$BUILDPLATFORM golang:1.26 AS api
+ARG TARGETOS TARGETARCH
+WORKDIR /src
+COPY services/api/go.mod services/api/go.sum ./
+RUN --mount=type=cache,target=/go/pkg/mod go mod download
+COPY services/api/ .
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
+    go build -trimpath -ldflags="-s -w" -o /out/api ./cmd/api \
+ && mkdir /out/data
 
-COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
-COPY apps/web/docker/nginx.conf /etc/nginx/nginx.conf
-COPY apps/web/docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+FROM gcr.io/distroless/static-debian12:nonroot
+COPY --from=api /out/api /api
+COPY --from=api --chown=nonroot:nonroot /out/data /data
+COPY --from=web /app/apps/web/dist /web
+USER nonroot
 
-# Privacy-focused defaults for self-hosting
+# Privacy-focused defaults for self-hosting; see services/api/README.md for all variables.
+# Port 80 binds as nonroot under Docker (unprivileged ports start at 0 there); elsewhere set PORT.
 ENV PORT=80 \
+    STATIC_DIR=/web \
+    DATA_DIR=/data \
     ENABLE_TELEMETRY=false \
     GA_TRACKING_ID="" \
-    DISABLE_ONLINE_TOOLS=true \
-    API_URL=""
+    DISABLE_ONLINE_TOOLS=false
 
 EXPOSE 80
-
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/api"]

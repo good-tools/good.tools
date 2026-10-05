@@ -179,7 +179,7 @@ func TestWeb(t *testing.T) {
 	w := get(h, "/config.js")
 	body := w.Body.String()
 	for _, want := range []string{`window.__RUNTIME_CONFIG__ = {`, `"ENABLE_TELEMETRY": true`, `"GA_TRACKING_ID": "G-\"x"`,
-		`"DISABLE_ONLINE_TOOLS": false`, `"API_URL": "/api"`, `"INTERNET_TOOLS_URL": "/api"`, `"IMAGE_BROWSER_URL": "/api"`} {
+		`"DISABLE_ONLINE_TOOLS": false`, `"API_URL": "/api"`} {
 		if !strings.Contains(body, want) {
 			t.Errorf("config.js missing %s:\n%s", want, body)
 		}

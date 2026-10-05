@@ -13,15 +13,6 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     go build -trimpath -ldflags="-s -w" -o /out/api ./cmd/api \
  && mkdir /out/data
 
-# Fly.io target (fly.toml: build-target = "fly"). Fly mounts volumes owned by root, so this
-# variant runs as root; the Firecracker micro-VM is the isolation boundary there.
-FROM gcr.io/distroless/static-debian12 AS fly
-COPY --from=build /out/api /api
-ENV PORT=8080 DATA_DIR=/data
-EXPOSE 8080
-ENTRYPOINT ["/api"]
-
-# Default target (self-hosting, ghcr.io): unprivileged
 FROM gcr.io/distroless/static-debian12:nonroot
 COPY --from=build /out/api /api
 COPY --from=build --chown=nonroot:nonroot /out/data /data
