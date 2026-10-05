@@ -1,6 +1,6 @@
 {
   "name": "@goodtools/protobuf-decoder",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Read raw protobuf buffers and return a readable representation of the data",
   "keywords": [
     "protobuf",

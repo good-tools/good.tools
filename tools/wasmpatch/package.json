@@ -1,6 +1,6 @@
 {
   "name": "@goodtools/wasmpatch",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Pinned upstream sources and Brave-style patches/overlays for WebAssembly builds",
   "keywords": [
     "wasm",

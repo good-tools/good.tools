@@ -1,3 +1,13 @@
+# Changelog
+
+## [1.25.0](https://github.com/good-tools/good.tools/compare/v1.24.0...v1.25.0) (2026-10-05)
+
+
+### Features
+
+* use a single API_URL (api.good.tools) for the online tools ([#23](https://github.com/good-tools/good.tools/issues/23)) ([f67aa2d](https://github.com/good-tools/good.tools/commit/f67aa2d45330642d307d262f073489f4fcb81a46))
+* **web:** serve the web app and the API from one self-host image ([#24](https://github.com/good-tools/good.tools/issues/24)) ([77da69b](https://github.com/good-tools/good.tools/commit/77da69b44d544d48bd0a00bf82c583eceae37b51))
+
 ## [1.24.0](https://github.com/good-tools/good.tools/compare/v1.23.2...v1.24.0) (2026-10-05)
 
 
