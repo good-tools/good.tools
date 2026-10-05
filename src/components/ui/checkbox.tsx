@@ -18,7 +18,7 @@ export function Checkbox({ className, title, description, id, ...props }: Checkb
       <input
         id={inputId}
         type='checkbox'
-        className='size-3.5 rounded-sm border-input text-primary dark:bg-background dark:checked:bg-primary focus:ring-ring/40 focus:ring-offset-0'
+        className='size-3.5 cursor-pointer appearance-auto accent-foreground'
         {...props}
       />
       {title && <span className='text-foreground/90 select-none'>{title}</span>}
