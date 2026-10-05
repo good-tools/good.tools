@@ -436,10 +436,15 @@ export const tools: Tool[] = [
     online: false,
     dependencies: [
       { name: 'ffmpeg.wasm', url: 'https://github.com/ffmpegwasm/ffmpeg.wasm' },
+      // Source of the exact pinned core release (0.12.10; the upstream v0.12.10 tag is the @ffmpeg/ffmpeg release)
+      {
+        name: '@ffmpeg/core-mt (GPL-2.0-or-later)',
+        url: 'https://github.com/ffmpegwasm/ffmpeg.wasm/tree/71aa99d37c02a7b4c435275ca9ef50e612f6efa1/packages/core-mt',
+      },
       { name: 'FFmpeg', url: 'https://ffmpeg.org' },
     ],
     notice:
-      'This tool downloads a large (~10 MB) WebAssembly build of FFmpeg to convert files in your browser. Encoding runs on your device and is slower than desktop FFmpeg.',
+      'This tool downloads a large (~10 MB) WebAssembly build of FFmpeg to convert files in your browser. Encoding runs on your device and is slower than desktop FFmpeg. The FFmpeg core is licensed under the GPL (2.0 or later); source: https://github.com/ffmpegwasm/ffmpeg.wasm/tree/71aa99d37c02a7b4c435275ca9ef50e612f6efa1/packages/core-mt',
   },
   {
     title: 'Images to PDF',
