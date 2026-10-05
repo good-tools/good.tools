@@ -34,8 +34,9 @@ export function formatRelative(date: Date | number | string, now = Date.now()): 
 }
 
 /** Triggers a browser download of `data` as `filename`. */
-export function downloadBlob(data: BlobPart | Blob, filename: string, type = 'application/octet-stream') {
-  const url = URL.createObjectURL(data instanceof Blob ? data : new Blob([data], { type }))
+export function downloadBlob(data: BlobPart | Uint8Array, filename: string, type = 'application/octet-stream') {
+  // Uint8Array<ArrayBufferLike> could be a SharedArrayBuffer view in theory; ours never are
+  const url = URL.createObjectURL(data instanceof Blob ? data : new Blob([data as BlobPart], { type }))
   const a = Object.assign(document.createElement('a'), { href: url, download: filename })
   a.click()
   setTimeout(() => URL.revokeObjectURL(url), 1000)
