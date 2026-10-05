@@ -18,7 +18,11 @@ describe('MarkdownNotes', () => {
   it('lists notes newest first and previews the active one with a toc', async () => {
     render(<MarkdownNotes />)
     const list = screen.getByRole('list', { name: 'Notes' })
-    expect(within(list).getAllByRole('button').map((b) => b.textContent)).toEqual(['Beta body', 'Alpha'])
+    expect(
+      within(list)
+        .getAllByRole('button')
+        .map((b) => b.textContent),
+    ).toEqual(['Beta body', 'Alpha'])
     expect(screen.getByTestId('preview').querySelector('h2#part-one')).toBeInTheDocument()
     expect(within(screen.getByRole('navigation')).getByText('Part one')).toBeInTheDocument()
 
