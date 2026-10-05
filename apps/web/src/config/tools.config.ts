@@ -115,10 +115,6 @@ export const tools: Tool[] = [
         name: '@monaco-editor/react',
         url: 'https://www.npmjs.com/package/@monaco-editor/react',
       },
-      {
-        name: 'react-inspector',
-        url: 'https://www.npmjs.com/package/react-inspector',
-      },
     ],
   },
   {
@@ -327,10 +323,6 @@ export const tools: Tool[] = [
         name: 'jsonpath',
         url: 'https://www.npmjs.com/package/jsonpath',
       },
-      {
-        name: 'react-inspector',
-        url: 'https://www.npmjs.com/package/react-inspector',
-      },
     ],
   },
   {
@@ -381,10 +373,6 @@ export const tools: Tool[] = [
       {
         name: 'xml-formatter',
         url: 'https://www.npmjs.com/package/xml-formatter',
-      },
-      {
-        name: 'react-inspector',
-        url: 'https://www.npmjs.com/package/react-inspector',
       },
     ],
   },

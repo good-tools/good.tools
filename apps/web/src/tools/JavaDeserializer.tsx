@@ -1,12 +1,12 @@
 import { type ClassDescription, type Content, deserialize, normalize, print } from '@goodtools/jdserialize'
-import Editor from '@monaco-editor/react'
 import { Buffer } from 'buffer'
 import { Eraser, FileUp, FlaskConical, Play } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { ObjectInspector } from 'react-inspector'
+import { JsonTree, useJsonTree } from '@/components/JsonTree'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { CodeEditor } from '@/components/ui/code-editor'
 import { CopyButton } from '@/components/ui/copy-button'
 import { FileButton } from '@/components/ui/file-button'
 import { Textarea } from '@/components/ui/input'
@@ -14,7 +14,6 @@ import { Segmented } from '@/components/ui/segmented'
 import { Panel, paneField, Split, Workspace } from '@/components/ui/toolbar'
 import { useToolState } from '@/hooks/useToolState'
 import { parseHex } from '@/lib/hex'
-import { useIsDark } from '@/stores/theme.store'
 
 const EXAMPLE_OBJECT = Buffer.from(
   'aced0005737200136a6176612e7574696c2e41727261794c6973747881d21d99c7619d03000149000473697a6578700000000277040000000273720017746f6f6c732e676f6f642e6d6f64656c2e506572736f6e8fa1a2737c31b1840200044900036167654c00086368696c6472656e7400104c6a6176612f7574696c2f4c6973743b4c000667656e6465727400204c746f6f6c732f676f6f642f6d6f64656c2f506572736f6e2447656e6465723b4c00046e616d657400124c6a6176612f6c616e672f537472696e673b7870000000417371007e0000000000027704000000027371007e00020000001c7371007e000000000000770400000000787e72001e746f6f6c732e676f6f642e6d6f64656c2e506572736f6e2447656e64657200000000000000001200007872000e6a6176612e6c616e672e456e756d000000000000000012000078707400044d414c457400054f73616d617371007e00020000001e7371007e0000000000007704000000007871007e000c740008416264756c6c61687871007e000c7400064b68616c69647371007e0002000000327371007e0000000000017704000000017371007e000200000019707e71007e000a74000646454d414c4574000548617269737871007e000c740005417a66617278',
@@ -28,12 +27,11 @@ interface DeserializedObject {
 
 const errorMessage = (e: unknown, fallback: string) => (e instanceof Error ? e.message : fallback)
 
-const editorOptions = { readOnly: true, wordWrap: 'on', contextmenu: false, minimap: { enabled: false } } as const
+const editorOptions = { readOnly: true, wordWrap: 'on', contextmenu: false } as const
 
 type View = 'data' | 'tree' | 'classes'
 
 function JavaDeserializer() {
-  const darkMode = useIsDark()
   const [encoded, setEncoded] = useToolState('java:hex', '')
   const [buffer, setBuffer] = useToolState<Buffer | null>('java:buffer', null)
   const [inputError, setInputError] = useState('')
@@ -50,6 +48,7 @@ function JavaDeserializer() {
     }
   }, [buffer, connect])
   const { decoded } = result
+  const treeState = useJsonTree(decoded?.objects)
 
   const classes = useMemo(() => {
     if (!decoded) return ''
@@ -144,17 +143,9 @@ function JavaDeserializer() {
           {!decoded ? (
             <p className='p-2.5 text-xs text-muted-foreground'>Press Decode to deserialize</p>
           ) : view === 'tree' ? (
-            <div className='p-2'>
-              <ObjectInspector data={decoded.objects} theme={darkMode ? 'chromeDark' : 'chromeLight'} />
-            </div>
+            <JsonTree value={decoded.objects} state={treeState} />
           ) : (
-            <Editor
-              height='100%'
-              value={text}
-              theme={darkMode ? 'vs-dark' : 'light'}
-              language={view === 'classes' ? 'java' : 'json'}
-              options={editorOptions}
-            />
+            <CodeEditor value={text} language={view === 'classes' ? 'java' : 'json'} options={editorOptions} />
           )}
         </Panel>
       </Split>

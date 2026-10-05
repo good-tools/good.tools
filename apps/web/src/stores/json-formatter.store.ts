@@ -25,24 +25,55 @@ export function applyJsonPath(data: unknown, query: string): { result: unknown; 
   }
 }
 
+export type Indent = '2' | '4' | 'tab'
+
+/** Recursively sorts object keys (arrays keep their order). */
+export function sortKeys(v: unknown): unknown {
+  if (Array.isArray(v)) return v.map(sortKeys)
+  if (typeof v !== 'object' || v === null) return v
+  return Object.fromEntries(
+    Object.keys(v)
+      .sort()
+      .map((k) => [k, sortKeys((v as Record<string, unknown>)[k])]),
+  )
+}
+
+export function stringify(v: unknown, indent: Indent | 'none', sort = false) {
+  const value = sort ? sortKeys(v) : v
+  return JSON.stringify(value, null, indent === 'none' ? undefined : indent === 'tab' ? '\t' : Number(indent))
+}
+
 interface JSONFormatterStore extends Parsed {
   value: string
   query: string
   tree: boolean
+  indent: Indent
+  sort: boolean
 
   /** Sets the editor text and re-parses it */
   setValue: (value: string) => void
   setQuery: (value: string) => void
   setTree: (value: boolean) => void
+  setIndent: (indent: Indent) => void
+  setSort: (sort: boolean) => void
   reset: () => void
 }
 
-const initial = () => ({ value: DEFAULT_VALUE, ...parseJson(DEFAULT_VALUE), query: '', tree: true })
+const initial = () => ({
+  value: DEFAULT_VALUE,
+  ...parseJson(DEFAULT_VALUE),
+  query: '',
+  tree: true,
+  indent: '2' as Indent,
+  sort: false,
+})
 
 export const useJSONFormatterStore = create<JSONFormatterStore>((set) => ({
   ...initial(),
   setValue: (value) => set({ value, ...parseJson(value) }),
   setQuery: (query) => set({ query }),
   setTree: (tree) => set({ tree }),
+  setIndent: (indent) => set({ indent }),
+  setSort: (sort) => set({ sort }),
   reset: () => set(initial()),
 }))

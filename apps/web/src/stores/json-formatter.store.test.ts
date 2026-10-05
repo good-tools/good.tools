@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { applyJsonPath, useJSONFormatterStore } from './json-formatter.store'
+import { applyJsonPath, stringify, useJSONFormatterStore } from './json-formatter.store'
 
 const s = () => useJSONFormatterStore.getState()
 
@@ -28,4 +28,11 @@ describe('json formatter store', () => {
     expect(bad.error).toBeTruthy()
     expect(bad.result).toBeUndefined()
   })
+})
+
+it('formats with the chosen indent and optional key sorting', () => {
+  const v = { b: [{ z: 1, a: 2 }], a: 1 }
+  expect(stringify(v, 'none', true)).toBe('{"a":1,"b":[{"a":2,"z":1}]}')
+  expect(stringify({ a: 1 }, 'tab')).toBe('{\n\t"a": 1\n}')
+  expect(stringify({ a: 1 }, '4')).toBe('{\n    "a": 1\n}')
 })

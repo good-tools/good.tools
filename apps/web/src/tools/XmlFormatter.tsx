@@ -1,20 +1,19 @@
-import Editor from '@monaco-editor/react'
 import { Allotment } from 'allotment'
 import 'allotment/dist/style.css'
 import { Braces, Eraser, ListTree, Minimize2, WandSparkles } from 'lucide-react'
-import { ObjectInspector } from 'react-inspector'
+import { JsonTree, useJsonTree } from '@/components/JsonTree'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { CodeEditor } from '@/components/ui/code-editor'
 import { CopyButton } from '@/components/ui/copy-button'
 import { Panel, Workspace } from '@/components/ui/toolbar'
-import { useIsDark } from '@/stores/theme.store'
 import { useXMLFormatterStore } from '@/stores/xml-formatter.store'
 
-const editorOptions = { wordWrap: 'on' as const, contextmenu: false, minimap: { enabled: false } }
+const editorOptions = { wordWrap: 'on' as const, contextmenu: false }
 
 function XmlFormatter() {
-  const dark = useIsDark()
   const { value, setValue, error, output, run } = useXMLFormatterStore()
+  const treeState = useJsonTree(output?.kind === 'tree' ? output.data : undefined)
   const text = output && output.kind !== 'tree' ? output.text : ''
 
   // Capture phase so Monaco doesn't also handle Ctrl+Enter (insert line)
@@ -54,10 +53,8 @@ function XmlFormatter() {
           <Allotment.Pane minSize={240}>
             <Panel title='Input' className='mr-1 h-full'>
               <div className='h-full' onKeyDownCapture={ctrlEnter}>
-                <Editor
-                  height='100%'
+                <CodeEditor
                   value={value}
-                  theme={dark ? 'vs-dark' : 'light'}
                   language='xml'
                   onChange={(v) => setValue(v ?? '')}
                   options={{ ...editorOptions, ariaLabel: 'XML input' }}
@@ -73,14 +70,10 @@ function XmlFormatter() {
             >
               <div className='h-full'>
                 {output?.kind === 'tree' ? (
-                  <div className='p-2'>
-                    <ObjectInspector data={output.data} expandLevel={2} theme={dark ? 'chromeDark' : 'chromeLight'} />
-                  </div>
+                  <JsonTree value={output.data} state={treeState} />
                 ) : output ? (
-                  <Editor
-                    height='100%'
+                  <CodeEditor
                     value={output.text}
-                    theme={dark ? 'vs-dark' : 'light'}
                     language={output.kind}
                     options={{ ...editorOptions, readOnly: true, ariaLabel: 'Output' }}
                   />

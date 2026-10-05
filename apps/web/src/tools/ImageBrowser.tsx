@@ -1,4 +1,3 @@
-import Editor from '@monaco-editor/react'
 import { filesize } from 'filesize'
 import { LRUCache as LRU } from 'lru-cache'
 import { ArrowRight, ChevronRight, Container, Download, Shuffle, X } from 'lucide-react'
@@ -7,6 +6,7 @@ import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import FileTree, { type FileNode } from '@/components/FileTree'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { CodeEditor } from '@/components/ui/code-editor'
 import { CopyButton } from '@/components/ui/copy-button'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
@@ -15,7 +15,6 @@ import { API_CONFIG } from '@/config/api.config'
 import { getJSON } from '@/hooks/useApiQuery'
 import { useToolState } from '@/hooks/useToolState'
 import { formatDateTime } from '@/lib/utils'
-import { useIsDark } from '@/stores/theme.store'
 import type { DockerFileListItem, DockerFileNode, DockerImageResponse } from '@/types/api.types'
 
 const RANDOM_IMAGES = [
@@ -56,7 +55,6 @@ const kvTable = (rows: [string, string][]) => (
 )
 
 function ImageBrowser() {
-  const darkMode = useIsDark()
   const [loading, setLoading] = useState(false)
   const [data, setData] = useToolState<DockerImageResponse | null>('docker:data', null)
   const [ref, setRef] = useToolState('docker:ref', '')
@@ -313,12 +311,7 @@ function ImageBrowser() {
                   files is not supported.
                 </p>
               ) : (
-                <Editor
-                  onMount={(e) => (editorRef.current = e)}
-                  theme={darkMode ? 'vs-dark' : 'light'}
-                  value={content}
-                  options={{ readOnly: true, minimap: { enabled: false }, fontSize: 12, scrollBeyondLastLine: false }}
-                />
+                <CodeEditor onMount={(e) => (editorRef.current = e)} value={content} options={{ readOnly: true }} />
               )}
             </Panel>
           </Split>
