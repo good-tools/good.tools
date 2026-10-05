@@ -39,7 +39,6 @@
     "pdfjs-dist": "^6.4.299",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "react-inspector": "^9.0.0",
     "react-router": "^8.4.0",
     "tailwind-merge": "^3.7.0",
     "tesseract.js": "^7.0.0",

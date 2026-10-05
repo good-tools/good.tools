@@ -324,3 +324,32 @@ html.dark .md-preview {
   --hl-attr: #ffa657;
   --hl-add: #7ee787;
 }
+/* JsonTree value colours, matching Monaco's JSON tokens */
+.json-tree {
+  & .json-key {
+    color: #0451a5;
+  }
+  & .json-string {
+    color: #a31515;
+  }
+  & .json-number {
+    color: #098658;
+  }
+  & .json-literal {
+    color: #0000ff;
+  }
+}
+html.dark .json-tree {
+  & .json-key {
+    color: #9cdcfe;
+  }
+  & .json-string {
+    color: #ce9178;
+  }
+  & .json-number {
+    color: #b5cea8;
+  }
+  & .json-literal {
+    color: #569cd6;
+  }
+}

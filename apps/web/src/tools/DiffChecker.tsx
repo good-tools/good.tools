@@ -1,13 +1,12 @@
-import { DiffEditor, default as Editor } from '@monaco-editor/react'
 import { ArrowLeftRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { CodeDiffEditor, CodeEditor } from '@/components/ui/code-editor'
 import { fieldClass } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Segmented } from '@/components/ui/segmented'
 import { Workspace } from '@/components/ui/toolbar'
 import { useToolState } from '@/hooks/useToolState'
 import { cn } from '@/lib/utils'
-import { useIsDark } from '@/stores/theme.store'
 
 const LANGUAGES = [
   'plaintext',
@@ -31,8 +30,6 @@ const LANGUAGES = [
 type View = 'original' | 'modified' | 'diff'
 
 function DiffChecker() {
-  const dark = useIsDark()
-  const theme = dark ? 'vs-dark' : 'light'
   const [original, setOriginal] = useToolState('diff:original', '')
   const [changed, setChanged] = useToolState('diff:changed', '')
   const [language, setLanguage] = useToolState('diff:language', 'plaintext')
@@ -80,21 +77,17 @@ function DiffChecker() {
     >
       <div className='min-h-0 flex-1 overflow-hidden rounded-md border'>
         {view === 'diff' ? (
-          <DiffEditor
-            height='100%'
+          <CodeDiffEditor
             original={original}
             modified={changed}
             language={language}
-            theme={theme}
             options={{ readOnly: true, originalEditable: false }}
           />
         ) : (
-          <Editor
+          <CodeEditor
             key={view}
-            height='100%'
             value={view === 'original' ? original : changed}
             language={language}
-            theme={theme}
             onChange={(v) => (view === 'original' ? setOriginal : setChanged)(v ?? '')}
             options={{
               ariaLabel: view === 'original' ? 'Original text' : 'Modified text',

@@ -1,9 +1,10 @@
-import Editor, { type OnMount } from '@monaco-editor/react'
+import type { OnMount } from '@monaco-editor/react'
 import { Download, FilePlus, FolderOpen, PanelLeft, TableOfContents, Trash2 } from 'lucide-react'
 import { useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { CodeEditor } from '@/components/ui/code-editor'
 import { FileButton } from '@/components/ui/file-button'
 import { Segmented } from '@/components/ui/segmented'
 import { Panel, Workspace } from '@/components/ui/toolbar'
@@ -246,12 +247,10 @@ function Notes() {
         )}
         {view !== 'preview' && (
           <Panel title='Markdown' className='min-w-0 flex-1'>
-            <Editor
-              height='100%'
+            <CodeEditor
               path={active.id}
               defaultLanguage='markdown'
               value={active.body}
-              theme={dark ? 'vs-dark' : 'light'}
               onMount={(e) => {
                 setEditor(e)
                 e.onDidDispose(() => setEditor(null))
@@ -259,12 +258,9 @@ function Notes() {
               onChange={(v) => update(v ?? '')}
               options={{
                 ariaLabel: 'Markdown source',
-                minimap: { enabled: false },
                 wordWrap: 'on',
                 lineNumbers: 'off',
                 folding: false,
-                scrollBeyondLastLine: false,
-                fontSize: 13,
               }}
             />
           </Panel>
