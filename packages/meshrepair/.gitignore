@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+built/
+.parcel-cache/
+
+# Lib
+lib/*
+!lib/meshrepair
+lib/meshrepair/mr_build
+!lib/tarballs
+!lib/crossfile.meson
+!lib/Makefile
+lib/tarballs/*
+!lib/tarballs/.gitkeep
+
+# Emscripten artifacts
+*.wasm
+*.data
+*.wasm.gz
+*.data.gz
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/
+
+# Environment
+.env
+.env.local
