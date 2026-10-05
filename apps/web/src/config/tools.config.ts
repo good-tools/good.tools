@@ -1,6 +1,7 @@
 import {
   Box,
   Braces,
+  CalendarSync,
   Code2,
   Coffee,
   Container,
@@ -374,6 +375,20 @@ export const tools: Tool[] = [
         name: 'xml-formatter',
         url: 'https://www.npmjs.com/package/xml-formatter',
       },
+    ],
+  },
+  {
+    title: 'Cron Expression',
+    path: '/cron',
+    description: 'Explain a cron expression in plain English and list its next run times in any time zone',
+    icon: CalendarSync,
+    categories: [CATEGORIES.DEVELOPMENT],
+    searchTags: ['cron', 'crontab', 'schedule', 'expression', 'explain', 'next run', 'quartz', 'timezone'],
+    component: lazy(() => import('@/tools/CronExplainer')),
+    online: false,
+    dependencies: [
+      { name: 'cronstrue', url: 'https://www.npmjs.com/package/cronstrue' },
+      { name: 'croner', url: 'https://www.npmjs.com/package/croner' },
     ],
   },
   {
