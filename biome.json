@@ -6,7 +6,13 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!public", "!CHANGELOG.md", "!.github/.release-please-manifest.json", "!index.html"]
+    "includes": [
+      "**",
+      "!apps/web/public",
+      "!**/CHANGELOG.md",
+      "!.github/.release-please-manifest.json",
+      "!apps/web/index.html"
+    ]
   },
   "formatter": {
     "indentStyle": "space",
