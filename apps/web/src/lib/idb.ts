@@ -27,3 +27,11 @@ async function run<T>(mode: IDBTransactionMode, fn: (s: IDBObjectStore) => IDBRe
 export const idbGet = <T>(key: string) => run<T | undefined>('readonly', (s) => s.get(key))
 export const idbSet = (key: string, value: unknown) => run('readwrite', (s) => s.put(value, key)).then(() => {})
 export const idbDelete = (key: string) => run('readwrite', (s) => s.delete(key)).then(() => {})
+
+/** Atomic read-modify-write: `fn` gets the stored value and returns the one to save, in a single transaction. */
+export const idbUpdate = <T>(key: string, fn: (current: T | undefined) => T) =>
+  run('readwrite', (s) => {
+    const r = s.get(key)
+    r.onsuccess = () => s.put(fn(r.result as T | undefined), key)
+    return r
+  }).then(() => {})

@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { useNotesStatus, useNotesStore } from '@/stores/notes.store'
+import { mergeNotebooks, useNotesStatus, useNotesStore } from '@/stores/notes.store'
 import MarkdownNotes from './MarkdownNotes'
 
 const note = (id: string, body: string, updated: number) => ({ id, body, updated })
@@ -12,6 +12,7 @@ beforeEach(() => {
   useNotesStore.setState({
     notes: [note('a', '# Alpha\n\n## Part one', 1), note('b', 'Beta body', 2)],
     activeId: 'a',
+    deleted: [],
     view: 'preview',
     showNotes: true,
     showToc: true,
@@ -59,4 +60,13 @@ it('waits for saved notes before rendering, so nothing overwrites them', () => {
   useNotesStatus.setState({ loaded: false })
   const { container } = render(<MarkdownNotes />)
   expect(container).toBeEmptyDOMElement()
+})
+
+it('merges two tabs: newer edit of each note wins, deletions stick', () => {
+  const tabA = { notes: [note('x', 'x edited in A', 5), note('y', 'y old', 1), note('z', 'z', 1)], deleted: [] }
+  const tabB = { notes: [note('x', 'x old', 1), note('y', 'y edited in B', 6)], deleted: ['z'] }
+  expect(mergeNotebooks(tabA, tabB)).toEqual({
+    notes: [note('x', 'x edited in A', 5), note('y', 'y edited in B', 6)],
+    deleted: ['z'],
+  })
 })
