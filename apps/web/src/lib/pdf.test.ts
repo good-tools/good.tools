@@ -1,6 +1,17 @@
-import { PDFDocument } from '@cantoo/pdf-lib'
+import { degrees, PDFDocument } from '@cantoo/pdf-lib'
 import { describe, expect, it } from 'vitest'
-import { type LayoutOptions, layoutPages, mergePdfs, mm, moveRect, PAGE_SIZES, resizeRect, targetPixels } from './pdf'
+import {
+  type LayoutOptions,
+  layoutPages,
+  mergePdfs,
+  mm,
+  moveRect,
+  organizePdf,
+  PAGE_SIZES,
+  parsePageRange,
+  resizeRect,
+  targetPixels,
+} from './pdf'
 
 const a4: LayoutOptions = { pageSize: 'a4', landscape: false, perPage: 2, margin: 0, size: 'fit' }
 const card = { width: 1000, height: 630 }
@@ -82,5 +93,58 @@ describe('targetPixels', () => {
       width: 100,
       height: 50,
     })
+  })
+})
+
+describe('parsePageRange', () => {
+  it('parses pages and ranges in the order given, 0-based, without repeats', () => {
+    expect(parsePageRange('1-3,7', 10)).toEqual([0, 1, 2, 6])
+    expect(parsePageRange(' 7 , 2 - 3, 2 ', 10)).toEqual([6, 1, 2])
+    expect(parsePageRange('9-', 10)).toEqual([8, 9])
+    expect(parsePageRange('3-1', 10)).toEqual([2, 1, 0])
+    expect(parsePageRange('1,,2,', 2)).toEqual([0, 1])
+  })
+
+  it('rejects malformed, empty and out-of-range input', () => {
+    for (const bad of ['', ' , ', 'a', '1-2-3', '-3', '0', '11', '2-11', '1.5'])
+      expect(() => parsePageRange(bad, 10), bad).toThrow()
+  })
+})
+
+describe('organizePdf', () => {
+  /** Pages told apart by width: page n is 100 + n points wide */
+  async function numbered(pages: number) {
+    const doc = await PDFDocument.create()
+    for (let i = 0; i < pages; i++) doc.addPage([100 + i, 300]).setRotation(degrees(i === 1 ? 90 : 0))
+    return doc.save()
+  }
+  const summary = async (bytes: Uint8Array) =>
+    (await PDFDocument.load(bytes)).getPages().map((p) => [p.getWidth() - 100, p.getRotation().angle])
+
+  it('reorders, drops and rotates on top of the existing rotation', async () => {
+    const out = await organizePdf(await numbered(4), [
+      { index: 3, rotation: 0 },
+      { index: 1, rotation: 270 },
+      { index: 0, rotation: -90 },
+    ])
+    expect(await summary(out)).toEqual([
+      [3, 0],
+      [1, 0],
+      [0, 270],
+    ])
+  })
+
+  it('can repeat a page', async () => {
+    expect(
+      await summary(
+        await organizePdf(
+          await numbered(2),
+          [0, 0].map((index) => ({ index, rotation: 180 })),
+        ),
+      ),
+    ).toEqual([
+      [0, 180],
+      [0, 180],
+    ])
   })
 })
