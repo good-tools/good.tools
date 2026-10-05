@@ -12,7 +12,7 @@ Free, fast, privacy-focused developer tools that run in your browser.
 
 | Category        | Tools                                                                         |
 | --------------- | ----------------------------------------------------------------------------- |
-| **Development** | Diff Checker, JSON Formatter, JSON Escape, XML Formatter, Docker Browser      |
+| **Development** | MCP Browser, Diff Checker, JSON Formatter, JSON Escape, XML Formatter, Docker Browser      |
 | **Encoding**    | Base64, URL Encoder/Decoder, Protobuf Decoder                                 |
 | **Security**    | JWT Decoder, Certificate Decoder, Java Object Deserializer, Hash Calculator                |
 | **Network**     | Packet Dissector (Wireshark), DNS Lookup, WHOIS, What's My IP, IP to Location |

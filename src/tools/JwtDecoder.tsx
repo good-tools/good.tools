@@ -45,7 +45,6 @@ function TokenEditor({ value, onChange }: { value: string; onChange: (v: string)
         className={cn(shared, 'pointer-events-none absolute inset-0 overflow-hidden')}
       >
         {segments.map((seg, i) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: segments are positional
           <span key={i}>
             {i > 0 && <span className='text-muted-foreground'>.</span>}
             <span className={PART_COLORS[i] ?? 'text-destructive'}>{seg}</span>
