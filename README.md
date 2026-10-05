@@ -48,13 +48,12 @@ docker run -p 3000:80 ghcr.io/good-tools/good.tools:latest
 
 In production, pin a release version tag (`ghcr.io/good-tools/good.tools:<version>`) rather than `latest`; see [Releases](https://github.com/good-tools/good.tools/releases). To build it yourself instead, run `docker build -f apps/web/Dockerfile -t good-tools .` from the repository root.
 
-By default, self-hosted instances send no telemetry and hide online tools. To enable the online tools, run the backend services and point the image at them:
+By default, self-hosted instances send no telemetry and hide online tools. The online tools (DNS, WHOIS, IP location, Docker Browser) use the good.tools API in [`services/api`](services/api). Run it yourself and point the image at it:
 
 ```bash
 docker run -p 3000:80 \
   -e DISABLE_ONLINE_TOOLS=false \
-  -e INTERNET_TOOLS_URL=https://your-api.example.com \
-  -e IMAGE_BROWSER_URL=https://your-images-api.example.com \
+  -e API_URL=https://your-api.example.com \
   ghcr.io/good-tools/good.tools:latest
 ```
 
@@ -64,8 +63,7 @@ docker run -p 3000:80 \
 | `ENABLE_TELEMETRY`     | `false` | Enable Google Analytics           |
 | `GA_TRACKING_ID`       | `""`    | GA4 tracking ID                   |
 | `DISABLE_ONLINE_TOOLS` | `true`  | Hide tools that need backend APIs |
-| `INTERNET_TOOLS_URL`   | `""`    | DNS / WHOIS / IP API base URL     |
-| `IMAGE_BROWSER_URL`    | `""`    | Docker image browser API base URL |
+| `API_URL`              | `""`    | Base URL of the good.tools API    |
 
 If you serve `dist/` from somewhere else, send `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp`. The image converter needs them for multi-threaded WebAssembly.
 

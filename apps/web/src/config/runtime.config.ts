@@ -6,8 +6,8 @@ export interface RuntimeConfig {
   ENABLE_TELEMETRY: boolean
   GA_TRACKING_ID: string
   DISABLE_ONLINE_TOOLS: boolean
-  INTERNET_TOOLS_URL: string
-  IMAGE_BROWSER_URL: string
+  /** Base URL of the good.tools API (services/api), e.g. https://api.good.tools or /api */
+  API_URL: string
 }
 
 declare global {
@@ -20,8 +20,7 @@ const defaults: RuntimeConfig = {
   ENABLE_TELEMETRY: false,
   GA_TRACKING_ID: '',
   DISABLE_ONLINE_TOOLS: true,
-  INTERNET_TOOLS_URL: '',
-  IMAGE_BROWSER_URL: '',
+  API_URL: '',
 }
 
 export function getRuntimeConfig(): RuntimeConfig {
@@ -31,8 +30,7 @@ export function getRuntimeConfig(): RuntimeConfig {
       ENABLE_TELEMETRY: env.VITE_ENABLE_TELEMETRY === 'true',
       GA_TRACKING_ID: env.VITE_GA_TRACKING_ID || '',
       DISABLE_ONLINE_TOOLS: env.VITE_DISABLE_ONLINE_TOOLS === 'true',
-      INTERNET_TOOLS_URL: env.VITE_INTERNET_TOOLS_URL || 'https://internet-tools.fly.dev',
-      IMAGE_BROWSER_URL: env.VITE_IMAGE_BROWSER_URL || 'https://image-browser.fly.dev',
+      API_URL: env.VITE_API_URL || 'https://api.good.tools',
     }
   }
   // globalThis.window: this module is also imported by the sitemap script outside the browser
