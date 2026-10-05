@@ -60,6 +60,8 @@ function git(cwd, ...args) {
 // ---------------------------------------------------------------------------
 // config
 
+const BOOLEAN_FLAGS = new Set(['help'])
+
 function parseArgs(argv) {
   const positional = []
   const flags = {}
@@ -67,7 +69,9 @@ function parseArgs(argv) {
     const a = argv[i]
     if (a.startsWith('--')) {
       const [k, v] = a.slice(2).split('=')
-      flags[k] = v !== undefined ? v : argv[++i]
+      if (v !== undefined) flags[k] = v
+      else if (BOOLEAN_FLAGS.has(k) || i + 1 >= argv.length || argv[i + 1].startsWith('--')) flags[k] = true
+      else flags[k] = argv[++i]
     } else positional.push(a)
   }
   return { positional, flags }
@@ -178,8 +182,11 @@ function patchFiles(dir) {
     : []
 }
 
+/** Edits not yet exported to patches/overlay, including new files that were never `git add`ed. */
 function unexported(dest) {
-  return fs.existsSync(path.join(dest, '.git')) ? git(dest, 'status', '--porcelain', '--untracked-files=no').trim() : ''
+  return fs.existsSync(path.join(dest, '.git'))
+    ? git(dest, 'status', '--porcelain', '--untracked-files=all').trim()
+    : ''
 }
 
 function apply(cfg, name) {
@@ -189,7 +196,7 @@ function apply(cfg, name) {
   if (dirty) {
     die(
       `${dest} has unexported changes:\n${dirty}\n` +
-        `Export them with \`wasmpatch export ${name}\`, or discard them with \`rm -rf ${dest}\`.`,
+        `Export them with \`wasmpatch export ${name}\` (\`git add\` new files first), or discard them with \`rm -rf ${dest}\`.`,
     )
   }
   const tarball = fetchSource(cfg, name, source)
@@ -395,7 +402,7 @@ const USAGE = `usage: wasmpatch <command> [--config upstream.json]
 
 const { positional, flags } = parseArgs(process.argv.slice(2))
 const [cmd, ...args] = positional
-if (!cmd || cmd === 'help' || flags.help !== undefined) {
+if (!cmd || cmd === 'help' || flags.help) {
   console.log(USAGE)
   process.exit(cmd ? 0 : 1)
 }
