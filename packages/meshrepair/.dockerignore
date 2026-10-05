@@ -1,0 +1,24 @@
+# Git
+.git
+.gitignore
+
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+built
+.parcel-cache
+
+# IDE
+.vscode
+.idea
+
+# Documentation
+*.md
+!README.md
+
+# Misc
+.DS_Store
+*.log
+coverage
