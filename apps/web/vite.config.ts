@@ -1,7 +1,9 @@
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
+import { gzipSync } from 'node:zlib'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import pkg from './package.json' with { type: 'json' }
 
@@ -11,8 +13,37 @@ const crossOriginIsolation = {
   'Cross-Origin-Embedder-Policy': 'require-corp',
 }
 
+/**
+ * `import url from 'big.wasm?gzip'` emits the file gzipped, for files over the host's 25 MiB per-file limit
+ * (fetch it with fetchInflated). The dev server serves the original file.
+ */
+function gzipAsset(): Plugin {
+  let dev = false
+  return {
+    name: 'gzip-asset',
+    enforce: 'pre',
+    configResolved: (config) => {
+      dev = config.command === 'serve'
+    },
+    // Virtual id: the original file must not be loaded as a module
+    async resolveId(source, importer) {
+      if (!source.endsWith('?gzip')) return
+      const resolved = await this.resolve(source.slice(0, -'?gzip'.length), importer)
+      return resolved && `\0gzip:${resolved.id}`
+    },
+    load(id) {
+      if (!id.startsWith('\0gzip:')) return
+      const file = id.slice('\0gzip:'.length)
+      if (dev) return `export default ${JSON.stringify(`/@fs${file}`)}`
+      const source = gzipSync(readFileSync(file), { level: 9 })
+      const ref = this.emitFile({ type: 'asset', name: `${path.basename(file)}.gz`, source })
+      return `export default import.meta.ROLLUP_FILE_URL_${ref}`
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [tailwindcss(), nodePolyfills({ include: ['buffer'], globals: { Buffer: true } }), react()],
+  plugins: [tailwindcss(), nodePolyfills({ include: ['buffer'], globals: { Buffer: true } }), react(), gzipAsset()],
 
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),

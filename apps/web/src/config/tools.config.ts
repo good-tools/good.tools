@@ -4,6 +4,7 @@ import {
   Code2,
   Coffee,
   Container,
+  Database,
   FileImage,
   FileKey,
   FileLock,
@@ -454,6 +455,18 @@ export const tools: Tool[] = [
     component: lazy(() => import('@/tools/PdfPassword')),
     online: false,
     dependencies: [{ name: 'qpdf', url: 'https://qpdf.sourceforge.io' }],
+  },
+  {
+    title: 'SQL Query',
+    path: '/sql-query',
+    description: 'Query CSV, JSON and Parquet files with SQL, right in your browser',
+    icon: Database,
+    categories: [CATEGORIES.DEVELOPMENT],
+    searchTags: ['sql', 'query', 'duckdb', 'csv', 'tsv', 'json', 'ndjson', 'parquet', 'database', 'table', 'data'],
+    component: lazy(() => import('@/tools/SqlQuery')),
+    online: false,
+    dependencies: [{ name: 'DuckDB-Wasm', url: 'https://github.com/duckdb/duckdb-wasm' }],
+    notice: 'This tool downloads DuckDB (~8 MB of compressed WebAssembly) to run SQL on your files in your browser.',
   },
 ]
 
