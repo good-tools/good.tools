@@ -17,6 +17,7 @@ import {
   KeyRound,
   Link,
   MapPin,
+  NotebookPen,
   Package,
   PlugZap,
   Quote,
@@ -330,6 +331,23 @@ export const tools: Tool[] = [
         name: 'react-inspector',
         url: 'https://www.npmjs.com/package/react-inspector',
       },
+    ],
+  },
+  {
+    title: 'Markdown Notes',
+    path: '/markdown-notes',
+    description:
+      'Write markdown notes with live preview, table of contents and mermaid diagrams, saved in your browser',
+    icon: NotebookPen,
+    categories: [CATEGORIES.DEVELOPMENT],
+    searchTags: ['markdown', 'md', 'notes', 'editor', 'preview', 'gfm', 'mermaid', 'diagram', 'codimd', 'hackmd'],
+    component: lazy(() => import('@/tools/MarkdownNotes')),
+    online: false,
+    dependencies: [
+      { name: '@monaco-editor/react', url: 'https://www.npmjs.com/package/@monaco-editor/react' },
+      { name: 'marked', url: 'https://www.npmjs.com/package/marked' },
+      { name: 'dompurify', url: 'https://www.npmjs.com/package/dompurify' },
+      { name: 'mermaid', url: 'https://www.npmjs.com/package/mermaid' },
     ],
   },
   {
