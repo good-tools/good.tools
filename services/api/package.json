@@ -1,0 +1,12 @@
+{
+  "name": "@good-tools/api",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "build": "go build -trimpath -ldflags=\"-s -w\" -o dist/api ./cmd/api",
+    "test": "go test -race ./...",
+    "typecheck": "go vet ./...",
+    "lint": "golangci-lint run"
+  }
+}

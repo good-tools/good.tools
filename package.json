@@ -10,7 +10,8 @@
   "workspaces": [
     "apps/*",
     "packages/*",
-    "tools/*"
+    "tools/*",
+    "services/*"
   ],
   "scripts": {
     "dev": "turbo run dev --filter=@good-tools/web",
