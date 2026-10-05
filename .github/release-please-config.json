@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "bootstrap-sha": "c0884d3a412c65da8026544587b208c74f0e227b",
+  "packages": {
+    ".": {
+      "release-type": "node",
+      "package-name": "good.tools",
+      "include-component-in-tag": false,
+      "changelog-path": "CHANGELOG.md"
+    }
+  }
+}
