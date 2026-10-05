@@ -55,3 +55,13 @@ export const protectPdf = (bytes: Uint8Array, o: ProtectOptions) =>
 
 /** Removes the open password and all restrictions. */
 export const unlockPdf = (bytes: Uint8Array, password: string) => qpdf(bytes, password, ['--decrypt'])
+
+/** Lossless structure squeeze: object streams, max Flate, drop unused resources. */
+export const optimizePdf = (bytes: Uint8Array) =>
+  qpdf(bytes, '', [
+    '--object-streams=generate',
+    '--compress-streams=y',
+    '--recompress-flate',
+    '--compression-level=9',
+    '--remove-unreferenced-resources=yes',
+  ])
