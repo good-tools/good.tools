@@ -6,7 +6,7 @@
 //                   its binaries (no toolchain needed: Vercel, Docker builds, forks)
 //   3. compile      with Emscripten from PATH (emcc, meson, ninja), or inside the pinned builder
 //                   image (tools/wasmpatch/Dockerfile.emsdk) when Docker is available
-//   4. stale        preview builds only (VERCEL=1 or WASM_ALLOW_STALE=1) with no toolchain: the latest
+//   4. stale        preview builds only (VERCEL_ENV=preview or WASM_ALLOW_STALE=1) with no toolchain: the latest
 //                   release's binaries, with a warning. Production builds never take this path.
 //
 // Turborepo additionally caches wasm/ by the same inputs (see turbo.json), locally and remotely.
@@ -202,8 +202,8 @@ if (process.argv.includes('--compile')) {
 } else if (has('docker')) {
   compileInDocker()
 } else if (
-  // Preview deployments (Vercel; production is built in CI) may fall back to the last release
-  (process.env.VERCEL === '1' || process.env.WASM_ALLOW_STALE === '1') &&
+  // Preview deployments (production is built in CI) may fall back to the last release
+  (process.env.VERCEL_ENV === 'preview' || process.env.WASM_ALLOW_STALE === '1') &&
   (await fromPublished(hash, { allowStale: true }))
 ) {
   // done, with a warning
