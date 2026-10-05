@@ -1,10 +1,11 @@
 import { filesize } from 'filesize'
-import { Download, Plus, Trash2 } from 'lucide-react'
+import { Download, LockOpen, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { DropZone } from '@/components/ui/drop-zone'
 import { FileButton } from '@/components/ui/file-button'
+import { Input } from '@/components/ui/input'
 import { SortableList } from '@/components/ui/sortable-list'
 import { Spinner } from '@/components/ui/spinner'
 import { Panel, Workspace } from '@/components/ui/toolbar'
@@ -17,22 +18,59 @@ interface Item {
   name: string
   bytes: Uint8Array
   pages?: number
+  /** Needs its open password before it can be merged */
+  locked?: boolean
   error?: string
 }
 
 const isPdf = (f: File) => f.type === 'application/pdf' || /\.pdf$/i.test(f.name)
 
-async function read(file: File): Promise<Item> {
-  const item = { id: crypto.randomUUID(), name: file.name, bytes: new Uint8Array(await file.arrayBuffer()) }
+async function inspect(item: Item): Promise<Item> {
   try {
-    return { ...item, pages: (await openPdf(item.bytes)).getPageCount() }
+    return { ...item, pages: (await openPdf(item.bytes)).getPageCount(), locked: false, error: undefined }
   } catch (e) {
-    const message = e instanceof Error ? e.message : String(e)
-    return {
-      ...item,
-      error: e instanceof Error && e.name === 'PasswordError' ? `${message}; unlock it first` : message,
-    }
+    if (e instanceof Error && e.name === 'PasswordError') return { ...item, locked: true }
+    return { ...item, error: e instanceof Error ? e.message : String(e) }
   }
+}
+
+const read = async (file: File) =>
+  inspect({ id: crypto.randomUUID(), name: file.name, bytes: new Uint8Array(await file.arrayBuffer()) })
+
+/** Decrypts with qpdf (loaded only when needed) so the merged file carries no encryption. */
+async function unlock(item: Item, password: string): Promise<Item> {
+  const { unlockPdf } = await import('@/lib/qpdf')
+  try {
+    return inspect({ ...item, bytes: await unlockPdf(item.bytes, password) })
+  } catch (e) {
+    return { ...item, error: e instanceof Error ? e.message : String(e) }
+  }
+}
+
+function UnlockForm({ item, onUnlock }: { item: Item; onUnlock: (password: string) => void }) {
+  const [password, setPassword] = useState('')
+  return (
+    <form
+      className='flex min-w-0 items-center gap-1'
+      onSubmit={(e) => {
+        e.preventDefault()
+        onUnlock(password)
+      }}
+    >
+      <Input
+        type='password'
+        aria-label={`Password for ${item.name}`}
+        placeholder='Password'
+        className='h-7 w-36 text-xs'
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <Button type='submit' size='sm' variant='outline'>
+        <LockOpen /> Unlock
+      </Button>
+      {item.error && <span className='truncate text-xs text-destructive'>{item.error}</span>}
+    </form>
+  )
 }
 
 function MergePdf() {
@@ -61,8 +99,13 @@ function MergePdf() {
     setBusy(false)
   }
 
+  const unlockItem = async (item: Item, password: string) => {
+    const next = await unlock(item, password)
+    setItems((prev) => prev.map((i) => (i.id === item.id ? next : i)))
+  }
+
   const pages = items.reduce((n, i) => n + (i.pages ?? 0), 0)
-  const blocked = items.some((i) => i.error)
+  const blocked = items.some((i) => i.error || i.locked)
 
   if (!items.length)
     return (
@@ -107,7 +150,9 @@ function MergePdf() {
               <span className='min-w-0 truncate' title={item.name}>
                 {item.name}
               </span>
-              {item.error ? (
+              {item.locked ? (
+                <UnlockForm item={item} onUnlock={(pw) => void unlockItem(item, pw)} />
+              ) : item.error ? (
                 <span className='truncate text-xs text-destructive'>{item.error}</span>
               ) : (
                 <span className='shrink-0 text-xs text-muted-foreground'>

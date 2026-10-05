@@ -6,7 +6,7 @@ Free, fast, privacy-focused developer tools that run in your browser.
 
 ![good.tools](docs/screenshot.png)
 
-- **Private.** Most tools run entirely client-side, some of them with WebAssembly (Wireshark, libvips, mesh repair, qpdf). Tools that call a server are labelled **Online**.
+- **Private.** Most tools run entirely client-side, some of them with WebAssembly (Wireshark, libvips, mesh repair, qpdf, Tesseract). Tools that call a server are labelled **Online**.
 - **Fast.** Each tool is code-split and loads only when you open it. Press <kbd>⌘K</kbd> / <kbd>Ctrl K</kbd> or <kbd>/</kbd> to jump to any tool.
 - **Self-hostable.** One Docker image, configured at runtime.
 
@@ -18,7 +18,7 @@ Free, fast, privacy-focused developer tools that run in your browser.
 | **Network**     | Packet Dissector (Wireshark), DNS Lookup, WHOIS, What's My IP, IP to Location |
 | **Image**       | Image Converter                                                               |
 | **3D & CAD**    | STL Repair                                                                    |
-| **PDF**         | Images to PDF, Merge PDF, PDF to Text, Protect / Unlock PDF (qpdf)            |
+| **PDF**         | Images to PDF, Merge PDF, PDF to Text (OCR), Protect / Unlock PDF            |
 
 ## Development
 

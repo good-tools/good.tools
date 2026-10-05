@@ -27,13 +27,16 @@ export interface LayoutOptions {
   size: 'fit' | 'card'
 }
 
-export interface Placed {
-  index: number
-  /** PDF coordinates: origin bottom-left, points */
+/** PDF coordinates: origin bottom-left, points */
+export interface Rect {
   x: number
   y: number
   width: number
   height: number
+}
+
+export interface Placed extends Rect {
+  index: number
 }
 
 export interface PageLayout {
@@ -106,12 +109,27 @@ export interface PdfImage extends Dims {
   format: 'png' | 'jpeg'
 }
 
-export async function imagesToPdf(images: PdfImage[], o: LayoutOptions): Promise<Uint8Array> {
+/** Moves `r` by (dx, dy) points (dy downwards, as on screen), keeping it on the page. */
+export function moveRect(r: Rect, dx: number, dy: number, page: Dims): Rect {
+  const clamp = (v: number, max: number) => Math.min(Math.max(v, 0), Math.max(max, 0))
+  return { ...r, x: clamp(r.x + dx, page.width - r.width), y: clamp(r.y - dy, page.height - r.height) }
+}
+
+/** Grows `r` by `dw` points of width, keeping its aspect ratio and top-left corner, within the page. */
+export function resizeRect(r: Rect, dw: number, page: Dims): Rect {
+  const top = r.y + r.height
+  const ratio = r.height / r.width
+  const width = Math.max(mm(5), Math.min(r.width + dw, page.width - r.x, top / ratio))
+  return { x: r.x, y: top - width * ratio, width, height: width * ratio }
+}
+
+/** Draws the images where `pages` puts them (from `layoutPages`, possibly moved by the user). */
+export async function imagesToPdf(images: PdfImage[], pages: PageLayout[]): Promise<Uint8Array> {
   const doc = await PDFDocument.create()
   const embedded = await Promise.all(
     images.map((i) => (i.format === 'png' ? doc.embedPng(i.bytes) : doc.embedJpg(i.bytes))),
   )
-  for (const page of layoutPages(images, o)) {
+  for (const page of pages) {
     const p = doc.addPage([page.width, page.height])
     for (const { index, ...rect } of page.items) p.drawImage(embedded[index]!, rect)
   }
