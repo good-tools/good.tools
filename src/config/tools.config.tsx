@@ -199,7 +199,7 @@ export const tools: Tool[] = [
       },
     ],
     warning: function () {
-      return <div>This tool uses a large (~18 MB) WASM binary for packet dissection in your browser.</div>
+      return <div>This tool uses a large (~20 MB) WASM binary for packet dissection in your browser.</div>
     },
   },
   {

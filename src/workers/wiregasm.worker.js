@@ -110,13 +110,13 @@ onmessage = (event) => {
       postMessage({ type: 'processed', name: name, data: res })
     }
   } else if (event.data.type === 'module-tree') {
-    const res = wg.list_modules()
+    const res = wg.listModules()
     // send it to the correct port
     event.ports[0].postMessage({
       result: JSON.parse(JSON.stringify(res, replacer)),
     })
   } else if (event.data.type === 'module-prefs') {
-    const res = wg.list_prefs(event.data.name)
+    const res = wg.listPrefs(event.data.name)
     // send it to the correct port
     event.ports[0].postMessage({
       result: JSON.parse(JSON.stringify(res, replacer)),
@@ -133,16 +133,16 @@ onmessage = (event) => {
     reader.readAsArrayBuffer(f)
   } else if (event.data.type === 'update-pref') {
     try {
-      console.log(`set_pref(${event.data.module}, ${event.data.key}, ${event.data.value})`)
-      wg.set_pref(event.data.module, event.data.key, event.data.value)
+      console.log(`setPref(${event.data.module}, ${event.data.key}, ${event.data.value})`)
+      wg.setPref(event.data.module, event.data.key, event.data.value)
       event.ports[0].postMessage({ result: 'ok' })
     } catch (e) {
-      console.error(`set_pref(${event.data.module}, ${event.data.key}, ${event.data.value}) failed: ${e.message}`)
+      console.error(`setPref(${event.data.module}, ${event.data.key}, ${event.data.value}) failed: ${e.message}`)
       event.ports[0].postMessage({ error: e.message })
     }
   } else if (event.data.type === 'apply-prefs') {
-    console.log(`apply_prefs()`)
-    wg.apply_prefs()
+    console.log(`applyPrefs()`)
+    wg.applyPrefs()
     event.ports[0].postMessage({ result: 'ok' })
   } else if (event.data.type === 'get-version') {
     event.ports[0].postMessage({ result: wg.lib.wiresharkVersion() })
