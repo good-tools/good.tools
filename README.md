@@ -6,19 +6,21 @@ Free, fast, privacy-focused developer tools that run in your browser.
 
 ![good.tools](docs/screenshot.png)
 
-- **Private.** Most tools run entirely client-side, some of them with WebAssembly (Wireshark, libvips, mesh repair, qpdf, Tesseract). Tools that call a server are labelled **Online**.
+- **Private.** Most tools run entirely client-side, many of them with WebAssembly (Wireshark, FFmpeg, DuckDB, libvips, qpdf, Tesseract, ONNX Runtime with Whisper, zxing, mesh repair). Tools that call a server are labelled **Online**.
 - **Fast.** Each tool is code-split and loads only when you open it. Press <kbd>⌘K</kbd> / <kbd>Ctrl K</kbd> or <kbd>/</kbd> to jump to any tool.
+- **Works offline.** Install it as an app; the local tools keep working without a connection.
 - **Self-hostable.** One Docker image, configured at runtime.
 
-| Category        | Tools                                                                         |
-| --------------- | ----------------------------------------------------------------------------- |
-| **Development** | MCP Browser, Diff Checker, JSON Formatter, JSON Escape, XML Formatter, Docker Browser      |
-| **Encoding**    | Base64, URL Encoder/Decoder, Protobuf Decoder                                 |
-| **Security**    | JWT Decoder, Certificate Decoder, Java Object Deserializer, Hash Calculator                |
+| Category        | Tools |
+| --------------- | ----- |
+| **Development** | Diff Checker, JSON Formatter, JSON Escape, XML Formatter, YAML / JSON / TOML Converter, Markdown Notes, Regex Tester, Cron Expression, Timestamp Converter, UUID / ULID Generator, SQL Query (DuckDB), MCP Browser, Docker Browser |
+| **Encoding**    | Base64, URL Encoder/Decoder, Protobuf Decoder, QR Code & Barcode |
+| **Security**    | JWT Decoder, Certificate Decoder, Java Object Deserializer, Hash Calculator, Password Generator |
 | **Network**     | Packet Dissector (Wireshark), DNS Lookup, WHOIS, What's My IP, IP to Location |
-| **Image**       | Image Converter                                                               |
-| **3D & CAD**    | STL Repair                                                                    |
-| **PDF**         | Images to PDF, Merge PDF, PDF to Text (OCR), Protect / Unlock PDF            |
+| **Image**       | Image Converter, Remove Background |
+| **Media**       | Video & Audio Converter (FFmpeg), Speech to Text (Whisper) |
+| **3D & CAD**    | STL Repair |
+| **PDF**         | Images to PDF, Merge PDF, Organize PDF, Compress PDF, PDF to Text (OCR), Protect / Unlock PDF |
 
 ## Development
 
@@ -61,7 +63,7 @@ The image is a single Go binary ([`services/api`](services/api)) that serves the
 
 The API has more settings, such as rate limits, the image size limit and a MaxMind key; see [`services/api`](services/api/README.md). Mount a volume at `/data` to keep its caches across restarts.
 
-If you serve `dist/` from somewhere else, send `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp`. The image converter needs them for multi-threaded WebAssembly.
+If you serve `dist/` from somewhere else, send `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp`. Multi-threaded WebAssembly (the image and video converters, among others) needs them.
 
 ## Contributing
 
@@ -75,4 +77,4 @@ Contributions are welcome, whether a bug report, a new tool or a fix. Start with
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE). Some bundled WebAssembly components keep their own licences: the FFmpeg core and Wireshark are GPL-2.0-or-later, and libvips is LGPL-2.1-or-later. Each tool's page lists the libraries it uses.
