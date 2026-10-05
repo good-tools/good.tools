@@ -1,0 +1,11 @@
+// good.tools on Cloudflare Workers (static assets only). Deployed by .github/workflows/release.yml.
+// Response headers: public/_headers.
+{
+  "name": "good-tools",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  },
+  "routes": [{ "pattern": "good.tools", "custom_domain": true }]
+}

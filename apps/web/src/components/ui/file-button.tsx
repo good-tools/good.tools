@@ -4,9 +4,10 @@ import { Button, type ButtonProps } from './button'
 export interface FileButtonProps extends Omit<ButtonProps, 'onClick' | 'asChild'> {
   onFileSelected: (e: ChangeEvent<HTMLInputElement>) => void
   accept?: string
+  multiple?: boolean
 }
 
-export function FileButton({ onFileSelected, accept, children, ...props }: FileButtonProps) {
+export function FileButton({ onFileSelected, accept, multiple, children, ...props }: FileButtonProps) {
   const input = useRef<HTMLInputElement>(null)
   return (
     <>
@@ -15,6 +16,7 @@ export function FileButton({ onFileSelected, accept, children, ...props }: FileB
         className='hidden'
         type='file'
         accept={accept}
+        multiple={multiple}
         onChange={(e) => {
           onFileSelected(e)
           e.target.value = '' // allow re-selecting the same file

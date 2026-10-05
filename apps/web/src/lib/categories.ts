@@ -1,4 +1,4 @@
-import { Binary, Box, Code, Globe, Image, Layers, Shield } from 'lucide-react'
+import { Binary, Box, Code, FileText, Globe, Image, Layers, Shield } from 'lucide-react'
 import { CATEGORIES, type CategoryName, type Tool, type ToolCategory } from '@/types/tool.types'
 
 export { CATEGORIES, type CategoryName } from '@/types/tool.types'
@@ -11,6 +11,7 @@ export const categories: ToolCategory[] = [
   { name: CATEGORIES.NETWORK, icon: Globe },
   { name: CATEGORIES['3D'], icon: Box },
   { name: CATEGORIES.IMAGE, icon: Image },
+  { name: CATEGORIES.PDF, icon: FileText },
 ]
 
 export function getToolsByCategory(tools: Tool[], category: CategoryName | 'All'): Tool[] {
