@@ -1,3 +1,4 @@
+import { useToolState } from '@/hooks/useToolState'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { filesize } from 'filesize'
 import { Download, RefreshCw, Trash2 } from 'lucide-react'
@@ -78,21 +79,21 @@ const selectClass = cn(fieldClass, 'h-7 w-auto py-0 pr-8 text-xs')
 const inlineLabel = 'flex items-center gap-1.5 text-xs text-muted-foreground'
 
 function ImageConverter() {
-  const [source, setSource] = useState<Source | null>(null)
-  const [info, setInfo] = useState<ImageInfo | null>(null)
-  const [result, setResult] = useState<Result | null>(null)
+  const [source, setSource] = useToolState<Source | null>('image:source', null)
+  const [info, setInfo] = useToolState<ImageInfo | null>('image:info', null)
+  const [result, setResult] = useToolState<Result | null>('image:result', null)
 
   const [ready, setReady] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [status, setStatus] = useState('Initializing...')
 
-  const [format, setFormat] = useState<OutputFormat>('webp')
-  const [quality, setQuality] = useState(80)
-  const [resizeMode, setResizeMode] = useState<ResizeMode>('none')
-  const [percentage, setPercentage] = useState(50)
-  const [width, setWidth] = useState<number | ''>('')
-  const [height, setHeight] = useState<number | ''>('')
+  const [format, setFormat] = useToolState<OutputFormat>('image:format', 'webp')
+  const [quality, setQuality] = useToolState('image:quality', 80)
+  const [resizeMode, setResizeMode] = useToolState<ResizeMode>('image:resizeMode', 'none')
+  const [percentage, setPercentage] = useToolState('image:percentage', 50)
+  const [width, setWidth] = useToolState<number | ''>('image:width', '')
+  const [height, setHeight] = useToolState<number | ''>('image:height', '')
 
   const workerRef = useRef<Worker | null>(null)
   // Replies carry the request id; anything but the latest request is stale and dropped
@@ -125,7 +126,7 @@ function ImageConverter() {
       worker.terminate()
       workerRef.current = null
     }
-  }, [])
+  }, [setFormat, setInfo, setResult])
 
   const send = (msg: VipsRequest) => {
     const buffer = msg.buffer.slice(0) // transferred; keep our copy intact
@@ -135,15 +136,18 @@ function ImageConverter() {
   }
 
   // The worker queues messages until wasm-vips is ready, so files dropped during init still load
-  const handleFile = useCallback(async ([file]: File[]) => {
-    if (!file) return
-    if (!file.type.startsWith('image/')) return setError(`${file.name} is not an image`)
-    const buffer = await file.arrayBuffer()
-    setSource({ name: file.name, buffer, type: file.type })
-    setInfo(null)
-    setResult(null)
-    send({ type: 'load', buffer })
-  }, [])
+  const handleFile = useCallback(
+    async ([file]: File[]) => {
+      if (!file) return
+      if (!file.type.startsWith('image/')) return setError(`${file.name} is not an image`)
+      const buffer = await file.arrayBuffer()
+      setSource({ name: file.name, buffer, type: file.type })
+      setInfo(null)
+      setResult(null)
+      send({ type: 'load', buffer })
+    },
+    [setInfo, setResult, setSource],
+  )
 
   const size = info && outputSize(info, resizeMode, percentage, width, height)
 

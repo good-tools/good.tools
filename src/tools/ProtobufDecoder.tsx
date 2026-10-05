@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
+import { useToolState } from '@/hooks/useToolState'
 import { Buffer } from 'buffer'
 import { decode, typeDefinition, possibleValues, type DecodingResult } from '@goodtools/protobuf-decoder'
-import { Eraser, FileUp } from 'lucide-react'
+import { Eraser, FileUp, FlaskConical } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -85,8 +86,8 @@ function ProtobufObject({ object, showBytes }: { object: DecodingResult; showByt
 }
 
 function ProtobufDecoder() {
-  const [encoded, setEncoded] = useState('')
-  const [showBytes, setShowBytes] = useState(false)
+  const [encoded, setEncoded] = useToolState('protobuf:hex', '')
+  const [showBytes, setShowBytes] = useToolState('protobuf:showBytes', false)
 
   const result = useMemo((): { decoded?: DecodingResult; error?: string } => {
     if (!encoded.trim()) return {}
@@ -106,8 +107,8 @@ function ProtobufDecoder() {
     <Workspace
       toolbar={
         <>
-          <Button size='sm' variant='outline' onClick={() => setEncoded(EXAMPLE_PROTOBUF.toString('hex'))}>
-            Load example
+          <Button size='sm' variant='ghost' onClick={() => setEncoded(EXAMPLE_PROTOBUF.toString('hex'))}>
+            <FlaskConical /> Load example
           </Button>
           <FileButton size='sm' variant='ghost' onFileSelected={loadFile}>
             <FileUp /> Load file

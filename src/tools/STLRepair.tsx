@@ -1,3 +1,4 @@
+import { useToolState } from '@/hooks/useToolState'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Download, Trash2, Wrench } from 'lucide-react'
 import { filesize } from 'filesize'
@@ -168,18 +169,28 @@ function RepairStats({ result }: { result: RepairResult }) {
 
 const parseSTL = (buffer: ArrayBuffer) => new STLLoader().parse(buffer)
 
+function toModel(geometry: THREE.BufferGeometry): Model {
+  geometry.computeBoundingSphere()
+  const sphere = geometry.boundingSphere ?? new THREE.Sphere()
+  return { geometry, offset: sphere.center.clone().negate(), radius: sphere.radius || 1 }
+}
+
 function STLRepair() {
-  const [file, setFile] = useState<{ name: string; data: Uint8Array } | null>(null)
-  const [model, setModel] = useState<Model | null>(null)
-  const [repaired, setRepaired] = useState<{ data: Uint8Array<ArrayBuffer>; result: RepairResult } | null>(null)
+  // Raw bytes are kept across navigation; geometries are rebuilt from them (GPU buffers are freed on unmount)
+  const [file, setFile] = useToolState<{ name: string; data: Uint8Array } | null>('stl:file', null)
+  const [repaired, setRepaired] = useToolState<{ data: Uint8Array<ArrayBuffer>; result: RepairResult } | null>(
+    'stl:repaired',
+    null,
+  )
+  const model = useMemo(() => (file ? toModel(parseSTL(file.data.slice().buffer)) : null), [file])
   const repairedGeometry = useMemo(() => (repaired ? parseSTL(repaired.data.slice().buffer) : null), [repaired])
 
   const [ready, setReady] = useState(false)
   const [progress, setProgress] = useState<{ step: string; value: number } | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const [preset, setPreset] = useState<PresetName>('print-ready')
-  const [options, setOptions] = useState<RepairOptions>({ ...PRESETS['print-ready'] })
+  const [preset, setPreset] = useToolState<PresetName>('stl:preset', 'print-ready')
+  const [options, setOptions] = useToolState<RepairOptions>('stl:options', () => ({ ...PRESETS['print-ready'] }))
 
   const camera = useRef<CameraState>({ position: new THREE.Vector3(), target: new THREE.Vector3() })
   const workerRef = useRef<Worker | null>(null)
@@ -205,7 +216,7 @@ function STLRepair() {
       worker.terminate()
       workerRef.current = null
     }
-  }, [])
+  }, [setRepaired])
 
   const handleFile = async ([f]: File[]) => {
     if (!f) return
@@ -216,11 +227,8 @@ function STLRepair() {
     setProgress(null)
     try {
       const buffer = await f.arrayBuffer()
-      const geometry = parseSTL(buffer)
-      geometry.computeBoundingSphere()
-      const sphere = geometry.boundingSphere ?? new THREE.Sphere()
+      parseSTL(buffer.slice(0)).dispose() // validate before accepting the file
       setFile({ name: f.name, data: new Uint8Array(buffer) })
-      setModel({ geometry, offset: sphere.center.clone().negate(), radius: sphere.radius || 1 })
     } catch (err) {
       setError(`Failed to parse STL: ${err instanceof Error ? err.message : String(err)}`)
     }
@@ -239,7 +247,6 @@ function STLRepair() {
   const clear = () => {
     requestId.current++
     setFile(null)
-    setModel(null)
     setRepaired(null)
     setProgress(null)
     setError(null)

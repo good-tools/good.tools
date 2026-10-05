@@ -1,4 +1,5 @@
-import { Suspense, useState } from 'react'
+import { Suspense } from 'react'
+import { useToolState } from '@/hooks/useToolState'
 import { Cloud, HardDrive, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -7,7 +8,7 @@ import { ErrorBoundary } from '@/components/layout/ErrorBoundary'
 import type { Tool } from '@/types/tool.types'
 
 export default function WrappedTool({ tool }: { tool: Tool }) {
-  const [accepted, setAccepted] = useState(false)
+  const [accepted, setAccepted] = useToolState(`notice:${tool.path}`, false)
   const Icon = tool.icon
   const builtWith = tool.dependencies?.map((d) => d.name).join(', ')
 

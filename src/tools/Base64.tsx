@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
+import { useToolState } from '@/hooks/useToolState'
 import { ArrowLeftRight, Eraser } from 'lucide-react'
 import { Buffer } from 'buffer'
 import { Alert } from '@/components/ui/alert'
@@ -26,7 +27,7 @@ type View = 'text' | 'hex'
 
 export default function Base64() {
   const { mode, input, urlSafe, setMode, setInput, setUrlSafe } = useBase64Store()
-  const [view, setView] = useState<View>('text')
+  const [view, setView] = useToolState<View>('base64:view', 'text')
 
   const result = useMemo((): { output: string; error?: string; binary?: boolean } => {
     if (!input) return { output: '' }

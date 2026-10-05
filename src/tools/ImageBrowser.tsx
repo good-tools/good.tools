@@ -1,3 +1,4 @@
+import { useToolState } from '@/hooks/useToolState'
 import { formatDateTime } from '@/lib/utils'
 import { ArrowRight, ChevronRight, Container, Download, Shuffle, X } from 'lucide-react'
 import { filesize } from 'filesize'
@@ -57,14 +58,14 @@ const kvTable = (rows: [string, string][]) => (
 function ImageBrowser() {
   const darkMode = useIsDark()
   const [loading, setLoading] = useState(false)
-  const [data, setData] = useState<DockerImageResponse | null>(null)
-  const [ref, setRef] = useState('')
-  const [pulledRef, setPulledRef] = useState('')
+  const [data, setData] = useToolState<DockerImageResponse | null>('docker:data', null)
+  const [ref, setRef] = useToolState('docker:ref', '')
+  const [pulledRef, setPulledRef] = useToolState('docker:pulledRef', '')
   const [error, setError] = useState<string | null>(null)
   const [listError, setListError] = useState<string | null>(null)
   const [fileError, setFileError] = useState<string | null>(null)
-  const [content, setContent] = useState('')
-  const [selected, setSelected] = useState<DockerFileNode | null>(null)
+  const [content, setContent] = useToolState('docker:content', '')
+  const [selected, setSelected] = useToolState<DockerFileNode | null>('docker:selected', null)
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
   const selectAbort = useRef<AbortController | null>(null)
 
@@ -75,13 +76,17 @@ function ImageBrowser() {
     setError(null)
   }
 
+  // Reset the viewer when a different image is pulled (not on mount, which restores the previous session)
+  const shownRef = useRef(pulledRef)
   useEffect(() => {
+    if (shownRef.current === pulledRef) return
+    shownRef.current = pulledRef
     selectAbort.current?.abort()
     setSelected(null)
     setContent('')
     setListError(null)
     setFileError(null)
-  }, [pulledRef])
+  }, [pulledRef, setContent, setSelected])
 
   const select = useCallback(
     async (fileNode: FileNode) => {
@@ -116,7 +121,7 @@ function ImageBrowser() {
         if (!ctrl.signal.aborted) setFileError(e instanceof Error ? e.message : 'Failed to load file')
       }
     },
-    [pulledRef],
+    [pulledRef, setContent, setSelected],
   )
 
   useEffect(() => {

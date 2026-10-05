@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useToolState } from '@/hooks/useToolState'
 import { DiffEditor, default as Editor } from '@monaco-editor/react'
 import { ArrowLeftRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -33,10 +33,10 @@ type View = 'original' | 'modified' | 'diff'
 function DiffChecker() {
   const dark = useIsDark()
   const theme = dark ? 'vs-dark' : 'light'
-  const [original, setOriginal] = useState('')
-  const [changed, setChanged] = useState('')
-  const [language, setLanguage] = useState('plaintext')
-  const [view, setView] = useState<View>('original')
+  const [original, setOriginal] = useToolState('diff:original', '')
+  const [changed, setChanged] = useToolState('diff:changed', '')
+  const [language, setLanguage] = useToolState('diff:language', 'plaintext')
+  const [view, setView] = useToolState<View>('diff:view', 'original')
 
   return (
     <Workspace

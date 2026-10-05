@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { FileUp, Info, ListTree, Settings2, Shuffle } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { FileUp, FlaskConical, Info, ListTree, Settings2 } from 'lucide-react'
 import { FileButton } from '@/components/ui/file-button'
 import { Input } from '@/components/ui/input'
 import DissectionTree, {
@@ -19,7 +19,8 @@ import { Spinner } from '@/components/ui/spinner'
 import { Toolbar } from '@/components/ui/toolbar'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { createWiregasmClient, type WiregasmClient } from '@/lib/wiregasm-client'
+import { useWiregasm } from '@/lib/wiregasm-client'
+import { useToolState } from '@/hooks/useToolState'
 import WiregasmPreferencesModal from '@/components/WiregasmPreferencesModal'
 import type { ModuleNode } from '@/components/WiregasmPreferenceTree'
 import type { Preference } from '@/components/WiregasmModulePreferences'
@@ -53,34 +54,32 @@ interface FramesResult {
 }
 
 function PacketDissector() {
-  const clientRef = useRef<WiregasmClient | null>(null)
+  const wiregasm = useWiregasm()
+  const initialized = wiregasm.ready
+  const status = wiregasm.status
 
-  const [version, setVersion] = useState<string | null>(null)
-  const [totalFrames, setTotalFrames] = useState(0)
-  const [matchedFrames, setMatchedFrames] = useState(0)
-  const [status, setStatus] = useState('Loading…')
+  // Capture view state outlives the component, like the shared worker that holds the capture
+  const [version, setVersion] = useToolState<string | null>('pd:version', null)
+  const [totalFrames, setTotalFrames] = useToolState('pd:totalFrames', 0)
+  const [matchedFrames, setMatchedFrames] = useToolState('pd:matchedFrames', 0)
   const [error, setError] = useState<string | null>(null)
-  const [columns, setColumns] = useState<string[]>([])
-  const [filter, setFilter] = useState('')
+  const [columns, setColumns] = useToolState<string[]>('pd:columns', [])
+  const [filter, setFilter] = useToolState('pd:filter', '')
   const [filterError, setFilterError] = useState<string | null>(null)
-  const [currentFilter, setCurrentFilter] = useState('')
-  const [selectedFrame, setSelectedFrame] = useState(1)
+  const [currentFilter, setCurrentFilter] = useToolState('pd:currentFilter', '')
+  const [selectedFrame, setSelectedFrame] = useToolState('pd:selectedFrame', 1)
   const [selectedPacket, setSelectedPacket] = useState<SelectedPacket | null>(null)
   const [preparedPositions, setPreparedPositions] = useState<Map<string, DissectionSelection>>(new Map())
   const [selectedTreeEntry, setSelectedTreeEntry] = useState<DissectionSelection>(NO_SELECTION)
   const [finishedProcessing, setFinishedProcessing] = useState(true)
-  const [initialized, setInitialized] = useState(false)
-  const [summary, setSummary] = useState<PacketSummary | null>(null)
+  const [summary, setSummary] = useToolState<PacketSummary | null>('pd:summary', null)
   const [summaryOpen, setSummaryOpen] = useState(false)
   const [selectedDataSourceIndex, setSelectedDataSourceIndex] = useState(0)
-  const [fileName, setFileName] = useState('')
+  const [fileName, setFileName] = useToolState('pd:fileName', '')
   const [preferencesOpen, setPreferencesOpen] = useState(false)
-  const [dissectionNonce, setDissectionNonce] = useState(0)
+  const [dissectionNonce, setDissectionNonce] = useToolState('pd:nonce', 0)
 
-  const call: WiregasmClient['call'] = useCallback((method, ...args) => {
-    if (!clientRef.current) return Promise.reject(new Error('Wireshark is not loaded'))
-    return clientRef.current.call(method, ...args)
-  }, [])
+  const { call } = wiregasm.client
 
   const clear = useMemo(
     () => () => {
@@ -90,31 +89,34 @@ function PacketDissector() {
       setSelectedTreeEntry(NO_SELECTION)
       setSelectedDataSourceIndex(0)
     },
-    [],
+    [setSelectedFrame],
   )
 
   useEffect(() => {
     setSelectedDataSourceIndex(selectedTreeEntry.idx)
   }, [selectedTreeEntry])
 
-  const handleLoadResult = useCallback((name: string, res: LoadResult | null) => {
-    setFinishedProcessing(true)
-    if (!res) return
-    setFileName(name)
-    // -12 is a short read: the capture is truncated but the frames before it are usable
-    if (res.code === 0 || res.code === -12) {
-      setDissectionNonce((n) => n + 1)
-      setError(
-        res.code === 0 ? null : 'The capture file appears to be truncated; showing the frames that could be read.',
-      )
-      setTotalFrames(res.summary.packet_count)
-      setSummary(res.summary)
-    } else {
-      setError(res.error || `Wireshark could not read this file (code ${res.code}).`)
-      setTotalFrames(0)
-      setMatchedFrames(0)
-    }
-  }, [])
+  const handleLoadResult = useCallback(
+    (name: string, res: LoadResult | null) => {
+      setFinishedProcessing(true)
+      if (!res) return
+      setFileName(name)
+      // -12 is a short read: the capture is truncated but the frames before it are usable
+      if (res.code === 0 || res.code === -12) {
+        setDissectionNonce((n) => n + 1)
+        setError(
+          res.code === 0 ? null : 'The capture file appears to be truncated; showing the frames that could be read.',
+        )
+        setTotalFrames(res.summary.packet_count)
+        setSummary(res.summary)
+      } else {
+        setError(res.error || `Wireshark could not read this file (code ${res.code}).`)
+        setTotalFrames(0)
+        setMatchedFrames(0)
+      }
+    },
+    [setDissectionNonce, setFileName, setMatchedFrames, setSummary, setTotalFrames],
+  )
 
   const processData = useCallback(
     (name: string, data: ArrayBuffer) => {
@@ -129,7 +131,7 @@ function PacketDissector() {
           setError(String(e))
         })
     },
-    [call, clear, handleLoadResult],
+    [call, clear, handleLoadResult, setSummary],
   )
 
   const loadExample = useCallback(async () => {
@@ -201,24 +203,10 @@ function PacketDissector() {
   }, [call, filter, initialized])
 
   useEffect(() => {
-    // Created inside the effect so StrictMode's double-invoke gets a fresh worker
-    const client = createWiregasmClient((e) => {
-      if (e.event === 'status') setStatus(e.message)
-      else if (e.event === 'error') setError(e.message)
-      else {
-        setStatus('Ready')
-        setInitialized(true)
-        client.call('columns').then(setColumns, () => {})
-        client.call('version').then(setVersion, () => {})
-      }
-    })
-    clientRef.current = client
-    clear()
-    return () => {
-      client.terminate()
-      clientRef.current = null
-    }
-  }, [clear])
+    if (!initialized) return
+    call('columns').then(setColumns, () => {})
+    call('version').then(setVersion, () => {})
+  }, [call, initialized, setColumns, setVersion])
 
   useEffect(() => {
     if (!finishedProcessing || selectedFrame < 1 || selectedFrame > totalFrames) return
@@ -251,7 +239,7 @@ function PacketDissector() {
       setMatchedFrames(res.matched)
       return res.frames
     },
-    [call, initialized, finishedProcessing],
+    [call, initialized, finishedProcessing, setMatchedFrames],
   )
 
   const loadFile = useCallback(
@@ -298,8 +286,8 @@ function PacketDissector() {
         <FileButton variant='default' size='sm' onFileSelected={loadFile} disabled={!initialized}>
           <FileUp /> Open capture
         </FileButton>
-        <Button size='sm' variant='outline' onClick={() => void loadExample()} disabled={!initialized}>
-          <Shuffle /> Example
+        <Button size='sm' variant='ghost' onClick={() => void loadExample()} disabled={!initialized}>
+          <FlaskConical /> Load example
         </Button>
         <Button size='sm' variant='ghost' onClick={() => setPreferencesOpen(true)} disabled={!initialized}>
           <Settings2 /> Preferences

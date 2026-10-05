@@ -1,8 +1,9 @@
 /**
  * React Query hooks for the online (internet-tools) APIs
  */
+import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useSearchParams } from 'react-router'
+import { useLocation, useSearchParams } from 'react-router'
 import { API_CONFIG } from '@/config/api.config'
 import type { DNSResponse, WhoisResponse, MyIPResponse, IPLocationResponse } from '@/types/api.types'
 
@@ -39,10 +40,27 @@ export async function getJSON<T>(
 export const shortTTL = (ttl: string) => ttl.replace(/(\d[hm])0s$/, '$1').replace(/(\d+h)0m$/, '$1')
 
 /** The submitted lookup value, synced to `?q=` so lookups are shareable. */
+const lastQuery = new Map<string, string>()
+
+/**
+ * The submitted lookup lives in `?q=` so results are shareable. Coming back to the tool without `?q=`
+ * (e.g. from the sidebar) restores the last lookup made in this session.
+ */
 export function useSubmittedQuery() {
   const [params, setParams] = useSearchParams()
-  const submitted = params.get('q') ?? ''
-  const submit = (value: string) => setParams(value ? { q: value } : {}, { replace: true })
+  const { pathname } = useLocation()
+  const fromUrl = params.get('q')
+  const submitted = fromUrl ?? lastQuery.get(pathname) ?? ''
+
+  useEffect(() => {
+    if (fromUrl === null && submitted) setParams({ q: submitted }, { replace: true })
+  }, [fromUrl, submitted, setParams])
+
+  const submit = (value: string) => {
+    lastQuery.set(pathname, value)
+    setParams(value ? { q: value } : {}, { replace: true })
+  }
+  if (fromUrl !== null) lastQuery.set(pathname, fromUrl)
   return [submitted, submit] as const
 }
 

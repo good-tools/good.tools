@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useToolState } from '@/hooks/useToolState'
 import { md } from 'node-forge'
 import { Eraser } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
@@ -25,8 +26,8 @@ async function hashAll(input: string): Promise<Hashes> {
 }
 
 function HashCalculator() {
-  const [input, setInput] = useState('')
-  const [upper, setUpper] = useState(false)
+  const [input, setInput] = useToolState('hash:input', '')
+  const [upper, setUpper] = useToolState('hash:upper', false)
   const [hashes, setHashes] = useState<Hashes>({})
   const [error, setError] = useState('')
 

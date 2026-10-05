@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
+import { useToolState } from '@/hooks/useToolState'
 import { Buffer } from 'buffer'
 import { deserialize, normalize, print, type ClassDescription, type Content } from '@goodtools/jdserialize'
 import Editor from '@monaco-editor/react'
 import { ObjectInspector } from 'react-inspector'
-import { Eraser, FileUp, Play } from 'lucide-react'
+import { Eraser, FileUp, FlaskConical, Play } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -33,11 +34,11 @@ type View = 'data' | 'tree' | 'classes'
 
 function JavaDeserializer() {
   const darkMode = useIsDark()
-  const [encoded, setEncoded] = useState('')
-  const [buffer, setBuffer] = useState<Buffer | null>(null)
+  const [encoded, setEncoded] = useToolState('java:hex', '')
+  const [buffer, setBuffer] = useToolState<Buffer | null>('java:buffer', null)
   const [inputError, setInputError] = useState('')
-  const [connect, setConnect] = useState(true)
-  const [view, setView] = useState<View>('data')
+  const [connect, setConnect] = useToolState('java:connect', true)
+  const [view, setView] = useToolState<View>('java:view', 'data')
 
   // Re-runs when "Connect classes" is toggled.
   const result = useMemo((): { decoded?: DeserializedObject; error?: string } => {
@@ -98,8 +99,8 @@ function JavaDeserializer() {
           <Button size='sm' onClick={deserializeObject} disabled={!encoded.trim()} title='Decode (Ctrl+Enter)'>
             <Play /> Decode
           </Button>
-          <Button size='sm' variant='outline' onClick={() => reset(EXAMPLE_OBJECT.toString('hex'))}>
-            Load example
+          <Button size='sm' variant='ghost' onClick={() => reset(EXAMPLE_OBJECT.toString('hex'))}>
+            <FlaskConical /> Load example
           </Button>
           <FileButton size='sm' variant='ghost' onFileSelected={loadFile}>
             <FileUp /> Load file

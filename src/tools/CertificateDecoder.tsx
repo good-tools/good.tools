@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useToolState } from '@/hooks/useToolState'
 import * as x509 from '@peculiar/x509'
-import { Eraser, FileUp } from 'lucide-react'
+import { Eraser, FileUp, FlaskConical } from 'lucide-react'
 import { Alert } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -275,7 +276,7 @@ function Details({ cert }: { cert: DecodedCert }) {
 }
 
 function CertificateDecoder() {
-  const [encoded, setEncoded] = useState('')
+  const [encoded, setEncoded] = useToolState('cert:pem', '')
   const [fileError, setFileError] = useState('')
 
   const result = useMemo((): { decoded?: DecodedCert; error?: string } => {
@@ -313,8 +314,8 @@ function CertificateDecoder() {
     <Workspace
       toolbar={
         <>
-          <Button size='sm' variant='outline' onClick={() => reset(EXAMPLE_CERT)}>
-            Load example
+          <Button size='sm' variant='ghost' onClick={() => reset(EXAMPLE_CERT)}>
+            <FlaskConical /> Load example
           </Button>
           <FileButton
             size='sm'
