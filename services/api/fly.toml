@@ -7,7 +7,7 @@ primary_region = "iad"
   build-target = "fly"
 
 [env]
-  CORS_ORIGINS = "https://good.tools"
+  CORS_ORIGINS = "https://good.tools,http://localhost:3000"
   TRUST_PROXY = "fly"
   # Sized for a shared-cpu-1x@256MB machine with a 1 GB volume
   GOMEMLIMIT = "200MiB"
@@ -35,10 +35,8 @@ primary_region = "iad"
     path = "/healthz"
     timeout = "5s"
 
-[mounts]
-  source = "api_data"
-  destination = "/data"
-  initial_size = "1gb"
+# No volume: /data (image cache, GeoIP databases) lives on the machine's root filesystem (~8 GB,
+# reset on restart/deploy, kept across suspend). It's all re-creatable.
 
 [[vm]]
   size = "shared-cpu-1x"
