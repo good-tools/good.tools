@@ -42,7 +42,7 @@ This is a Bun workspaces + Turborepo monorepo. Run commands from the repository 
 apps/web/src/
   config/tools.config.ts   # the tool registry: the single list of every tool
   tools/                   # one component per tool (lazy-loaded)
-  workers/                 # web workers (Wireshark, libvips, mesh repair)
+  workers/                 # web workers (Wireshark, libvips, mesh repair, Whisper, background removal, PDF compression)
   components/ui/           # design system: Workspace, Split, Panel, Button, Input, Alert, …
   components/shell/        # header, sidebar, command palette
   hooks/                   # useToolState, API hooks
