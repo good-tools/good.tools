@@ -1,0 +1,43 @@
+{
+  "name": "@goodtools/wasmpatch",
+  "version": "0.0.0",
+  "description": "Pinned upstream sources and Brave-style patches/overlays for WebAssembly builds",
+  "keywords": [
+    "wasm",
+    "emscripten",
+    "patches",
+    "vendoring",
+    "build"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/good-tools/good.tools.git",
+    "directory": "tools/wasmpatch"
+  },
+  "homepage": "https://github.com/good-tools/good.tools/tree/master/tools/wasmpatch#readme",
+  "bugs": "https://github.com/good-tools/good.tools/issues",
+  "bin": {
+    "wasmpatch": "./wasmpatch.mjs"
+  },
+  "files": [
+    "wasmpatch.mjs",
+    "Dockerfile.emsdk",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "vitest": "^5.0.3"
+  }
+}
