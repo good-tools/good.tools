@@ -8,15 +8,12 @@ import (
 )
 
 // configJS serves the web app's runtime config, generated once from the environment.
-// INTERNET_TOOLS_URL and IMAGE_BROWSER_URL point at API_URL for current frontends.
 func (s *Server) configJS() http.Handler {
 	c := s.Config
 	b, _ := json.MarshalIndent(map[string]any{
 		"ENABLE_TELEMETRY":     c.EnableTelemetry,
 		"GA_TRACKING_ID":       c.GATrackingID,
 		"DISABLE_ONLINE_TOOLS": c.DisableOnlineTools,
-		"INTERNET_TOOLS_URL":   c.APIURL,
-		"IMAGE_BROWSER_URL":    c.APIURL,
 		"API_URL":              c.APIURL,
 	}, "", "  ")
 	body := []byte("window.__RUNTIME_CONFIG__ = " + string(b) + ";\n")

@@ -4,7 +4,6 @@ primary_region = "iad"
 
 [build]
   dockerfile = "Dockerfile"
-  build-target = "fly"
 
 [env]
   CORS_ORIGINS = "https://good.tools,http://localhost:3000"

@@ -45,7 +45,7 @@ Web app runtime config, served as `/config.js` when `STATIC_DIR` is set:
 
 | Variable | Default | |
 | --- | --- | --- |
-| `API_URL` | `/api` | where the web app calls the API (also sent as `INTERNET_TOOLS_URL` / `IMAGE_BROWSER_URL` for older builds) |
+| `API_URL` | `/api` | where the web app calls the API |
 | `DISABLE_ONLINE_TOOLS` | `false` | hide the server-backed tools. With `STATIC_DIR` set this also turns the API off and skips the geolocation download (air-gapped installs). |
 | `ENABLE_TELEMETRY` | `false` | |
 | `GA_TRACKING_ID` | empty | |

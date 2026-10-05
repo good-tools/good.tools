@@ -48,22 +48,17 @@ docker run -p 3000:80 ghcr.io/good-tools/good.tools:latest
 
 In production, pin a release version tag (`ghcr.io/good-tools/good.tools:<version>`) rather than `latest`; see [Releases](https://github.com/good-tools/good.tools/releases). To build it yourself instead, run `docker build -f apps/web/Dockerfile -t good-tools .` from the repository root.
 
-By default, self-hosted instances send no telemetry and hide online tools. The online tools (DNS, WHOIS, IP location, Docker Browser) use the good.tools API in [`services/api`](services/api). Run it yourself and point the image at it:
+The image is a single Go binary ([`services/api`](services/api)) that serves the web app and the API behind the online tools (DNS, WHOIS, IP location, Docker Browser). It sends no telemetry. The online tools need outbound internet access, and IP location downloads a geolocation database at startup. For an offline instance, set `DISABLE_ONLINE_TOOLS=true`.
 
-```bash
-docker run -p 3000:80 \
-  -e DISABLE_ONLINE_TOOLS=false \
-  -e API_URL=https://your-api.example.com \
-  ghcr.io/good-tools/good.tools:latest
-```
+| Variable               | Default | Description                                                            |
+| ---------------------- | ------- | ---------------------------------------------------------------------- |
+| `PORT`                 | `80`    | Listen port (use a port above 1024 outside Docker; the image runs as nonroot) |
+| `DISABLE_ONLINE_TOOLS` | `false` | Hide the online tools and turn the API off                             |
+| `API_URL`              | `/api`  | Where the web app calls the API, e.g. `https://api.good.tools`         |
+| `ENABLE_TELEMETRY`     | `false` | Enable Google Analytics                                                |
+| `GA_TRACKING_ID`       | `""`    | GA4 tracking ID                                                        |
 
-| Variable               | Default | Description                       |
-| ---------------------- | ------- | --------------------------------- |
-| `PORT`                 | `80`    | Nginx listen port                 |
-| `ENABLE_TELEMETRY`     | `false` | Enable Google Analytics           |
-| `GA_TRACKING_ID`       | `""`    | GA4 tracking ID                   |
-| `DISABLE_ONLINE_TOOLS` | `true`  | Hide tools that need backend APIs |
-| `API_URL`              | `""`    | Base URL of the good.tools API    |
+The API has more settings, such as rate limits, the image size limit and a MaxMind key; see [`services/api`](services/api/README.md). Mount a volume at `/data` to keep its caches across restarts.
 
 If you serve `dist/` from somewhere else, send `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp`. The image converter needs them for multi-threaded WebAssembly.
 
