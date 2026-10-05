@@ -6,6 +6,8 @@
 //                   its binaries (no toolchain needed: Vercel, Docker builds, forks)
 //   3. compile      with Emscripten from PATH (emcc, meson, ninja), or inside the pinned builder
 //                   image (tools/wasmpatch/Dockerfile.emsdk) when Docker is available
+//   4. stale        preview builds only (VERCEL=1 or WASM_ALLOW_STALE=1) with no toolchain: the latest
+//                   release's binaries, with a warning. Production builds never take this path.
 //
 // Turborepo additionally caches wasm/ by the same inputs (see turbo.json), locally and remotely.
 // The inputs hash covers the native sources, the wasmpatch pins/patches/overlays and the build
@@ -66,8 +68,11 @@ function markBuilt(hash) {
   fs.writeFileSync(path.join(wasmDir, HASH_FILE), `${hash}\n`)
 }
 
-/** Downloads the binaries of a published version that was built from exactly these inputs. */
-async function fromPublished(hash) {
+/**
+ * Downloads the binaries of a published version that was built from exactly these inputs.
+ * With `allowStale` (preview deployments only), falls back to the latest release's binaries.
+ */
+async function fromPublished(hash, { allowStale = false } = {}) {
   const { name, version } = JSON.parse(fs.readFileSync(path.join(pkg, 'package.json'), 'utf8'))
   let meta
   try {
@@ -77,32 +82,55 @@ async function fromPublished(hash) {
   } catch {
     return false
   }
+  const latest = meta['dist-tags']?.latest
   // Prefer this package version, then the latest release
-  const candidates = [...new Set([version, meta['dist-tags']?.latest])].filter((v) => meta.versions?.[v])
+  const candidates = [...new Set([version, latest])].filter((v) => meta.versions?.[v])
   for (const v of candidates) {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'meshrepair-'))
+    const extracted = await download(meta.versions[v].dist)
+    if (!extracted) continue
     try {
-      const tarball = path.join(tmp, 'pkg.tgz')
-      const res = await fetch(meta.versions[v].dist.tarball)
-      if (!res.ok) continue
-      const bytes = Buffer.from(await res.arrayBuffer())
-      // the registry's integrity field guards the download
-      const [algo, expected] = meta.versions[v].dist.integrity.split('-')
-      if (crypto.createHash(algo).update(bytes).digest('base64') !== expected) continue
-      fs.writeFileSync(tarball, bytes)
-      execFileSync('tar', ['xzf', tarball, '-C', tmp])
-      const published = path.join(tmp, 'package/dist', HASH_FILE)
-      if (!fs.existsSync(published) || fs.readFileSync(published, 'utf8').trim() !== hash) continue
+      const published = path.join(extracted, 'package/dist', HASH_FILE)
+      const matches = fs.existsSync(published) && fs.readFileSync(published, 'utf8').trim() === hash
+      if (!matches && !(allowStale && v === latest)) continue
       fs.mkdirSync(wasmDir, { recursive: true })
-      for (const f of OUTPUTS) fs.copyFileSync(path.join(tmp, 'package/dist', f), path.join(wasmDir, f))
-      markBuilt(hash)
-      log(`using the prebuilt binaries of ${name}@${v} (same inputs)`)
+      for (const f of OUTPUTS) fs.copyFileSync(path.join(extracted, 'package/dist', f), path.join(wasmDir, f))
+      if (matches) {
+        markBuilt(hash)
+        log(`using the prebuilt binaries of ${name}@${v} (same inputs)`)
+      } else {
+        // never matches a real inputs hash, so the next build with a toolchain rebuilds
+        fs.writeFileSync(path.join(wasmDir, HASH_FILE), `stale-from-${v}\n`)
+        const msg = `the native inputs changed since ${name}@${v}; this PREVIEW uses that release's binaries`
+        console.warn(
+          process.env.GITHUB_ACTIONS || process.env.VERCEL
+            ? `::warning::build-wasm: ${msg}`
+            : `build-wasm: WARNING: ${msg}`,
+        )
+      }
       return true
     } finally {
-      fs.rmSync(tmp, { recursive: true, force: true })
+      fs.rmSync(extracted, { recursive: true, force: true })
     }
   }
   return false
+}
+
+/** Fetches and unpacks a registry tarball after checking its integrity; returns the temp dir. */
+async function download(dist) {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'meshrepair-'))
+  try {
+    const res = await fetch(dist.tarball)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const bytes = Buffer.from(await res.arrayBuffer())
+    const [algo, expected] = dist.integrity.split('-')
+    if (crypto.createHash(algo).update(bytes).digest('base64') !== expected) throw new Error('integrity mismatch')
+    fs.writeFileSync(path.join(tmp, 'pkg.tgz'), bytes)
+    execFileSync('tar', ['xzf', path.join(tmp, 'pkg.tgz'), '-C', tmp])
+    return tmp
+  } catch {
+    fs.rmSync(tmp, { recursive: true, force: true })
+    return null
+  }
 }
 
 function compile(hash) {
@@ -173,6 +201,12 @@ if (process.argv.includes('--compile')) {
   compile(hash)
 } else if (has('docker')) {
   compileInDocker()
+} else if (
+  // Preview deployments (Vercel; production is built in CI) may fall back to the last release
+  (process.env.VERCEL === '1' || process.env.WASM_ALLOW_STALE === '1') &&
+  (await fromPublished(hash, { allowStale: true }))
+) {
+  // done, with a warning
 } else {
   console.error(
     'build-wasm: no published @goodtools/meshrepair was built from these native inputs, and neither\n' +

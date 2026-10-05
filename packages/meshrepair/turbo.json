@@ -12,7 +12,8 @@
         "../../tools/wasmpatch/wasmpatch.mjs",
         "../../tools/wasmpatch/Dockerfile.emsdk"
       ],
-      "outputs": ["wasm/**"]
+      "outputs": ["wasm/**"],
+      "env": ["VERCEL", "WASM_ALLOW_STALE"]
     },
     "build": {
       "dependsOn": ["build:wasm"],
