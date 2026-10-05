@@ -22,6 +22,7 @@ import {
   PlugZap,
   Quote,
   Radio,
+  Regex,
   Search,
 } from 'lucide-react'
 import { lazy } from 'react'
@@ -375,6 +376,16 @@ export const tools: Tool[] = [
         url: 'https://www.npmjs.com/package/xml-formatter',
       },
     ],
+  },
+  {
+    title: 'Regex Tester',
+    path: '/regex',
+    description: 'Test JavaScript regular expressions with live match highlighting, capture groups and replace',
+    icon: Regex,
+    categories: [CATEGORIES.DEVELOPMENT],
+    searchTags: ['regex', 'regexp', 'regular expression', 'match', 'test', 'replace', 'capture', 'groups'],
+    component: lazy(() => import('@/tools/RegexTester')),
+    online: false,
   },
   {
     title: 'Image Converter',
