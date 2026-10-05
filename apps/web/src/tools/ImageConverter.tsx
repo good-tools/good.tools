@@ -1,15 +1,22 @@
 import { filesize } from 'filesize'
-import { Download, RefreshCw, Trash2 } from 'lucide-react'
+import { Download, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { DropZone } from '@/components/ui/drop-zone'
 import { fieldClass, Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { Panel, Split, Workspace } from '@/components/ui/toolbar'
 import { useToolState } from '@/hooks/useToolState'
 import { cn, downloadBlob } from '@/lib/utils'
-import type { ImageInfo, OutputFormat, VipsRequest, VipsWorkerResponse } from '@/workers/vips.worker'
+import {
+  HEIF_WORKER,
+  type ImageInfo,
+  type OutputFormat,
+  type VipsRequest,
+  type VipsWorkerResponse,
+} from '@/workers/vips.worker'
 
 type ResizeMode = 'none' | 'percentage' | 'width' | 'height' | 'dimensions'
 
@@ -17,6 +24,8 @@ interface Source {
   name: string
   buffer: ArrayBuffer
   type: string
+  /** PNG decoded by the browser when vips can't read the original format */
+  decoded?: ArrayBuffer
 }
 
 interface Result {
@@ -25,6 +34,7 @@ interface Result {
 }
 
 const mimeOf = (format: OutputFormat) => `image/${format}`
+const extensionOf = (format: OutputFormat) => (format === 'jpeg' ? 'jpg' : format)
 
 /** Object URL for `data`, revoked when the data changes or the component unmounts. */
 function useObjectUrl(data: ArrayBuffer | undefined, type: string) {
@@ -68,7 +78,7 @@ function Preview({ title, url, footer }: { title: string; url?: string; footer: 
         {url ? (
           <img src={url} alt={title} className='max-h-full max-w-full object-contain' />
         ) : (
-          <span className='text-xs text-muted-foreground'>Convert to see the result</span>
+          <span className='text-xs text-muted-foreground'>Converting…</span>
         )}
       </div>
     </Panel>
@@ -94,17 +104,30 @@ function ImageConverter() {
   const [percentage, setPercentage] = useToolState('image:percentage', 50)
   const [width, setWidth] = useToolState<number | ''>('image:width', '')
   const [height, setHeight] = useToolState<number | ''>('image:height', '')
+  const [keepMetadata, setKeepMetadata] = useToolState('image:keepMetadata', false)
+
+  // AVIF needs the HEIF module (3.8 MB); switch to a worker that loads it the first time AVIF is picked
+  const [heif, setHeif] = useState(format === 'avif')
+  if (format === 'avif' && !heif) setHeif(true)
 
   const workerRef = useRef<Worker | null>(null)
   // Replies carry the request id; anything but the latest request is stale and dropped
   const requestId = useRef(0)
+  // Pick a default output format only for a newly opened file, not when a worker reloads the same one
+  const pickFormat = useRef(false)
+  const sourceRef = useRef(source)
+  sourceRef.current = source
 
   const originalUrl = useObjectUrl(source?.buffer, source?.type ?? '')
   const resultUrl = useObjectUrl(result?.buffer, result ? mimeOf(result.format) : '')
 
   useEffect(() => {
-    const worker = new Worker(new URL('../workers/vips.worker.ts', import.meta.url), { type: 'module' })
+    const worker = new Worker(new URL('../workers/vips.worker.ts', import.meta.url), {
+      type: 'module',
+      name: heif ? HEIF_WORKER : 'vips',
+    })
     workerRef.current = worker
+    setReady(false)
     worker.onerror = (e) => setError(`Image worker failed to load: ${e.message}`)
     worker.onmessage = (event: MessageEvent<VipsWorkerResponse>) => {
       const msg = event.data
@@ -118,15 +141,24 @@ function ImageConverter() {
         if (msg.type === 'error') setError(msg.error)
         else if (msg.type === 'loaded') {
           setInfo(msg.data)
-          setFormat(msg.data.hasAlpha ? 'png' : 'webp')
+          const current = sourceRef.current
+          if (msg.decoded && current) setSource({ ...current, decoded: msg.decoded })
+          if (pickFormat.current) setFormat(msg.data.hasAlpha ? 'png' : 'webp')
+          pickFormat.current = false
         } else if (msg.type === 'converted') setResult({ buffer: msg.data, format: msg.format })
       }
+    }
+    // A replacement worker (switching to AVIF) gets the open file again if it was still loading
+    const pending = sourceRef.current
+    if (pending && !pending.decoded) {
+      const buffer = pending.buffer.slice(0)
+      worker.postMessage({ type: 'load', buffer, id: ++requestId.current }, [buffer])
     }
     return () => {
       worker.terminate()
       workerRef.current = null
     }
-  }, [setFormat, setInfo, setResult])
+  }, [heif, setFormat, setInfo, setResult, setSource])
 
   const send = useCallback((msg: VipsRequest) => {
     const buffer = msg.buffer.slice(0) // transferred; keep our copy intact
@@ -139,11 +171,13 @@ function ImageConverter() {
   const handleFile = useCallback(
     async ([file]: File[]) => {
       if (!file) return
-      if (!file.type.startsWith('image/')) return setError(`${file.name} is not an image`)
+      // Some systems report no type for HEIC/AVIF; let the decoder decide then
+      if (file.type && !file.type.startsWith('image/')) return setError(`${file.name} is not an image`)
       const buffer = await file.arrayBuffer()
       setSource({ name: file.name, buffer, type: file.type })
       setInfo(null)
       setResult(null)
+      pickFormat.current = true
       send({ type: 'load', buffer })
     },
     [setInfo, setResult, setSource, send],
@@ -151,15 +185,28 @@ function ImageConverter() {
 
   const size = info && outputSize(info, resizeMode, percentage, width, height)
 
-  const convert = () => {
-    if (!source || !size) return
-    send({
-      type: 'convert',
-      buffer: source.buffer,
-      format,
-      options: { quality, resize: resizeMode === 'none' ? undefined : size },
-    })
-  }
+  const outWidth = size?.width
+  const outHeight = size?.height
+  // Convert live as settings change; replies to superseded requests are dropped by id
+  // biome-ignore lint/correctness/useExhaustiveDependencies: heif re-sends to the new worker after switching
+  useEffect(() => {
+    if (!source || !info || !outWidth || !outHeight) return
+    const t = setTimeout(
+      () =>
+        send({
+          type: 'convert',
+          buffer: source.decoded ?? source.buffer,
+          format,
+          options: {
+            quality,
+            resize: resizeMode === 'none' ? undefined : { width: outWidth, height: outHeight },
+            keepMetadata,
+          },
+        }),
+      250,
+    )
+    return () => clearTimeout(t)
+  }, [source, info, format, quality, resizeMode, outWidth, outHeight, keepMetadata, send, heif])
 
   const clear = () => {
     requestId.current++
@@ -183,7 +230,7 @@ function ImageConverter() {
           className='py-5'
           onFiles={(f) => void handleFile(f)}
           accept='image/*'
-          hint='JPEG, PNG, WebP, GIF, TIFF, AVIF — converted locally with libvips'
+          hint='JPEG, PNG, WebP, GIF, TIFF, AVIF, HEIC (if your browser opens it). Converted on your device; nothing is uploaded.'
         >
           Drop an image here or click to browse
         </DropZone>
@@ -196,9 +243,6 @@ function ImageConverter() {
     <Workspace
       toolbar={
         <>
-          <Button size='sm' onClick={convert} disabled={busy || !info}>
-            <RefreshCw /> Convert
-          </Button>
           <select
             aria-label='Output format'
             className={selectClass}
@@ -207,6 +251,7 @@ function ImageConverter() {
           >
             <option value='webp'>WebP</option>
             <option value='jpeg'>JPEG</option>
+            <option value='avif'>AVIF</option>
             <option value='png'>PNG (lossless)</option>
           </select>
           {format !== 'png' && (
@@ -274,6 +319,12 @@ function ImageConverter() {
           {resizeMode !== 'none' && size && (
             <span className='font-mono text-xs text-muted-foreground'>→ {`${size.width}×${size.height}`}</span>
           )}
+          <Checkbox
+            title='Keep metadata'
+            description='Camera, date and GPS location. Removed unless checked.'
+            checked={keepMetadata}
+            onChange={(e) => setKeepMetadata(e.target.checked)}
+          />
           {result && (
             <Button
               size='sm'
@@ -281,7 +332,7 @@ function ImageConverter() {
               onClick={() =>
                 downloadBlob(
                   result.buffer,
-                  `${source.name.replace(/\.[^/.]+$/, '')}.${result.format}`,
+                  `${source.name.replace(/\.[^/.]+$/, '')}.${extensionOf(result.format)}`,
                   mimeOf(result.format),
                 )
               }
