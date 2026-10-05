@@ -19,7 +19,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Release tag to deploy (e.g. v1.24.0)
+        description: Release tag to deploy (e.g. good.tools-v1.28.0)
         required: true
 
 concurrency:
@@ -184,11 +184,12 @@ jobs:
         env:
           IMAGE: ghcr.io/${{ github.repository }}
           IS_NEW_RELEASE: ${{ github.event_name != 'workflow_dispatch' }}
+        # Tags are good.tools-vX.Y.Z (older ones vX.Y.Z); the image tag is the bare version
         run: |
           {
-            echo "version=${TAG#v}"
+            echo "version=${TAG##*v}"
             echo "tags<<EOF"
-            echo "$IMAGE:${TAG#v}"
+            echo "$IMAGE:${TAG##*v}"
             # a manual redeploy of an older release must not move :latest
             if [ "$IS_NEW_RELEASE" = "true" ]; then echo "$IMAGE:latest"; fi
             echo "EOF"

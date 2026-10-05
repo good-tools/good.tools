@@ -27,6 +27,15 @@ jobs:
         with:
           path: packages/*/.cache/tarballs
           key: wasmpatch-tarballs-${{ hashFiles('packages/*/upstream.json') }}
+      # release-please can't tag a release PR that releases one package whose tag has no
+      # component: it then expects the component in the branch name and gives up (1.27.0).
+      - name: Every release tag includes its package name
+        run: |
+          bad=$(jq -r '.packages | to_entries[] | select(.value["include-component-in-tag"] != true) | .key' .github/release-please-config.json)
+          if [ -n "$bad" ]; then
+            echo "::error file=.github/release-please-config.json::Set \"include-component-in-tag\": true for: $bad"
+            exit 1
+          fi
       - run: bun install --frozen-lockfile
       # Build first so the WebAssembly packages' tests run against real binaries. Turborepo
       # skips anything whose inputs are unchanged; native code is only compiled (in the pinned

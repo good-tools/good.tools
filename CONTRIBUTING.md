@@ -95,6 +95,8 @@ tools/wasmpatch/           # pinned upstream sources + patches for WebAssembly b
 
 Releases are automated with [release-please](https://github.com/googleapis/release-please). Merged PRs accumulate in a release PR. Merging that PR tags the version, deploys good.tools, and publishes `ghcr.io/good-tools/good.tools` for amd64 and arm64.
 
+Every release tag starts with its package name: `good.tools-v1.28.0` for the site, `jdserialize-v2.0.0` for a package (releases up to 1.27.0 of the site were tagged `v1.27.0`). Keep `include-component-in-tag` set to `true` for every package in `.github/release-please-config.json`; CI checks it. Without the name, a release PR that releases only that package can't be tagged, so nothing deploys.
+
 ## License
 
 By contributing you agree that your contributions are licensed under the [MIT License](LICENSE).
