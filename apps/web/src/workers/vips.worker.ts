@@ -75,7 +75,12 @@ async function open(vips: typeof Vips, buffer: ArrayBuffer): Promise<{ image: Vi
       throw new Error("This image format isn't supported, or the file is damaged")
     }
     const canvas = new OffscreenCanvas(bitmap.width, bitmap.height)
-    canvas.getContext('2d')?.drawImage(bitmap, 0, 0)
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      bitmap.close()
+      throw new Error("This browser can't decode this image format")
+    }
+    ctx.drawImage(bitmap, 0, 0)
     bitmap.close()
     const decoded = await (await canvas.convertToBlob({ type: 'image/png' })).arrayBuffer()
     return { image: vips.Image.newFromBuffer(new Uint8Array(decoded)), decoded }
