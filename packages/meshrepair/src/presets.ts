@@ -6,7 +6,7 @@
  * SPDX-License-Identifier: GPL-3.0
  */
 
-import type { RepairOptions, PresetName } from './types';
+import type { PresetName, RepairOptions } from './types'
 
 /**
  * Preset configurations for common repair operations
@@ -71,23 +71,23 @@ export const PRESETS: Record<PresetName, Required<RepairOptions>> = {
     removeFaceFoldByFlip: true,
     binaryOutput: true,
   },
-};
+}
 
 /**
  * Resolve options - merge preset with custom options
  */
 export function resolveOptions(options?: RepairOptions | PresetName): Required<RepairOptions> {
   if (!options) {
-    return PRESETS['minimal'];
+    return PRESETS.minimal
   }
 
   if (typeof options === 'string') {
-    return PRESETS[options];
+    return PRESETS[options]
   }
 
   // Merge with minimal preset for defaults
   return {
-    ...PRESETS['minimal'],
+    ...PRESETS.minimal,
     ...options,
-  };
+  }
 }

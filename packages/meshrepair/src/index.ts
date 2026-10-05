@@ -6,22 +6,22 @@
  * SPDX-License-Identifier: GPL-3.0
  */
 
+import { resolveOptions } from './presets'
 import type {
-  RepairOptions,
-  RepairResult,
-  RepairFileOptions,
-  ProgressCallback,
-  PresetName,
-  MeshRepairModule,
   EmscriptenFS,
   InitOptions,
   MeshRepairLoader,
-} from './types';
-import { resolveOptions } from './presets';
+  MeshRepairModule,
+  PresetName,
+  ProgressCallback,
+  RepairFileOptions,
+  RepairOptions,
+  RepairResult,
+} from './types'
 
+export { PRESETS } from './presets'
 // Re-export types and presets
-export * from './types';
-export { PRESETS } from './presets';
+export * from './types'
 
 /**
  * MeshRepair - WebAssembly STL Mesh Repair Library
@@ -41,11 +41,11 @@ export { PRESETS } from './presets';
  */
 export class MeshRepair {
   /** Direct access to Emscripten virtual filesystem */
-  public readonly FS: EmscriptenFS;
+  public readonly FS: EmscriptenFS
 
-  private lib: MeshRepairModule;
-  private uploadDir = '/uploads';
-  private outputDir = '/output';
+  private lib: MeshRepairModule
+  private uploadDir = '/uploads'
+  private outputDir = '/output'
 
   /**
    * Initialize MeshRepair WASM module
@@ -68,22 +68,22 @@ export class MeshRepair {
    * ```
    */
   static async init(loader: MeshRepairLoader, options?: InitOptions): Promise<MeshRepair> {
-    const lib = await loader(options);
-    return new MeshRepair(lib);
+    const lib = await loader(options)
+    return new MeshRepair(lib)
   }
 
   private constructor(lib: MeshRepairModule) {
-    this.lib = lib;
-    this.FS = lib.FS;
+    this.lib = lib
+    this.FS = lib.FS
 
     // Create working directories
     try {
-      this.lib.FS.mkdir(this.uploadDir);
+      this.lib.FS.mkdir(this.uploadDir)
     } catch {
       // Directory may already exist
     }
     try {
-      this.lib.FS.mkdir(this.outputDir);
+      this.lib.FS.mkdir(this.outputDir)
     } catch {
       // Directory may already exist
     }
@@ -111,21 +111,21 @@ export class MeshRepair {
     name: string,
     data: string | ArrayBufferView,
     options?: RepairOptions | PresetName,
-    onProgress?: ProgressCallback
+    onProgress?: ProgressCallback,
   ): { result: RepairResult; output: Uint8Array } {
-    const inputPath = `${this.uploadDir}/${name}`;
-    this.lib.FS.writeFile(inputPath, data);
+    const inputPath = `${this.uploadDir}/${name}`
+    this.lib.FS.writeFile(inputPath, data)
 
     try {
       const response = this.repairFile(inputPath, {
         options,
         onProgress,
-      });
-      return { result: response.result, output: response.output };
+      })
+      return { result: response.result, output: response.output }
     } finally {
       // Cleanup input file
       try {
-        this.lib.FS.unlink(inputPath);
+        this.lib.FS.unlink(inputPath)
       } catch {
         // Ignore cleanup errors
       }
@@ -155,27 +155,27 @@ export class MeshRepair {
    */
   repairFile(
     inputPath: string,
-    options?: RepairFileOptions
+    options?: RepairFileOptions,
   ): { result: RepairResult; output: Uint8Array; outputPath: string } {
-    const opts = options ?? {};
-    const finalOutputPath = opts.outputPath ?? this.generateOutputPath(inputPath);
-    const mergedOptions = resolveOptions(opts.options);
+    const opts = options ?? {}
+    const finalOutputPath = opts.outputPath ?? this.generateOutputPath(inputPath)
+    const mergedOptions = resolveOptions(opts.options)
 
-    const session = new this.lib.RepairSession(inputPath);
+    const session = new this.lib.RepairSession(inputPath)
 
     try {
       // WASM binding requires a callback function, use no-op if not provided
-      const callback = opts.onProgress ?? (() => {});
-      const result = session.repair(mergedOptions, finalOutputPath, callback);
+      const callback = opts.onProgress ?? (() => {})
+      const result = session.repair(mergedOptions, finalOutputPath, callback)
 
       if (result.code !== 0) {
-        throw new Error(result.error || `Repair failed with code ${result.code}`);
+        throw new Error(result.error || `Repair failed with code ${result.code}`)
       }
 
-      const output = this.lib.FS.readFile(finalOutputPath);
-      return { result, output, outputPath: finalOutputPath };
+      const output = this.lib.FS.readFile(finalOutputPath)
+      return { result, output, outputPath: finalOutputPath }
     } finally {
-      session.delete();
+      session.delete()
     }
   }
 
@@ -201,28 +201,25 @@ export class MeshRepair {
    * const repairedData = meshrepair.FS.readFile(outputPath);
    * ```
    */
-  repairFileInPlace(
-    inputPath: string,
-    options?: RepairFileOptions
-  ): { result: RepairResult; outputPath: string } {
-    const opts = options ?? {};
-    const finalOutputPath = opts.outputPath ?? this.generateOutputPath(inputPath);
-    const mergedOptions = resolveOptions(opts.options);
+  repairFileInPlace(inputPath: string, options?: RepairFileOptions): { result: RepairResult; outputPath: string } {
+    const opts = options ?? {}
+    const finalOutputPath = opts.outputPath ?? this.generateOutputPath(inputPath)
+    const mergedOptions = resolveOptions(opts.options)
 
-    const session = new this.lib.RepairSession(inputPath);
+    const session = new this.lib.RepairSession(inputPath)
 
     try {
       // WASM binding requires a callback function, use no-op if not provided
-      const callback = opts.onProgress ?? (() => {});
-      const result = session.repair(mergedOptions, finalOutputPath, callback);
+      const callback = opts.onProgress ?? (() => {})
+      const result = session.repair(mergedOptions, finalOutputPath, callback)
 
       if (result.code !== 0) {
-        throw new Error(result.error || `Repair failed with code ${result.code}`);
+        throw new Error(result.error || `Repair failed with code ${result.code}`)
       }
 
-      return { result, outputPath: finalOutputPath };
+      return { result, outputPath: finalOutputPath }
     } finally {
-      session.delete();
+      session.delete()
     }
   }
 
@@ -231,12 +228,12 @@ export class MeshRepair {
    */
   destroy(): void {
     try {
-      this.removeDir(this.uploadDir);
+      this.removeDir(this.uploadDir)
     } catch {
       // Ignore cleanup errors
     }
     try {
-      this.removeDir(this.outputDir);
+      this.removeDir(this.outputDir)
     } catch {
       // Ignore cleanup errors
     }
@@ -246,28 +243,28 @@ export class MeshRepair {
    * Generate output path from input path
    */
   private generateOutputPath(inputPath: string): string {
-    const basename = inputPath.split('/').pop() || 'output';
-    const name = basename.replace(/\.stl$/i, '');
-    return `${this.outputDir}/${name}_repaired.stl`;
+    const basename = inputPath.split('/').pop() || 'output'
+    const name = basename.replace(/\.stl$/i, '')
+    return `${this.outputDir}/${name}_repaired.stl`
   }
 
   /**
    * Recursively remove a directory
    */
   private removeDir(path: string): void {
-    const entries = this.lib.FS.readdir(path);
+    const entries = this.lib.FS.readdir(path)
     for (const entry of entries) {
-      if (entry === '.' || entry === '..') continue;
-      const fullPath = `${path}/${entry}`;
-      const stat = this.lib.FS.stat(fullPath);
+      if (entry === '.' || entry === '..') continue
+      const fullPath = `${path}/${entry}`
+      const stat = this.lib.FS.stat(fullPath)
       if (this.lib.FS.isDir(stat.mode)) {
-        this.removeDir(fullPath);
+        this.removeDir(fullPath)
       } else {
-        this.lib.FS.unlink(fullPath);
+        this.lib.FS.unlink(fullPath)
       }
     }
-    this.lib.FS.rmdir(path);
+    this.lib.FS.rmdir(path)
   }
 }
 
-export default MeshRepair;
+export default MeshRepair

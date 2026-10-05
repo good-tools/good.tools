@@ -1,0 +1,22 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build:wasm": {
+      "inputs": [
+        "native/**",
+        "upstream.json",
+        "patches/**",
+        "overlay/**",
+        "scripts/build-wasm.mjs",
+        "../../tools/wasmpatch/wasmpatch.mjs",
+        "../../tools/wasmpatch/Dockerfile.emsdk"
+      ],
+      "outputs": ["wasm/**"]
+    },
+    "build": {
+      "dependsOn": ["build:wasm"],
+      "outputs": ["dist/**"]
+    }
+  }
+}
