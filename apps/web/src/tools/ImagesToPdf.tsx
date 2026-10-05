@@ -2,7 +2,7 @@ import { Download, Plus, RotateCcw, RotateCw, Trash2 } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { DropZone } from '@/components/ui/drop-zone'
+import { DropTarget, DropZone } from '@/components/ui/drop-zone'
 import { FileButton } from '@/components/ui/file-button'
 import { fieldClass, Input } from '@/components/ui/input'
 import { Segmented } from '@/components/ui/segmented'
@@ -243,129 +243,131 @@ function ImagesToPdf() {
     )
 
   return (
-    <Workspace
-      toolbar={
-        <>
-          <Button size='sm' onClick={() => void download()} disabled={busy}>
-            <Download /> Download PDF
-          </Button>
-          <FileButton
-            size='sm'
-            accept='image/*'
-            multiple
-            onFileSelected={(e) => void add(Array.from(e.target.files ?? []))}
-          >
-            <Plus /> Add images
-          </FileButton>
-          <select
-            aria-label='Page size'
-            className={selectClass}
-            value={pageSize}
-            onChange={(e) => setPageSize(e.target.value as PageSize)}
-          >
-            <option value='a4'>A4</option>
-            <option value='letter'>Letter</option>
-            <option value='legal'>Legal</option>
-            <option value='a5'>A5</option>
-            <option value='fit'>Page = image size</option>
-          </select>
-          {pageSize !== 'fit' && (
-            <>
-              <Segmented
-                label='Orientation'
-                value={landscape ? 'landscape' : 'portrait'}
-                onChange={(v) => setLandscape(v === 'landscape')}
-                options={[
-                  ['portrait', 'Portrait'],
-                  ['landscape', 'Landscape'],
-                ]}
-              />
-              <select
-                aria-label='Images per page'
-                className={selectClass}
-                value={perPage}
-                onChange={(e) => setPerPage(Number(e.target.value))}
-              >
-                {[1, 2, 4, 6].map((n) => (
-                  <option key={n} value={n}>
-                    {n} per page
-                  </option>
-                ))}
-              </select>
-            </>
-          )}
-          <select
-            aria-label='Image size'
-            className={selectClass}
-            value={size}
-            onChange={(e) => setSize(e.target.value as LayoutOptions['size'])}
-          >
-            <option value='fit'>Fit to space</option>
-            <option value='card'>ID card size (85.6×54 mm)</option>
-          </select>
-          <label className={inlineLabel}>
-            Margin
-            <Input
-              type='number'
-              min={0}
-              max={50}
-              className='h-7 w-14 text-xs'
-              value={marginMm}
-              onChange={(e) => setMarginMm(Math.max(0, Number(e.target.value)))}
-            />
-            mm
-          </label>
-          {Object.keys(rects).length > 0 && (
-            <Button size='sm' variant='ghost' onClick={() => setPlaced({ key: '', rects: {} })}>
-              <RotateCcw /> Reset positions
+    <DropTarget onFiles={(f) => void add(f)} label='Drop to add images'>
+      <Workspace
+        toolbar={
+          <>
+            <Button size='sm' onClick={() => void download()} disabled={busy}>
+              <Download /> Download PDF
             </Button>
-          )}
-          <Button size='sm' variant='ghost' onClick={() => update([])}>
-            <Trash2 /> Clear
-          </Button>
-          {busy && <Spinner />}
-        </>
-      }
-    >
-      <Alert>{error}</Alert>
-      <Split>
-        <Panel title={`${images.length} images`}>
-          <SortableList
-            items={images}
-            onChange={update}
-            actions={(item) => (
-              <Button
-                size='icon-sm'
-                variant='ghost'
-                aria-label={`Rotate ${item.name}`}
-                onClick={() => void rotate(item)}
-              >
-                <RotateCw />
-              </Button>
-            )}
-          >
-            {(item) => (
+            <FileButton
+              size='sm'
+              accept='image/*'
+              multiple
+              onFileSelected={(e) => void add(Array.from(e.target.files ?? []))}
+            >
+              <Plus /> Add images
+            </FileButton>
+            <select
+              aria-label='Page size'
+              className={selectClass}
+              value={pageSize}
+              onChange={(e) => setPageSize(e.target.value as PageSize)}
+            >
+              <option value='a4'>A4</option>
+              <option value='letter'>Letter</option>
+              <option value='legal'>Legal</option>
+              <option value='a5'>A5</option>
+              <option value='fit'>Page = image size</option>
+            </select>
+            {pageSize !== 'fit' && (
               <>
-                <img src={item.url} alt='' className='size-9 shrink-0 rounded-sm border object-contain' />
-                <span className='min-w-0 truncate' title={item.name}>
-                  {item.name}
-                </span>
-                <span className='shrink-0 font-mono text-xs text-muted-foreground'>
-                  {item.width}×{item.height}
-                </span>
+                <Segmented
+                  label='Orientation'
+                  value={landscape ? 'landscape' : 'portrait'}
+                  onChange={(v) => setLandscape(v === 'landscape')}
+                  options={[
+                    ['portrait', 'Portrait'],
+                    ['landscape', 'Landscape'],
+                  ]}
+                />
+                <select
+                  aria-label='Images per page'
+                  className={selectClass}
+                  value={perPage}
+                  onChange={(e) => setPerPage(Number(e.target.value))}
+                >
+                  {[1, 2, 4, 6].map((n) => (
+                    <option key={n} value={n}>
+                      {n} per page
+                    </option>
+                  ))}
+                </select>
               </>
             )}
-          </SortableList>
-        </Panel>
-        <Panel title={`Preview · ${pages.length} ${pages.length === 1 ? 'page' : 'pages'}`}>
-          <div className='flex flex-col items-center gap-3 bg-muted/30 p-3'>
-            {pages.map((page, n) => (
-              <PagePreview key={n} page={page} number={n + 1} images={images} onPlace={place} />
-            ))}
-          </div>
-        </Panel>
-      </Split>
-    </Workspace>
+            <select
+              aria-label='Image size'
+              className={selectClass}
+              value={size}
+              onChange={(e) => setSize(e.target.value as LayoutOptions['size'])}
+            >
+              <option value='fit'>Fit to space</option>
+              <option value='card'>ID card size (85.6×54 mm)</option>
+            </select>
+            <label className={inlineLabel}>
+              Margin
+              <Input
+                type='number'
+                min={0}
+                max={50}
+                className='h-7 w-14 text-xs'
+                value={marginMm}
+                onChange={(e) => setMarginMm(Math.max(0, Number(e.target.value)))}
+              />
+              mm
+            </label>
+            {Object.keys(rects).length > 0 && (
+              <Button size='sm' variant='ghost' onClick={() => setPlaced({ key: '', rects: {} })}>
+                <RotateCcw /> Reset positions
+              </Button>
+            )}
+            <Button size='sm' variant='ghost' onClick={() => update([])}>
+              <Trash2 /> Clear
+            </Button>
+            {busy && <Spinner />}
+          </>
+        }
+      >
+        <Alert>{error}</Alert>
+        <Split>
+          <Panel title={`${images.length} images`}>
+            <SortableList
+              items={images}
+              onChange={update}
+              actions={(item) => (
+                <Button
+                  size='icon-sm'
+                  variant='ghost'
+                  aria-label={`Rotate ${item.name}`}
+                  onClick={() => void rotate(item)}
+                >
+                  <RotateCw />
+                </Button>
+              )}
+            >
+              {(item) => (
+                <>
+                  <img src={item.url} alt='' className='size-9 shrink-0 rounded-sm border object-contain' />
+                  <span className='min-w-0 truncate' title={item.name}>
+                    {item.name}
+                  </span>
+                  <span className='shrink-0 font-mono text-xs text-muted-foreground'>
+                    {item.width}×{item.height}
+                  </span>
+                </>
+              )}
+            </SortableList>
+          </Panel>
+          <Panel title={`Preview · ${pages.length} ${pages.length === 1 ? 'page' : 'pages'}`}>
+            <div className='flex flex-col items-center gap-3 bg-muted/30 p-3'>
+              {pages.map((page, n) => (
+                <PagePreview key={n} page={page} number={n + 1} images={images} onPlace={place} />
+              ))}
+            </div>
+          </Panel>
+        </Split>
+      </Workspace>
+    </DropTarget>
   )
 }
 

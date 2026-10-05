@@ -66,3 +66,49 @@ export function DropZone({ onFiles, accept, multiple, disabled, className, child
     </label>
   )
 }
+
+/**
+ * Accepts files dropped anywhere on its children, e.g. a tool whose DropZone is gone once files are loaded.
+ * Ignores drags that carry no files (like reordering rows).
+ */
+export function DropTarget({
+  onFiles,
+  label = 'Drop to add',
+  children,
+}: {
+  onFiles: (files: File[]) => void
+  label?: string
+  children: ReactNode
+}) {
+  const [over, setOver] = useState(false)
+  const hasFiles = (e: React.DragEvent) => e.dataTransfer.types.includes('Files')
+
+  return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: drop-only convenience; every tool also has a file button
+    <div
+      className='relative'
+      onDragOver={(e) => {
+        if (!hasFiles(e)) return
+        e.preventDefault()
+        setOver(true)
+      }}
+      onDragLeave={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOver(false)
+      }}
+      onDrop={(e) => {
+        if (!hasFiles(e)) return
+        e.preventDefault()
+        setOver(false)
+        const files = Array.from(e.dataTransfer.files)
+        if (files.length) onFiles(files)
+      }}
+    >
+      {children}
+      {over && (
+        <div className='pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-md border-2 border-dashed border-foreground/50 bg-background/80 text-[13px] font-medium'>
+          {label}
+        </div>
+      )}
+    </div>
+  )
+}
