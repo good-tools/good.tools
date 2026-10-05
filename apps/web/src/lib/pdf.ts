@@ -1,4 +1,4 @@
-import { PDFDocument } from '@cantoo/pdf-lib'
+import { degrees, PDFDocument } from '@cantoo/pdf-lib'
 
 /** Millimetres to PDF points (1/72 in). */
 export const mm = (v: number) => (v * 72) / 25.4
@@ -182,3 +182,48 @@ export async function mergePdfs(files: Uint8Array[]): Promise<Uint8Array> {
 
 /** `report.pdf` → `report-suffix.pdf` */
 export const renamePdf = (name: string, suffix: string) => `${name.replace(/\.pdf$/i, '')}-${suffix}.pdf`
+
+/**
+ * `"1-3, 7, 9-"` → 0-based page indices in the order given, without repeats. `9-` runs to the last page;
+ * a descending range (`5-3`) runs backwards. Throws on anything malformed or out of range.
+ */
+export function parsePageRange(spec: string, count: number): number[] {
+  const out = new Set<number>()
+  for (const part of spec.split(',').map((p) => p.trim())) {
+    if (!part) continue
+    const m = /^(\d+)(?:\s*(-)\s*(\d*))?$/.exec(part)
+    if (!m) throw new Error(`Not a page or range: "${part}"`)
+    const from = Number(m[1])
+    const to = m[2] ? (m[3] ? Number(m[3]) : count) : from
+    for (const n of [from, to]) if (n < 1 || n > count) throw new Error(`No page ${n}; the document has ${count}`)
+    const step = from <= to ? 1 : -1
+    for (let n = from; n !== to + step; n += step) out.add(n - 1)
+  }
+  if (!out.size) throw new Error('Enter pages, e.g. 1-3, 7')
+  return [...out]
+}
+
+export interface PageEdit {
+  /** 0-based page in the source PDF */
+  index: number
+  /** Clockwise degrees added to the page's own rotation */
+  rotation: number
+}
+
+/**
+ * A new PDF of `pages` from `source`, in that order, each turned by its rotation. Covers reorder, delete and extract.
+ * Pass an already opened document to make several PDFs from one source without parsing it each time.
+ */
+export async function organizePdf(source: Uint8Array | PDFDocument, pages: PageEdit[]): Promise<Uint8Array> {
+  const src = source instanceof PDFDocument ? source : await openPdf(source)
+  const out = await PDFDocument.create()
+  const copied = await out.copyPages(
+    src,
+    pages.map((p) => p.index),
+  )
+  copied.forEach((page, i) => {
+    page.setRotation(degrees((((page.getRotation().angle + pages[i]!.rotation) % 360) + 360) % 360))
+    out.addPage(page)
+  })
+  return out.save()
+}

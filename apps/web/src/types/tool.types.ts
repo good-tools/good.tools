@@ -8,8 +8,8 @@ export const CATEGORIES = {
   NETWORK: 'Network',
   '3D': '3D & CAD',
   IMAGE: 'Image',
-  MEDIA: 'Media',
   PDF: 'PDF',
+  MEDIA: 'Media',
 } as const
 
 export type CategoryName = (typeof CATEGORIES)[keyof typeof CATEGORIES]

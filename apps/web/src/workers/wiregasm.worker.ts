@@ -11,7 +11,7 @@ import { vectorToArray, Wiregasm, type WiregasmLoader } from '@goodtools/wiregas
 import loadWiregasm from '@goodtools/wiregasm/dist/wiregasm'
 import dataPath from '@goodtools/wiregasm/dist/wiregasm.data.gz?url'
 import wasmPath from '@goodtools/wiregasm/dist/wiregasm.wasm.gz?url'
-import { fetchInflated } from '@/lib/utils'
+import { fetchInflated } from '@/lib/fetch-inflated'
 
 declare const self: DedicatedWorkerGlobalScope
 

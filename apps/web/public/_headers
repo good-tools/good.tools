@@ -12,3 +12,7 @@
 
 /config.js
   Cache-Control: no-store
+
+# The service worker must be revalidated so new deploys are picked up
+/sw.js
+  Cache-Control: no-cache

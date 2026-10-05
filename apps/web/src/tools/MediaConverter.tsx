@@ -12,8 +12,9 @@ import { fieldClass, Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { Panel, Split, Workspace } from '@/components/ui/toolbar'
 import { useToolState } from '@/hooks/useToolState'
+import { fetchInflated } from '@/lib/fetch-inflated'
 import { AUDIO_ONLY, buildArgs, canCopy, type MediaFormat, type MediaQuality, MIME, parseTime } from '@/lib/media'
-import { cn, downloadBlob, fetchInflated } from '@/lib/utils'
+import { cn, downloadBlob } from '@/lib/utils'
 
 interface Result {
   data: Uint8Array

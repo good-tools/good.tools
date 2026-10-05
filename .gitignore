@@ -30,3 +30,4 @@ apps/web/public/sitemap.xml
 # turborepo
 .turbo
 .wrangler
+apps/web/public/whisper/
