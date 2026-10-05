@@ -1,298 +1,298 @@
-## [1.23.2](https://github.com/good-tools/good.tools/compare/v1.23.1...v1.23.2) (2026-01-26)
-
-
-### Bug Fixes
-
-* add image converter ([#8](https://github.com/good-tools/good.tools/issues/8)) ([828cf69](https://github.com/good-tools/good.tools/commit/828cf69c832516b95f3733a8399b52e0b79000fa))
-
 ## [1.24.0](https://github.com/good-tools/good.tools/compare/v1.23.2...v1.24.0) (2026-10-05)
 
 
 ### Features
 
-* add MCP Browser; black favicon ([#13](https://github.com/good-tools/good.tools/issues/13)) ([a20632a](https://github.com/good-tools/good.tools/commit/a20632a86cf34c0a4aaef38ef9c434f482386bf4))
-* modernize stack, redesign UI and fix tool bugs ([#12](https://github.com/good-tools/good.tools/issues/12)) ([57fbee2](https://github.com/good-tools/good.tools/commit/57fbee26c85ffbf31f79a77709cc7bb94b3af2d4))
-* Packet Dissector on wiregasm 2.0 (Wireshark 4.6.9) ([#10](https://github.com/good-tools/good.tools/issues/10)) ([f2fc078](https://github.com/good-tools/good.tools/commit/f2fc0787ede4cb41270b0f1e8b9ba3d55fc2711a))
+* add MCP Browser; black favicon ([#13](https://github.com/good-tools/good.tools/issues/13)) ([7266f19](https://github.com/good-tools/good.tools/commit/7266f1984a04ecdf2950842f02800018966da71c))
+* modernize stack, redesign UI and fix tool bugs ([#12](https://github.com/good-tools/good.tools/issues/12)) ([93586d2](https://github.com/good-tools/good.tools/commit/93586d27fd01beb81b058e59fc67522c5056c192))
+* Packet Dissector on wiregasm 2.0 (Wireshark 4.6.9) ([#10](https://github.com/good-tools/good.tools/issues/10)) ([808c963](https://github.com/good-tools/good.tools/commit/808c963d28f2a6f207b677db89b237fa2dcd68b3))
+
+## [1.23.2](https://github.com/good-tools/good.tools/compare/v1.23.1...v1.23.2) (2026-01-26)
+
+
+### Bug Fixes
+
+* add image converter ([#8](https://github.com/good-tools/good.tools/issues/8)) ([70ed0ee](https://github.com/good-tools/good.tools/commit/70ed0ee2dc83e9a77982ebfc2b31a0bc58895723))
 
 ## [1.23.1](https://github.com/good-tools/good.tools/compare/v1.23.0...v1.23.1) (2026-01-25)
 
 
 ### Bug Fixes
 
-* support non-RSA certificates in decoder (EC, Ed25519, etc.) ([#7](https://github.com/good-tools/good.tools/issues/7)) ([3c44b17](https://github.com/good-tools/good.tools/commit/3c44b1793ffcdc121ca7316f4b6d95b7b1d9f9a8))
+* support non-RSA certificates in decoder (EC, Ed25519, etc.) ([#7](https://github.com/good-tools/good.tools/issues/7)) ([0cc8d48](https://github.com/good-tools/good.tools/commit/0cc8d48cfba2a4e9608e77fd330fb02a432399e7))
 
 # [1.23.0](https://github.com/good-tools/good.tools/compare/v1.22.0...v1.23.0) (2026-01-19)
 
 
 ### Features
 
-* Implement STL Repair tool with WASM support and improved UI ([#6](https://github.com/good-tools/good.tools/issues/6)) ([6a904b0](https://github.com/good-tools/good.tools/commit/6a904b0607dbf67f9653c067233618f954a05481))
+* Implement STL Repair tool with WASM support and improved UI ([#6](https://github.com/good-tools/good.tools/issues/6)) ([37b5359](https://github.com/good-tools/good.tools/commit/37b53597830864b92fe7337915893d956ee8b164))
 
 # [1.22.0](https://github.com/good-tools/good.tools/compare/v1.21.1...v1.22.0) (2026-01-18)
 
 
 ### Features
 
-* add JSON Escape/Unescape tool ([#5](https://github.com/good-tools/good.tools/issues/5)) ([31604df](https://github.com/good-tools/good.tools/commit/31604df277c98af2ae773f56ab643f3ea16ee848))
+* add JSON Escape/Unescape tool ([#5](https://github.com/good-tools/good.tools/issues/5)) ([ad8ac9a](https://github.com/good-tools/good.tools/commit/ad8ac9a9b81f97d6453328956189fab06bd21a17))
 
 ## [1.21.1](https://github.com/good-tools/good.tools/compare/v1.21.0...v1.21.1) (2026-01-17)
 
 
 ### Bug Fixes
 
-* dockerized, readme ([26e2964](https://github.com/good-tools/good.tools/commit/26e2964903c46bd6a2ff8addf9746c79508f98aa))
+* dockerized, readme ([755bb3d](https://github.com/good-tools/good.tools/commit/755bb3dbd08fad684aeb9e57b676313e8b0305f0))
 
 # [1.21.0](https://github.com/good-tools/good.tools/compare/v1.20.0...v1.21.0) (2026-01-17)
 
 
 ### Features
 
-* Migrate from CRA to Vite + TypeScript ([#4](https://github.com/good-tools/good.tools/issues/4)) ([9bf0cdd](https://github.com/good-tools/good.tools/commit/9bf0cddadc15106f9af4d8bba9abb50f16cc72b3))
+* Migrate from CRA to Vite + TypeScript ([#4](https://github.com/good-tools/good.tools/issues/4)) ([0867e6c](https://github.com/good-tools/good.tools/commit/0867e6cfd93c2443bb04016d897947df8dc1d206))
 
 # [1.20.0](https://github.com/good-tools/good.tools/compare/v1.19.3...v1.20.0) (2026-01-13)
 
 
 ### Features
 
-* trigger release for UI redesign deployment ([5acbf74](https://github.com/good-tools/good.tools/commit/5acbf74a0cd9cf830d995f250ae7bf629b732b2d))
+* trigger release for UI redesign deployment ([11b1f66](https://github.com/good-tools/good.tools/commit/11b1f666dc71c9597f9b66d7e7d88f2a2e3a6990))
 
 ## [1.19.3](https://github.com/good-tools/good.tools/compare/v1.19.2...v1.19.3) (2025-09-01)
 
 
 ### Bug Fixes
 
-* update wiregasm version and show version ([d5ea6f7](https://github.com/good-tools/good.tools/commit/d5ea6f75a2ac7547a03f7b1bffe85c954c06407a))
+* update wiregasm version and show version ([6b9628c](https://github.com/good-tools/good.tools/commit/6b9628c8a0e29678df115d7472a42e3ef40b65b8))
 
 ## [1.19.2](https://github.com/good-tools/good.tools/compare/v1.19.1...v1.19.2) (2024-10-16)
 
 
 ### Bug Fixes
 
-* allow -12 for short reads in packet dissector ([415d373](https://github.com/good-tools/good.tools/commit/415d373245ea33bdb41c5c071affd85abe77919e))
+* allow -12 for short reads in packet dissector ([7275b41](https://github.com/good-tools/good.tools/commit/7275b4123bd921e68f4f10dce93f1d855da30f55))
 
 ## [1.19.1](https://github.com/good-tools/good.tools/compare/v1.19.0...v1.19.1) (2024-08-26)
 
 
 ### Bug Fixes
 
-* reopen source maps ([0070812](https://github.com/good-tools/good.tools/commit/0070812833099e1cb6fb3a494bd4214217f79063))
+* reopen source maps ([7a08c75](https://github.com/good-tools/good.tools/commit/7a08c758e2c5dd432751572c5c539f9803a086aa))
 
 # [1.19.0](https://github.com/good-tools/good.tools/compare/v1.18.0...v1.19.0) (2024-05-09)
 
 
 ### Features
 
-* updating wiregasm, reloading on dissection preference change ([aae1b80](https://github.com/good-tools/good.tools/commit/aae1b806ddf03a079a11ac763c3691816e461003))
+* updating wiregasm, reloading on dissection preference change ([22022f6](https://github.com/good-tools/good.tools/commit/22022f6850f2afcb75afa998ba4b83f044b0845d))
 
 # [1.18.0](https://github.com/good-tools/good.tools/compare/v1.17.2...v1.18.0) (2024-05-08)
 
 
 ### Features
 
-* adding preferences to packet dissector ([0ae8a2c](https://github.com/good-tools/good.tools/commit/0ae8a2ce10153da4b5a2fb0d9600c581649b7cdc))
+* adding preferences to packet dissector ([90d9d35](https://github.com/good-tools/good.tools/commit/90d9d35a52fee13a0a9c4591ad47ac7e4e15e4d6))
 
 ## [1.17.2](https://github.com/good-tools/good.tools/compare/v1.17.1...v1.17.2) (2024-01-24)
 
 
 ### Bug Fixes
 
-* disable sourcemaps on prod ([5f43a96](https://github.com/good-tools/good.tools/commit/5f43a96ac1aaeee2688be694a525beca1719528d))
+* disable sourcemaps on prod ([4045dd2](https://github.com/good-tools/good.tools/commit/4045dd27a568a110d9363c7223a3cad5fd056e25))
 
 ## [1.17.1](https://github.com/good-tools/good.tools/compare/v1.17.0...v1.17.1) (2023-10-25)
 
 
 ### Bug Fixes
 
-* add sitemap generation, update to node 21 ([467d382](https://github.com/good-tools/good.tools/commit/467d3828561d28f0e568a6fd7dc4c6b9c8e38cfc))
+* add sitemap generation, update to node 21 ([8d9cfb7](https://github.com/good-tools/good.tools/commit/8d9cfb761cd530debd802e7752ebf16659e15e07))
 
 # [1.17.0](https://github.com/good-tools/good.tools/compare/v1.16.1...v1.17.0) (2023-02-23)
 
 
 ### Features
 
-* updating to wiregasm 1.2.0 and using compressed wasm/data ([fd7c318](https://github.com/good-tools/good.tools/commit/fd7c3187de0b80dc83b83dfd8dd9a141130a525d))
+* updating to wiregasm 1.2.0 and using compressed wasm/data ([e53dbec](https://github.com/good-tools/good.tools/commit/e53dbec58ad2380305dadc0dadead96bdb947f76))
 
 ## [1.16.1](https://github.com/good-tools/good.tools/compare/v1.16.0...v1.16.1) (2023-02-21)
 
 
 ### Bug Fixes
 
-* updating wiregasm to 1.1.0 ([e32b959](https://github.com/good-tools/good.tools/commit/e32b9592cda0f79e0e6741ff17145f35a9a0aa3a))
+* updating wiregasm to 1.1.0 ([9a38661](https://github.com/good-tools/good.tools/commit/9a38661aa19686bd6ce981f5215ccb704ae93598))
 
 # [1.16.0](https://github.com/good-tools/good.tools/compare/v1.15.0...v1.16.0) (2023-02-20)
 
 
 ### Bug Fixes
 
-* adding random packet dissection examples ([e25caa5](https://github.com/good-tools/good.tools/commit/e25caa57b37b9d98453e26e935b4b9e3c93b486f))
-* tool warnings, packet dissection summary ([39a98dc](https://github.com/good-tools/good.tools/commit/39a98dc1952d9bcbf1307b5f1d833de690ddf9c8))
-* updating wiregasm, use correct bindings ([1c322a8](https://github.com/good-tools/good.tools/commit/1c322a866bddfa1cd59b830208959be463de987b))
+* adding random packet dissection examples ([8737e5b](https://github.com/good-tools/good.tools/commit/8737e5b6488a3d88329f087c04b21128ac687a27))
+* tool warnings, packet dissection summary ([16e7734](https://github.com/good-tools/good.tools/commit/16e7734102b8664cb9636dd85fe9aa2d875694c4))
+* updating wiregasm, use correct bindings ([0643597](https://github.com/good-tools/good.tools/commit/0643597b253c1f14e2918959dce441e92264bbad))
 
 
 ### Features
 
-* adding Packet Dissector ([ef6a862](https://github.com/good-tools/good.tools/commit/ef6a862ad4759862a11763acc32918acf227ccc6))
+* adding Packet Dissector ([eca50fb](https://github.com/good-tools/good.tools/commit/eca50fbd7cc2e7eb097a03dea7afc4b936d269be))
 
 # [1.15.0](https://github.com/good-tools/good.tools/compare/v1.14.2...v1.15.0) (2023-01-17)
 
 
 ### Features
 
-* added XML Formatter tool ([00c551c](https://github.com/good-tools/good.tools/commit/00c551c524f67ac7f31b8ebcdfe2360f8477a6f4))
+* added XML Formatter tool ([2f0fecb](https://github.com/good-tools/good.tools/commit/2f0fecb38666fcd2963dddaa670bb98e26bac32b))
 
 ## [1.14.2](https://github.com/good-tools/good.tools/compare/v1.14.1...v1.14.2) (2023-01-16)
 
 
 ### Bug Fixes
 
-* persist state for json formatter, focus hash calculator input ([ad9fc48](https://github.com/good-tools/good.tools/commit/ad9fc4836ee1ff11f87c50815a8e711653b5e129))
+* persist state for json formatter, focus hash calculator input ([3178f0d](https://github.com/good-tools/good.tools/commit/3178f0dc00fce1c3a878e754741ee9993152ab78))
 
 ## [1.14.1](https://github.com/good-tools/good.tools/compare/v1.14.0...v1.14.1) (2023-01-16)
 
 
 ### Bug Fixes
 
-* persist state in URL/Base64 encoders ([391b5c9](https://github.com/good-tools/good.tools/commit/391b5c9d1b6eeb95c8eabc4ec85751e2dd7350f4))
+* persist state in URL/Base64 encoders ([e7cf17a](https://github.com/good-tools/good.tools/commit/e7cf17aa4b1694d4ad77760318278a1a42b2eaae))
 
 # [1.14.0](https://github.com/good-tools/good.tools/compare/v1.13.1...v1.14.0) (2023-01-16)
 
 
 ### Features
 
-* adding URL encoder/decoder ([691173e](https://github.com/good-tools/good.tools/commit/691173eb7bee12e55fa81efc2a3cdbe159f93137))
+* adding URL encoder/decoder ([9cc451e](https://github.com/good-tools/good.tools/commit/9cc451e61eddf4eef1e86bc9c67afdcc5d4bc704))
 
 ## [1.13.1](https://github.com/good-tools/good.tools/compare/v1.13.0...v1.13.1) (2023-01-16)
 
 
 ### Bug Fixes
 
-* add description and keywords from meta tags ([1682537](https://github.com/good-tools/good.tools/commit/16825378a30a5e435a1ed3c7a53031482f767382))
+* add description and keywords from meta tags ([ee3b51d](https://github.com/good-tools/good.tools/commit/ee3b51d4cb3816aa18f022fc2ecdfaf05e869bcf))
 
 # [1.13.0](https://github.com/good-tools/good.tools/compare/v1.12.2...v1.13.0) (2023-01-16)
 
 
 ### Features
 
-* adding hash calculator ([2dd9a5d](https://github.com/good-tools/good.tools/commit/2dd9a5d0da87944881c38a48658d04d166625789))
+* adding hash calculator ([e7349c2](https://github.com/good-tools/good.tools/commit/e7349c226d5d65175bacecea6d000e05ddaa0892))
 
 ## [1.12.2](https://github.com/good-tools/good.tools/compare/v1.12.1...v1.12.2) (2023-01-16)
 
 
 ### Bug Fixes
 
-* div -> span, flex -> inline for dependency tags ([f1b1f68](https://github.com/good-tools/good.tools/commit/f1b1f68d981edb9664d3562a49096326213cd9fa))
+* div -> span, flex -> inline for dependency tags ([13c4eed](https://github.com/good-tools/good.tools/commit/13c4eed03ed330132b1ad8acadb12d0877b8de39))
 
 ## [1.12.1](https://github.com/good-tools/good.tools/compare/v1.12.0...v1.12.1) (2023-01-16)
 
 
 ### Bug Fixes
 
-* adding links to deps + cosmetics ([eccef26](https://github.com/good-tools/good.tools/commit/eccef265de8aa02c15a6f2f77c912ba60a2af80c))
+* adding links to deps + cosmetics ([306bb1c](https://github.com/good-tools/good.tools/commit/306bb1c3b1a90b54d08e0c5771ba49bcaa984ccc))
 
 # [1.12.0](https://github.com/good-tools/good.tools/compare/v1.11.0...v1.12.0) (2023-01-15)
 
 
 ### Features
 
-* adding description and dependencies, hero on homepage, inline b64, online info ([9c0c62e](https://github.com/good-tools/good.tools/commit/9c0c62e45c06be76558f2150be5a12b394832a7f))
+* adding description and dependencies, hero on homepage, inline b64, online info ([2458c4d](https://github.com/good-tools/good.tools/commit/2458c4db3711ec22632d7498bd297b92c533bd7f))
 
 # [1.11.0](https://github.com/good-tools/good.tools/compare/v1.10.3...v1.11.0) (2023-01-14)
 
 
 ### Features
 
-* adding JavaDeserializer and react-inspector object trees ([a9dc3a8](https://github.com/good-tools/good.tools/commit/a9dc3a89579737072955778340cc294189c84472))
+* adding JavaDeserializer and react-inspector object trees ([c21f2ef](https://github.com/good-tools/good.tools/commit/c21f2ef375649184ca117de3279604a4bfed425a))
 
 ## [1.10.3](https://github.com/good-tools/good.tools/compare/v1.10.2...v1.10.3) (2023-01-12)
 
 
 ### Bug Fixes
 
-* removing the ObjectTree from JSON Formatter ([8bb3df9](https://github.com/good-tools/good.tools/commit/8bb3df97e78aead568baf31ac2ab8135c6a8d151))
+* removing the ObjectTree from JSON Formatter ([5cd5096](https://github.com/good-tools/good.tools/commit/5cd509632ce2990ceb97c1522cc1b6034a2c50d4))
 
 ## [1.10.2](https://github.com/good-tools/good.tools/compare/v1.10.1...v1.10.2) (2023-01-11)
 
 
 ### Bug Fixes
 
-* add example inputs ([272825b](https://github.com/good-tools/good.tools/commit/272825ba687557d7eea77643e4509f4dedf235c3))
+* add example inputs ([c5b05c2](https://github.com/good-tools/good.tools/commit/c5b05c26b173fe54931bb30c12de13356cf9368e))
 
 ## [1.10.1](https://github.com/good-tools/good.tools/compare/v1.10.0...v1.10.1) (2023-01-11)
 
 
 ### Bug Fixes
 
-* fix code wrapping ([3b0b70f](https://github.com/good-tools/good.tools/commit/3b0b70fda252823e2b9743ceb2653f3a9d6d98ac))
+* fix code wrapping ([f4068b1](https://github.com/good-tools/good.tools/commit/f4068b187543dcf453675660fdea1edbe2f06f05))
 
 # [1.10.0](https://github.com/good-tools/good.tools/compare/v1.9.0...v1.10.0) (2023-01-10)
 
 
 ### Features
 
-* adding protobuf decoder + simple json object tree ([96989cf](https://github.com/good-tools/good.tools/commit/96989cffc9b1d06bfd3b0a3c6366f72f7e103ae3))
+* adding protobuf decoder + simple json object tree ([3a9b6ab](https://github.com/good-tools/good.tools/commit/3a9b6ab77973496ac91b13c85ad46fd41d1382da))
 
 # [1.9.0](https://github.com/good-tools/good.tools/compare/v1.8.2...v1.9.0) (2023-01-05)
 
 
 ### Features
 
-* adding JSON formatter ([ad65e91](https://github.com/good-tools/good.tools/commit/ad65e911616a460d6dc60040393e527ef7ab3dac))
+* adding JSON formatter ([07532a4](https://github.com/good-tools/good.tools/commit/07532a414e7c7f03238e3a94bd57a985e6d5eb52))
 
 ## [1.8.2](https://github.com/good-tools/good.tools/compare/v1.8.1...v1.8.2) (2022-12-31)
 
 
 ### Bug Fixes
 
-* fix pageview tracking using useLocation ([bddb18c](https://github.com/good-tools/good.tools/commit/bddb18cfb633a1fc2374a88c58b61de564b48864))
+* fix pageview tracking using useLocation ([d03c018](https://github.com/good-tools/good.tools/commit/d03c0180ffa64a9c0c75a85e46d95bd856c01249))
 
 ## [1.8.1](https://github.com/good-tools/good.tools/compare/v1.8.0...v1.8.1) (2022-12-31)
 
 
 ### Bug Fixes
 
-* add GA, add LRU cache for docker-browser ([1953cd5](https://github.com/good-tools/good.tools/commit/1953cd50c5415f5a39f52b9a97ba66a5eb4b160a))
+* add GA, add LRU cache for docker-browser ([682d02f](https://github.com/good-tools/good.tools/commit/682d02f13fbe78ac822d972152922516f662e5cf))
 
 # [1.8.0](https://github.com/good-tools/good.tools/compare/v1.7.4...v1.8.0) (2022-12-30)
 
 
 ### Features
 
-* updated theme, support dark mode ([d541bd7](https://github.com/good-tools/good.tools/commit/d541bd726c93b3f51de80489ef5478ebde219c0b))
+* updated theme, support dark mode ([b8e0aba](https://github.com/good-tools/good.tools/commit/b8e0aba914cba38a358b35cd934806d2e1ed68da))
 
 ## [1.7.4](https://github.com/good-tools/good.tools/compare/v1.7.3...v1.7.4) (2022-12-29)
 
 
 ### Bug Fixes
 
-* better search, adding more tools ([f42b1d8](https://github.com/good-tools/good.tools/commit/f42b1d84d3ab4d091d147ab1869bd61d3ee1579c))
+* better search, adding more tools ([b6bab84](https://github.com/good-tools/good.tools/commit/b6bab84706ca8442b97b3c92b8f3f84d35991407))
 
 ## [1.7.3](https://github.com/good-tools/good.tools/compare/v1.7.2...v1.7.3) (2022-12-29)
 
 
 ### Bug Fixes
 
-* if mime is not defined, do not attempt to read the file ([cf26b84](https://github.com/good-tools/good.tools/commit/cf26b846931529c7c09f2a5593b432fd9f48943a))
+* if mime is not defined, do not attempt to read the file ([c922dee](https://github.com/good-tools/good.tools/commit/c922deed21a2ee7c8661af7ca890bc3aaf19fd61))
 
 ## [1.7.2](https://github.com/good-tools/good.tools/compare/v1.7.1...v1.7.2) (2022-12-29)
 
 
 ### Bug Fixes
 
-* fix readable types ([68862c5](https://github.com/good-tools/good.tools/commit/68862c59ec95172146dca2729c15bc98ee291443))
+* fix readable types ([a437cd0](https://github.com/good-tools/good.tools/commit/a437cd0d2962ba39a02609c73ab42d9776265e3b))
 
 ## [1.7.1](https://github.com/good-tools/good.tools/compare/v1.7.0...v1.7.1) (2022-12-29)
 
 
 ### Bug Fixes
 
-* update tool wrapper width, fix tree styling and added metadata ([88b4ab4](https://github.com/good-tools/good.tools/commit/88b4ab496eedb2c1514f0a5968c068357920facc))
+* update tool wrapper width, fix tree styling and added metadata ([4174d84](https://github.com/good-tools/good.tools/commit/4174d8483e1292eb4129d98fdec4a41b93262e59))
 
 # [1.7.0](https://github.com/good-tools/good.tools/compare/v1.6.0...v1.7.0) (2022-12-28)
 
 
 ### Features
 
-* adding docker image browser ([73af17a](https://github.com/good-tools/good.tools/commit/73af17acb47ac0f0f7eaaa2fd638139b9c688f8f))
+* adding docker image browser ([061d172](https://github.com/good-tools/good.tools/commit/061d1727416e832d33389fbdf7f3db26d2a89dac))
 
 # [1.6.0](https://github.com/good-tools/good.tools/compare/v1.5.0...v1.6.0) (2022-12-22)
 
