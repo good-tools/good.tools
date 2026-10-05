@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware'
+import { idbDelete, idbGet, idbSet } from '@/lib/idb'
 
 export type NotesView = 'code' | 'split' | 'preview'
 
@@ -11,7 +12,7 @@ export interface Note {
 
 const WELCOME = `# Welcome to Markdown Notes
 
-Notes are saved in this browser only (local storage). Nothing is uploaded.
+Notes are saved in this browser only. Nothing is uploaded.
 
 ## Formatting
 
@@ -49,42 +50,68 @@ export const noteTitle = (n: Note) =>
 
 const newNote = (body = ''): Note => ({ id: crypto.randomUUID(), body, updated: Date.now() })
 
-/** Set when the browser refuses to save (quota exceeded, storage disabled) so the UI can warn. */
-export const useNotesSaveError = create<{ error?: string }>(() => ({}))
+/** Load/save status, kept out of the persisted store so updating it never triggers a save. */
+export const useNotesStatus = create<{ loaded: boolean; error?: string }>(() => ({ loaded: false }))
+
+const message = (e: unknown) => (e instanceof Error ? e.message : String(e))
+const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('good-tools:notes') : undefined
+// If loading failed, saving would overwrite the notes we couldn't read, so refuse until a reload succeeds
+let loadFailed = false
 
 const storage: StateStorage = {
-  getItem: (k) => localStorage.getItem(k),
-  removeItem: (k) => localStorage.removeItem(k),
+  getItem: (k) =>
+    idbGet<string>(k).then(
+      (v) => {
+        loadFailed = false
+        return v ?? null
+      },
+      (e) => {
+        loadFailed = true
+        useNotesStatus.setState({ error: `Could not load notes: ${message(e)}. Changes are not being saved.` })
+        return null
+      },
+    ),
   setItem: (k, v) => {
-    try {
-      localStorage.setItem(k, v)
-      if (useNotesSaveError.getState().error) useNotesSaveError.setState({ error: undefined })
-    } catch (e) {
-      useNotesSaveError.setState({ error: e instanceof Error ? e.message : String(e) })
-    }
+    if (loadFailed) return
+    return idbSet(k, v).then(
+      () => {
+        if (useNotesStatus.getState().error) useNotesStatus.setState({ error: undefined })
+        channel?.postMessage('saved')
+      },
+      (e) => useNotesStatus.setState({ error: `Could not save notes: ${message(e)}. Download your note to keep it.` }),
+    )
   },
+  removeItem: (k) => idbDelete(k),
 }
 
 interface NotesStore {
   notes: Note[]
   activeId: string
   view: NotesView
+  syncScroll: boolean
+  showNotes: boolean
+  showToc: boolean
   create: (body?: string) => void
   update: (body: string) => void
   remove: (id: string) => void
   select: (id: string) => void
   setView: (view: NotesView) => void
+  setSyncScroll: (syncScroll: boolean) => void
+  toggleNotes: () => void
+  toggleToc: () => void
 }
 
 const first = newNote(WELCOME)
 
-// ponytail: the whole notebook is rewritten to localStorage on every edit; move to IndexedDB if notes reach MBs
 export const useNotesStore = create<NotesStore>()(
   persist(
     (set) => ({
       notes: [first],
       activeId: first.id,
       view: 'split',
+      syncScroll: true,
+      showNotes: true,
+      showToc: true,
       create: (body) => {
         const n = newNote(body)
         set((s) => ({ notes: [n, ...s.notes], activeId: n.id }))
@@ -100,11 +127,22 @@ export const useNotesStore = create<NotesStore>()(
         }),
       select: (activeId) => set({ activeId }),
       setView: (view) => set({ view }),
+      setSyncScroll: (syncScroll) => set({ syncScroll }),
+      toggleNotes: () => set((s) => ({ showNotes: !s.showNotes })),
+      toggleToc: () => set((s) => ({ showToc: !s.showToc })),
     }),
     {
       name: 'good-tools:notes',
       storage: createJSONStorage(() => storage),
-      partialize: ({ notes, activeId, view }) => ({ notes, activeId, view }),
+      partialize: ({ notes, activeId, view, syncScroll, showNotes, showToc }) => ({
+        notes,
+        activeId,
+        view,
+        syncScroll,
+        showNotes,
+        showToc,
+      }),
+      onRehydrateStorage: () => () => useNotesStatus.setState({ loaded: true }),
       // Never load an empty notebook: the UI assumes at least one note
       merge: (saved, current) => {
         const s = saved as Partial<NotesStore> | undefined
@@ -114,8 +152,5 @@ export const useNotesStore = create<NotesStore>()(
   ),
 )
 
-// Keep tabs in sync: another tab saving reloads the notebook here
-if (typeof window !== 'undefined')
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'good-tools:notes') useNotesStore.persist.rehydrate()
-  })
+// Keep tabs in sync: another tab saving reloads the notebook here (rehydrating doesn't save, so no echo)
+channel?.addEventListener('message', () => void useNotesStore.persist.rehydrate())

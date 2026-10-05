@@ -248,3 +248,79 @@
     background: var(--muted);
   }
 }
+
+/* Syntax highlighting in the markdown preview (highlight.js classes), GitHub's palette */
+.md-preview {
+  --hl-keyword: #cf222e;
+  --hl-string: #0a3069;
+  --hl-comment: #6e7781;
+  --hl-number: #0550ae;
+  --hl-title: #8250df;
+  --hl-attr: #953800;
+  --hl-add: #116329;
+
+  & .hljs-comment,
+  & .hljs-quote,
+  & .hljs-meta {
+    color: var(--hl-comment);
+  }
+  & .hljs-comment {
+    font-style: italic;
+  }
+  & .hljs-keyword,
+  & .hljs-selector-tag,
+  & .hljs-type,
+  & .hljs-doctag,
+  & .hljs-template-tag {
+    color: var(--hl-keyword);
+  }
+  & .hljs-string,
+  & .hljs-regexp,
+  & .hljs-meta .hljs-string {
+    color: var(--hl-string);
+  }
+  & .hljs-number,
+  & .hljs-literal,
+  & .hljs-symbol,
+  & .hljs-bullet,
+  & .hljs-built_in,
+  & .hljs-selector-id,
+  & .hljs-selector-class {
+    color: var(--hl-number);
+  }
+  & .hljs-title,
+  & .hljs-section,
+  & .hljs-name {
+    color: var(--hl-title);
+  }
+  & .hljs-attr,
+  & .hljs-attribute,
+  & .hljs-variable,
+  & .hljs-template-variable,
+  & .hljs-property,
+  & .hljs-params {
+    color: var(--hl-attr);
+  }
+  & .hljs-addition {
+    color: var(--hl-add);
+  }
+  & .hljs-deletion {
+    color: var(--destructive);
+  }
+  & .hljs-strong {
+    font-weight: 600;
+  }
+  & .hljs-emphasis {
+    font-style: italic;
+  }
+}
+
+html.dark .md-preview {
+  --hl-keyword: #ff7b72;
+  --hl-string: #a5d6ff;
+  --hl-comment: #8b949e;
+  --hl-number: #79c0ff;
+  --hl-title: #d2a8ff;
+  --hl-attr: #ffa657;
+  --hl-add: #7ee787;
+}

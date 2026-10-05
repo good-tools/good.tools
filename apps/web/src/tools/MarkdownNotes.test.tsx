@@ -1,18 +1,22 @@
+import 'fake-indexeddb/auto'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { useNotesStore } from '@/stores/notes.store'
+import { useNotesStatus, useNotesStore } from '@/stores/notes.store'
 import MarkdownNotes from './MarkdownNotes'
 
 const note = (id: string, body: string, updated: number) => ({ id, body, updated })
 
-beforeEach(() =>
+beforeEach(() => {
+  useNotesStatus.setState({ loaded: true, error: undefined })
   useNotesStore.setState({
     notes: [note('a', '# Alpha\n\n## Part one', 1), note('b', 'Beta body', 2)],
     activeId: 'a',
     view: 'preview',
-  }),
-)
+    showNotes: true,
+    showToc: true,
+  })
+})
 
 describe('MarkdownNotes', () => {
   it('lists notes newest first and previews the active one with a toc', async () => {
@@ -40,4 +44,19 @@ describe('MarkdownNotes', () => {
     expect(notes).toHaveLength(1)
     expect(notes[0]).toMatchObject({ id: activeId, body: '' })
   })
+})
+
+it('hides the notes list and contents for a focused editor', async () => {
+  render(<MarkdownNotes />)
+  await userEvent.click(screen.getByRole('button', { name: 'Notes list' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Contents' }))
+  expect(screen.queryByRole('list', { name: 'Notes' })).not.toBeInTheDocument()
+  expect(screen.queryByRole('navigation')).not.toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Notes list' })).toHaveAttribute('aria-pressed', 'false')
+})
+
+it('waits for saved notes before rendering, so nothing overwrites them', () => {
+  useNotesStatus.setState({ loaded: false })
+  const { container } = render(<MarkdownNotes />)
+  expect(container).toBeEmptyDOMElement()
 })

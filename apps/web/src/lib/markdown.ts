@@ -1,4 +1,5 @@
 import DOMPurify from 'dompurify'
+import hljs from 'highlight.js/lib/common'
 import { Marked, type Token, type Tokens } from 'marked'
 
 export interface TocEntry {
@@ -25,7 +26,10 @@ DOMPurify.addHook('afterSanitizeAttributes', (node) => {
   }
 })
 
-/** GitHub-flavoured markdown to sanitized HTML plus a table of contents. ```mermaid blocks become <pre class="mermaid">. */
+/**
+ * GitHub-flavoured markdown to sanitized HTML plus a table of contents. Fenced code is syntax highlighted,
+ * ```mermaid blocks become <pre class="mermaid">, and top-level blocks get data-line="<source line>".
+ */
 export function renderMarkdown(source: string): { html: string; toc: TocEntry[] } {
   const toc: TocEntry[] = []
   const seen = new Map<string, number>()
@@ -51,16 +55,37 @@ export function renderMarkdown(source: string): { html: string; toc: TocEntry[] 
         return `<h${token.depth} id="${id}">${this.parser.parseInline(token.tokens)}</h${token.depth}>\n`
       },
       code({ text, lang }) {
-        return lang === 'mermaid' ? `<pre class="mermaid">${escapeHtml(text)}</pre>\n` : false
+        const name = lang?.trim().split(/\s+/)[0]
+        if (name === 'mermaid') return `<pre class="mermaid">${escapeHtml(text)}</pre>\n`
+        const language = name && hljs.getLanguage(name) ? name : undefined
+        const body = language ? hljs.highlight(text, { language, ignoreIllegals: true }).value : escapeHtml(text)
+        return `<pre><code class="hljs${language ? ` language-${language}` : ''}">${body}</code></pre>\n`
       },
     },
   })
 
   const tokens = marked.lexer(source.replace(/\r\n?/g, '\n'))
+  // Render block by block so each top-level element can carry its source line (data-line), used for scroll sync
   let line = 1
-  for (const t of tokens) {
+  const html = tokens.map((t) => {
     if (t.type === 'heading') (t as LinedHeading).line = line
+    const out = marked.parser([t]).replace(/^<([a-z][a-z0-9]*)/i, `<$1 data-line="${line}"`)
     line += t.raw.split('\n').length - 1
+    return out
+  })
+  return { html: DOMPurify.sanitize(html.join('')), toc }
+}
+
+/**
+ * Piecewise-linear lookup: maps x to y through points sorted by x (y must not decrease).
+ * Used to map an editor line to a preview offset and back.
+ */
+export function interpolate(points: [number, number][], x: number): number {
+  for (let i = 1; i < points.length; i++) {
+    const [x0, y0] = points[i - 1] as [number, number]
+    const [x1, y1] = points[i] as [number, number]
+    if (x < x1 || i === points.length - 1)
+      return x1 === x0 ? y0 : y0 + (y1 - y0) * Math.min(1, Math.max(0, (x - x0) / (x1 - x0)))
   }
-  return { html: DOMPurify.sanitize(marked.parser(tokens)), toc }
+  return points[0]?.[1] ?? 0
 }
