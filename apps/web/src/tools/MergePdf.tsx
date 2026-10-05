@@ -3,7 +3,7 @@ import { Download, LockOpen, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { DropZone } from '@/components/ui/drop-zone'
+import { DropTarget, DropZone } from '@/components/ui/drop-zone'
 import { FileButton } from '@/components/ui/file-button'
 import { Input } from '@/components/ui/input'
 import { SortableList } from '@/components/ui/sortable-list'
@@ -118,52 +118,54 @@ function MergePdf() {
     )
 
   return (
-    <Workspace
-      toolbar={
-        <>
-          <Button size='sm' onClick={() => void merge()} disabled={busy || blocked || items.length < 2}>
-            <Download /> Merge &amp; download
-          </Button>
-          <FileButton
-            size='sm'
-            accept='application/pdf,.pdf'
-            multiple
-            onFileSelected={(e) => void add(Array.from(e.target.files ?? []))}
-          >
-            <Plus /> Add PDFs
-          </FileButton>
-          <Button size='sm' variant='ghost' onClick={() => setItems([])}>
-            <Trash2 /> Clear
-          </Button>
-          {busy && <Spinner />}
-        </>
-      }
-    >
-      <Alert>{error}</Alert>
-      <Panel
-        title={`${items.length} files · ${pages} pages`}
-        actions={<span className='px-1.5 text-xs text-muted-foreground'>Drag or use the arrows to reorder</span>}
+    <DropTarget onFiles={(f) => void add(f)} label='Drop to add PDFs'>
+      <Workspace
+        toolbar={
+          <>
+            <Button size='sm' onClick={() => void merge()} disabled={busy || blocked || items.length < 2}>
+              <Download /> Merge &amp; download
+            </Button>
+            <FileButton
+              size='sm'
+              accept='application/pdf,.pdf'
+              multiple
+              onFileSelected={(e) => void add(Array.from(e.target.files ?? []))}
+            >
+              <Plus /> Add PDFs
+            </FileButton>
+            <Button size='sm' variant='ghost' onClick={() => setItems([])}>
+              <Trash2 /> Clear
+            </Button>
+            {busy && <Spinner />}
+          </>
+        }
       >
-        <SortableList items={items} onChange={setItems}>
-          {(item) => (
-            <>
-              <span className='min-w-0 truncate' title={item.name}>
-                {item.name}
-              </span>
-              {item.locked ? (
-                <UnlockForm item={item} onUnlock={(pw) => void unlockItem(item, pw)} />
-              ) : item.error ? (
-                <span className='truncate text-xs text-destructive'>{item.error}</span>
-              ) : (
-                <span className='shrink-0 text-xs text-muted-foreground'>
-                  {item.pages} {item.pages === 1 ? 'page' : 'pages'} · {filesize(item.bytes.byteLength, { base: 2 })}
+        <Alert>{error}</Alert>
+        <Panel
+          title={`${items.length} files · ${pages} pages`}
+          actions={<span className='px-1.5 text-xs text-muted-foreground'>Drag or use the arrows to reorder</span>}
+        >
+          <SortableList items={items} onChange={setItems}>
+            {(item) => (
+              <>
+                <span className='min-w-0 truncate' title={item.name}>
+                  {item.name}
                 </span>
-              )}
-            </>
-          )}
-        </SortableList>
-      </Panel>
-    </Workspace>
+                {item.locked ? (
+                  <UnlockForm item={item} onUnlock={(pw) => void unlockItem(item, pw)} />
+                ) : item.error ? (
+                  <span className='truncate text-xs text-destructive'>{item.error}</span>
+                ) : (
+                  <span className='shrink-0 text-xs text-muted-foreground'>
+                    {item.pages} {item.pages === 1 ? 'page' : 'pages'} · {filesize(item.bytes.byteLength, { base: 2 })}
+                  </span>
+                )}
+              </>
+            )}
+          </SortableList>
+        </Panel>
+      </Workspace>
+    </DropTarget>
   )
 }
 

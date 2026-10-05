@@ -6,7 +6,7 @@ import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { CopyButton } from '@/components/ui/copy-button'
-import { DropZone } from '@/components/ui/drop-zone'
+import { DropTarget, DropZone } from '@/components/ui/drop-zone'
 import { Input, Textarea } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { Panel, paneField, Workspace } from '@/components/ui/toolbar'
@@ -98,6 +98,10 @@ function PdfToText() {
     setBusy(false)
   }
 
+  const openFile = ([f]: File[]) => {
+    if (f) void f.arrayBuffer().then((b) => extract(f.name, new Uint8Array(b)))
+  }
+
   const clear = () => {
     setResult(null)
     setPending(null)
@@ -134,7 +138,7 @@ function PdfToText() {
         <DropZone
           className='py-5'
           accept='application/pdf,.pdf'
-          onFiles={([f]) => f && void f.arrayBuffer().then((b) => extract(f.name, new Uint8Array(b)))}
+          onFiles={openFile}
           hint='Extracted locally with pdf.js'
         >
           Drop a PDF here or click to browse
@@ -166,49 +170,51 @@ function PdfToText() {
     )
 
   return (
-    <Workspace
-      toolbar={
-        <>
-          <CopyButton variant='outline' value={text} />
-          <Button
-            size='sm'
-            variant='outline'
-            onClick={() => downloadBlob(text, `${result.name.replace(/\.pdf$/i, '')}.txt`, 'text/plain')}
-          >
-            <Download /> Download .txt
-          </Button>
-          <Checkbox title='Page separators' checked={separators} onChange={(e) => setSeparators(e.target.checked)} />
-          <Button size='sm' variant='ghost' onClick={clear} disabled={!!ocrStatus}>
-            <Trash2 /> Clear
-          </Button>
-          {ocrStatus && <Spinner label={ocrStatus} />}
-        </>
-      }
-    >
-      <Alert>{error}</Alert>
-      {scanned.length > 0 && !ocrStatus && (
-        <Alert variant='warning'>
-          <div className='flex flex-wrap items-center gap-2'>
-            {scanned.length === result.pages.length
-              ? 'No text found. This looks like a scanned PDF.'
-              : `${scanned.length} of ${result.pages.length} pages have no text (scanned?).`}
-            <Button size='sm' variant='outline' onClick={() => void ocr()}>
-              <ScanText /> Read with OCR
+    <DropTarget onFiles={openFile} label='Drop to open another PDF'>
+      <Workspace
+        toolbar={
+          <>
+            <CopyButton variant='outline' value={text} />
+            <Button
+              size='sm'
+              variant='outline'
+              onClick={() => downloadBlob(text, `${result.name.replace(/\.pdf$/i, '')}.txt`, 'text/plain')}
+            >
+              <Download /> Download .txt
             </Button>
-            <span className='text-xs text-muted-foreground'>
-              English, runs in your browser; downloads about 7 MB the first time
-            </span>
-          </div>
-        </Alert>
-      )}
-      <Panel
-        title={`${result.name} · ${result.pages.length} ${result.pages.length === 1 ? 'page' : 'pages'}`}
-        actions={<span className='px-1.5 text-xs text-muted-foreground'>{text.length.toLocaleString()} chars</span>}
-        className='flex-1'
+            <Checkbox title='Page separators' checked={separators} onChange={(e) => setSeparators(e.target.checked)} />
+            <Button size='sm' variant='ghost' onClick={clear} disabled={!!ocrStatus}>
+              <Trash2 /> Clear
+            </Button>
+            {ocrStatus && <Spinner label={ocrStatus} />}
+          </>
+        }
       >
-        <Textarea aria-label='Extracted text' readOnly value={text} className={paneField} />
-      </Panel>
-    </Workspace>
+        <Alert>{error}</Alert>
+        {scanned.length > 0 && !ocrStatus && (
+          <Alert variant='warning'>
+            <div className='flex flex-wrap items-center gap-2'>
+              {scanned.length === result.pages.length
+                ? 'No text found. This looks like a scanned PDF.'
+                : `${scanned.length} of ${result.pages.length} pages have no text (scanned?).`}
+              <Button size='sm' variant='outline' onClick={() => void ocr()}>
+                <ScanText /> Read with OCR
+              </Button>
+              <span className='text-xs text-muted-foreground'>
+                English, runs in your browser; downloads about 7 MB the first time
+              </span>
+            </div>
+          </Alert>
+        )}
+        <Panel
+          title={`${result.name} · ${result.pages.length} ${result.pages.length === 1 ? 'page' : 'pages'}`}
+          actions={<span className='px-1.5 text-xs text-muted-foreground'>{text.length.toLocaleString()} chars</span>}
+          className='flex-1'
+        >
+          <Textarea aria-label='Extracted text' readOnly value={text} className={paneField} />
+        </Panel>
+      </Workspace>
+    </DropTarget>
   )
 }
 
