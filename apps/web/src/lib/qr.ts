@@ -1,3 +1,5 @@
+import wasmUrl from 'zxing-wasm/reader/zxing_reader.wasm?url'
+
 export type WifiSecurity = 'WPA' | 'WEP' | 'nopass'
 
 export interface Wifi {
@@ -18,29 +20,64 @@ export function wifiPayload({ ssid, password, security, hidden }: Wifi): string 
 
 /** Not in TypeScript's DOM lib yet (Chromium on Android/macOS/ChromeOS, Safari 17+ behind a flag). */
 interface BarcodeDetectorLike {
-  detect(source: ImageBitmapSource): Promise<{ rawValue: string }[]>
+  detect(source: ImageBitmapSource): Promise<{ rawValue: string; format: string }[]>
 }
 declare const BarcodeDetector:
   | undefined
   | ((new (opts: { formats: string[] }) => BarcodeDetectorLike) & { getSupportedFormats(): Promise<string[]> })
+
+/** BarcodeDetector format names, labelled the way zxing-cpp labels them. */
+const NATIVE_LABELS: Record<string, string> = {
+  aztec: 'Aztec',
+  codabar: 'Codabar',
+  code_39: 'Code 39',
+  code_93: 'Code 93',
+  code_128: 'Code 128',
+  data_matrix: 'DataMatrix',
+  ean_8: 'EAN-8',
+  ean_13: 'EAN-13',
+  itf: 'ITF',
+  pdf417: 'PDF417',
+  qr_code: 'QR Code',
+  upc_a: 'UPC-A',
+  upc_e: 'UPC-E',
+}
 
 let native: Promise<BarcodeDetectorLike | null> | undefined
 const nativeDetector = () =>
   (native ??= (async () => {
     if (typeof BarcodeDetector === 'undefined') return null
     const formats = await BarcodeDetector.getSupportedFormats().catch((): string[] => [])
-    return formats.includes('qr_code') ? new BarcodeDetector({ formats: ['qr_code'] }) : null
+    return formats.length ? new BarcodeDetector({ formats }) : null
   })())
+
+let zxing: Promise<typeof import('zxing-wasm/reader')> | undefined
+const zxingReader = () =>
+  (zxing ??= import('zxing-wasm/reader').then((z) => {
+    // Serve the .wasm from our own origin instead of zxing-wasm's default CDN
+    z.prepareZXingModule({
+      overrides: { locateFile: (path: string, prefix: string) => (path.endsWith('.wasm') ? wasmUrl : prefix + path) },
+    })
+    return z
+  }))
 
 let canvas: HTMLCanvasElement | undefined
 
+export interface Decoded {
+  text: string
+  format: string
+}
+
 /**
- * Reads a QR code from an image or a playing video frame; null when none is found.
- * Uses the browser's BarcodeDetector when it supports QR, otherwise jsQR (lazy-loaded).
+ * Reads the first QR code or barcode in an image or a playing video frame; null when none is found.
+ * Uses the browser's BarcodeDetector when available, otherwise zxing-wasm (lazy-loaded).
  */
-export async function readQr(source: ImageBitmap | HTMLVideoElement): Promise<string | null> {
+export async function readCode(source: ImageBitmap | HTMLVideoElement): Promise<Decoded | null> {
   const detector = await nativeDetector()
-  if (detector) return (await detector.detect(source))[0]?.rawValue ?? null
+  if (detector) {
+    const [hit] = await detector.detect(source)
+    return hit ? { text: hit.rawValue, format: NATIVE_LABELS[hit.format] ?? hit.format } : null
+  }
 
   const width = source instanceof HTMLVideoElement ? source.videoWidth : source.width
   const height = source instanceof HTMLVideoElement ? source.videoHeight : source.height
@@ -51,6 +88,10 @@ export async function readQr(source: ImageBitmap | HTMLVideoElement): Promise<st
   const ctx = canvas.getContext('2d', { willReadFrequently: true })
   if (!ctx) throw new Error('Canvas is not available')
   ctx.drawImage(source, 0, 0)
-  const { default: jsQR } = await import('jsqr')
-  return jsQR(ctx.getImageData(0, 0, width, height).data, width, height)?.data ?? null
+  const z = await zxingReader()
+  const [hit] = await z.readBarcodes(ctx.getImageData(0, 0, width, height), { maxNumberOfSymbols: 1 })
+  if (!hit) return null
+  // zxing-cpp reports UPC-A as an EAN-13 with a leading 0, which is the same number
+  if (hit.format === 'EAN13' && hit.text.startsWith('0')) return { text: hit.text.slice(1), format: 'UPC-A' }
+  return { text: hit.text, format: z.formatToLabel(hit.format) ?? hit.format }
 }
