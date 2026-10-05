@@ -1,6 +1,6 @@
 import { PDFDocument } from '@cantoo/pdf-lib'
 import { describe, expect, it } from 'vitest'
-import { type LayoutOptions, layoutPages, mergePdfs, mm, PAGE_SIZES } from './pdf'
+import { type LayoutOptions, layoutPages, mergePdfs, mm, moveRect, PAGE_SIZES, resizeRect } from './pdf'
 
 const a4: LayoutOptions = { pageSize: 'a4', landscape: false, perPage: 2, margin: 0, size: 'fit' }
 const card = { width: 1000, height: 630 }
@@ -51,5 +51,23 @@ describe('pdf operations', () => {
   it('merges in the given order', async () => {
     const merged = await PDFDocument.load(await mergePdfs([await blank(2, 100), await blank(1, 200)]))
     expect(merged.getPages().map((p) => p.getWidth())).toEqual([100, 100, 200])
+  })
+})
+
+describe('placement', () => {
+  const page = { width: 600, height: 800 }
+  const r = { x: 100, y: 100, width: 200, height: 100 }
+
+  it('moves with screen-down dy and stays on the page', () => {
+    expect(moveRect(r, 10, 20, page)).toEqual({ ...r, x: 110, y: 80 })
+    expect(moveRect(r, -500, 5000, page)).toEqual({ ...r, x: 0, y: 0 })
+    expect(moveRect(r, 5000, -5000, page)).toEqual({ ...r, x: 400, y: 700 })
+  })
+
+  it('resizes keeping ratio and the top-left corner, capped by the page edge', () => {
+    expect(resizeRect(r, 100, page)).toEqual({ x: 100, y: 50, width: 300, height: 150 })
+    expect(resizeRect(r, 10_000, page).width).toBe(400) // right edge
+    expect(resizeRect(r, 10_000, { width: 10_000, height: 800 })).toMatchObject({ y: 0, height: 200 }) // bottom
+    expect(resizeRect(r, -10_000, page).width).toBeCloseTo(mm(5))
   })
 })

@@ -36,6 +36,13 @@ export default defineConfig({
     // Keep .gz wasm payloads as separate files
     assetsInlineLimit: 0,
     rolldownOptions: {
+      output: {
+        // Tesseract fetches `${langPath}/eng.traineddata.gz` itself, so the name must not be hashed
+        assetFileNames: ({ names }) =>
+          names[0]?.endsWith('.traineddata.gz')
+            ? 'assets/tessdata-4.0.0_best_int/[name][extname]'
+            : 'assets/[name]-[hash][extname]',
+      },
       onwarn(warning, warn) {
         // wasm-vips' emscripten glue uses eval; nothing we can change
         if (warning.code === 'EVAL') return

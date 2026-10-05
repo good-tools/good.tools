@@ -389,7 +389,8 @@ export const tools: Tool[] = [
   {
     title: 'Images to PDF',
     path: '/images-to-pdf',
-    description: 'Put images on PDF pages: page size, orientation, several per page, or real ID-card size',
+    description:
+      'Put images on PDF pages: page size, orientation, several per page, real ID-card size, or drag them anywhere',
     icon: FileImage,
     categories: [CATEGORIES.PDF, CATEGORIES.IMAGE],
     searchTags: ['image', 'jpg', 'jpeg', 'png', 'pdf', 'convert', 'scan', 'id card', 'cnic', 'photo', 'combine'],
@@ -411,13 +412,16 @@ export const tools: Tool[] = [
   {
     title: 'PDF to Text',
     path: '/pdf-to-text',
-    description: 'Extract the text of a PDF, page by page',
+    description: 'Extract the text of a PDF, page by page, with OCR for scanned pages',
     icon: FileType,
     categories: [CATEGORIES.PDF],
-    searchTags: ['pdf', 'text', 'extract', 'txt', 'copy', 'convert'],
+    searchTags: ['pdf', 'text', 'extract', 'txt', 'copy', 'convert', 'ocr', 'scan', 'tesseract'],
     component: lazy(() => import('@/tools/PdfToText')),
     online: false,
-    dependencies: [{ name: 'pdf.js', url: 'https://mozilla.github.io/pdf.js/' }],
+    dependencies: [
+      { name: 'pdf.js', url: 'https://mozilla.github.io/pdf.js/' },
+      { name: 'tesseract.js', url: 'https://github.com/naptha/tesseract.js' },
+    ],
   },
   {
     title: 'Protect / Unlock PDF',
