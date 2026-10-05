@@ -21,48 +21,15 @@ Free, fast, privacy-focused developer tools that run in your browser.
 
 ## Development
 
-Requires [Bun](https://bun.sh) ≥ 1.2.
-
 ```bash
 bun install
 bun run dev        # http://localhost:3000
-bun run check      # type-check + lint + tests
-bun run build      # sitemap + type-check + production build into dist/
+bun run check      # type-check, Biome lint + format, tests
 ```
 
-Stack: React 19, React Router, Vite, Tailwind CSS 4, TanStack Query, zustand, Vitest.
+Stack: React 19, React Router, Vite, Tailwind CSS 4, TanStack Query, zustand, Biome, Vitest.
 
-### Project layout
-
-```
-src/
-  config/tools.config.ts   # the tool registry: the single list of every tool
-  tools/                   # one component per tool (lazy-loaded)
-  workers/                 # web workers (Wireshark, libvips, mesh repair)
-  components/ui/           # design system: Workspace, Split, Panel, Button, Input, Alert, …
-  components/shell/        # header, sidebar, command palette
-  pages/                   # home, tool page wrapper, 404
-```
-
-### Adding a tool
-
-1. Create `src/tools/MyTool.tsx` with a default-exported component. The page wrapper already renders the title bar (name, description, local/online badge), so start with the tool's own UI. Use the layout from `@/components/ui/toolbar`: a `Workspace` (a toolbar row plus a full-height body) holding a `Split` of input and output `Panel`s. Show results live as the user types where that's cheap. `src/tools/Base64.tsx` is the reference implementation.
-2. Add an entry to `src/config/tools.config.ts`:
-
-   ```ts
-   {
-     title: 'My Tool',
-     path: '/my-tool',
-     description: 'One sentence about what it does',
-     icon: Wrench, // from lucide-react
-     categories: [CATEGORIES.DEVELOPMENT],
-     searchTags: ['keywords', 'for', 'search'],
-     component: lazy(() => import('@/tools/MyTool')),
-     online: false, // true if it sends data to a server
-   }
-   ```
-
-The route, the sidebar entry, search, the home page listing and `sitemap.xml` all come from this entry.
+To add a tool, read [CONTRIBUTING.md](CONTRIBUTING.md). It covers the project layout, the tool registry, the UI guidelines and the PR process.
 
 ## Self-hosting
 
@@ -97,10 +64,14 @@ If you serve `dist/` from somewhere else, send `Cross-Origin-Opener-Policy: same
 
 ## Contributing
 
-PRs are welcome. Run `bun run check` before you push. Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/).
+Contributions are welcome, whether a bug report, a new tool or a fix. Start with [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Releases are automatic. PRs are squash-merged, so the PR title must be a Conventional Commit; it decides the next version. [release-please](https://github.com/googleapis/release-please) keeps a release PR open with the next version and changelog. Merging that PR tags the release, deploys the site, and publishes the multi-arch image to `ghcr.io/good-tools/good.tools`. The version is shown in the site header.
+### Contributors
+
+<a href="https://github.com/good-tools/good.tools/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=good-tools/good.tools" alt="Contributors" />
+</a>
 
 ## License
 
-MIT
+[MIT](LICENSE)

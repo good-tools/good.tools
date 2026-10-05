@@ -25,10 +25,7 @@ coverage
 .env
 .env.*
 !.env.example
-.prettierrc*
-.eslintrc*
-eslint.config.js
-release.config.cjs
+biome.json
 
 # OS files
 .DS_Store

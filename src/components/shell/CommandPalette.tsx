@@ -1,13 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router'
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
 import { CornerDownLeft, Search } from 'lucide-react'
-import { availableTools } from '@/config/tools.config'
-import { searchTools } from '@/lib/categories'
-import { useLayoutStore } from '@/stores/useLayoutStore'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { Kbd } from '@/components/ui/kbd'
+import { availableTools } from '@/config/tools.config'
+import { searchTools } from '@/lib/categories'
 import { cn } from '@/lib/utils'
+import { useLayoutStore } from '@/stores/useLayoutStore'
 
 /** Global ⌘K / Ctrl+K / "/" tool switcher. Mounted once in Layout. */
 export function CommandPalette() {
@@ -34,8 +34,10 @@ export function CommandPalette() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [setOpen])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset the highlight whenever the query changes
   useEffect(() => setActive(0), [query])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll the newly active option into view
   useEffect(() => {
     listRef.current?.querySelector('[data-active="true"]')?.scrollIntoView({ block: 'nearest' })
   }, [active])
@@ -102,15 +104,19 @@ export function CommandPalette() {
             <ul
               ref={listRef}
               id='palette-results'
+              // biome-ignore lint/a11y/noNoninteractiveElementToInteractiveRole: WAI-ARIA combobox/listbox pattern; the input owns focus and keyboard
               role='listbox'
               className='max-h-[min(60vh,420px)] overflow-y-auto p-1.5'
             >
               {results.map((tool, i) => {
                 const Icon = tool.icon
                 return (
+                  // biome-ignore lint/a11y/useFocusableInteractive: focus stays in the combobox input (aria-activedescendant)
+                  // biome-ignore lint/a11y/useKeyWithClickEvents: ↑/↓/Enter are handled by the input
                   <li
                     key={tool.path}
                     id={`palette-${tool.path}`}
+                    // biome-ignore lint/a11y/noNoninteractiveElementToInteractiveRole: listbox option (see above)
                     role='option'
                     aria-selected={i === active}
                     data-active={i === active}

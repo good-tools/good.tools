@@ -1,11 +1,11 @@
+import { Search, X } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router'
-import { Search, X } from 'lucide-react'
+import { GITHUB_URL } from '@/config/app.config'
 import { availableTools } from '@/config/tools.config'
-import { categories, getToolsByCategory, groupByCategory, searchTools, type CategoryName } from '@/lib/categories'
+import { type CategoryName, categories, getToolsByCategory, groupByCategory, searchTools } from '@/lib/categories'
 import { cn } from '@/lib/utils'
 import type { Tool } from '@/types/tool.types'
-import { GITHUB_URL } from '@/config/app.config'
 
 function ToolRow({ tool }: { tool: Tool }) {
   const Icon = tool.icon

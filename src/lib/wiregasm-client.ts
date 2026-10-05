@@ -62,7 +62,7 @@ function getShared() {
     }
     const update = (patch: Partial<SharedState>) => {
       s.state = { ...s.state, ...patch } // new object so useSyncExternalStore sees the change
-      s.listeners.forEach((l) => l())
+      for (const l of s.listeners) l()
     }
     s.client = createWiregasmClient((e) => {
       if (e.event === 'status') update({ status: e.message })

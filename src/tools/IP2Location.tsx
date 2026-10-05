@@ -1,5 +1,5 @@
 import { ExternalLink, MapPin, Search, Shuffle, X } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import { type ReactNode, useState } from 'react'
 import { Alert } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -59,6 +59,7 @@ function IP2Location() {
         ['ASN', `AS${data.asn.number} ${data.asn.organization}`, `AS${data.asn.number}`],
         [
           'Traits',
+          // biome-ignore lint/correctness/useJsxKeyInIterable: a cell value in a data tuple, not a rendered list; rows are keyed by label
           <span className='flex gap-1 font-sans'>
             <Badge variant={data.traits.anonymous_proxy ? 'warning' : 'outline'}>
               Anonymous proxy: {data.traits.anonymous_proxy ? 'yes' : 'no'}

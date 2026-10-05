@@ -1,11 +1,11 @@
-import { Link } from 'react-router'
 import { Menu, Search } from 'lucide-react'
-import { useLayoutStore } from '@/stores/useLayoutStore'
+import { Link } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Kbd } from '@/components/ui/kbd'
-import { ThemeToggle } from './ThemeToggle'
-import { GitHubIcon, LogoMark } from './icons'
 import { GITHUB_URL, RELEASE_URL, VERSION } from '@/config/app.config'
+import { useLayoutStore } from '@/stores/useLayoutStore'
+import { GitHubIcon, LogoMark } from './icons'
+import { ThemeToggle } from './ThemeToggle'
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent)
 

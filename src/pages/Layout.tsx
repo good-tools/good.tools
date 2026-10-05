@@ -1,7 +1,7 @@
 import { Outlet, useLocation } from 'react-router'
+import { CommandPalette } from '@/components/shell/CommandPalette'
 import { Header } from '@/components/shell/Header'
 import { Sidebar } from '@/components/shell/Sidebar'
-import { CommandPalette } from '@/components/shell/CommandPalette'
 
 export function Layout() {
   const isHome = useLocation().pathname === '/'

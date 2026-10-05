@@ -1,5 +1,5 @@
-import { forwardRef, type ButtonHTMLAttributes } from 'react'
 import { Slot } from '@radix-ui/react-slot'
+import { type ButtonHTMLAttributes, forwardRef } from 'react'
 import { cn } from '@/lib/utils'
 
 const variants = {

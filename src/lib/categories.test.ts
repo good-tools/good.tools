@@ -1,5 +1,5 @@
 import { tools } from '@/config/tools.config'
-import { searchTools, groupByCategory } from '@/lib/categories'
+import { groupByCategory, searchTools } from '@/lib/categories'
 
 test('tool paths are unique and well-formed', () => {
   const paths = tools.map((t) => t.path)

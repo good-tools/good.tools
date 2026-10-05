@@ -1,13 +1,13 @@
-import { useEffect } from 'react'
-import { NavLink, useLocation } from 'react-router'
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
 import { PanelLeftClose, PanelLeftOpen, X } from 'lucide-react'
+import { useEffect } from 'react'
+import { NavLink, useLocation } from 'react-router'
+import { Button } from '@/components/ui/button'
+import { GITHUB_URL, RELEASE_URL, VERSION } from '@/config/app.config'
 import { availableTools } from '@/config/tools.config'
 import { groupByCategory } from '@/lib/categories'
-import { useLayoutStore } from '@/stores/useLayoutStore'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { GITHUB_URL, RELEASE_URL, VERSION } from '@/config/app.config'
+import { useLayoutStore } from '@/stores/useLayoutStore'
 
 const groups = groupByCategory(availableTools)
 
@@ -60,6 +60,7 @@ export function Sidebar({ desktop = true }: { desktop?: boolean }) {
   const { sidebarCollapsed, toggleSidebar, mobileNavOpen, setMobileNavOpen } = useLayoutStore()
   const { pathname } = useLocation()
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: close the mobile drawer on every navigation
   useEffect(() => setMobileNavOpen(false), [pathname, setMobileNavOpen])
 
   return (

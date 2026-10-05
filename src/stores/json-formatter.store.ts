@@ -1,5 +1,5 @@
-import { create } from 'zustand'
 import jp from 'jsonpath'
+import { create } from 'zustand'
 
 const DEFAULT_VALUE = JSON.stringify({ message: 'Hello, World!' }, null, 2)
 

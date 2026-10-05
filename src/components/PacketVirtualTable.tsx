@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { useInfiniteQuery } from '@tanstack/react-query'
+import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { useVirtualizer } from '@tanstack/react-virtual'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { useIsDark } from '@/stores/theme.store'
 
@@ -60,7 +60,7 @@ function PacketVirtualTable({
     initialPageParam: 0,
   })
 
-  const flatData = useMemo(() => data?.pages?.flatMap((i) => i) ?? [], [data])
+  const flatData = useMemo(() => data?.pages?.flat() ?? [], [data])
 
   const totalDBRowCount = total ?? 0
   const totalFetched = flatData.length
@@ -118,8 +118,11 @@ function PacketVirtualTable({
   }
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: focusable scroll region; ↑/↓ move the packet selection
+    // biome-ignore lint/a11y/useAriaPropsSupportedByRole: focusable scroll region; ↑/↓ move the packet selection
     <div
       ref={tableContainerRef}
+      // biome-ignore lint/a11y/noNoninteractiveTabindex: focusable scroll region; ↑/↓ move the packet selection
       tabIndex={0}
       aria-label='Packets (use ↑/↓ to select)'
       onKeyDown={onKeyDown}

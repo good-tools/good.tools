@@ -1,22 +1,22 @@
-import { useToolState } from '@/hooks/useToolState'
-import { formatDateTime } from '@/lib/utils'
-import { ArrowRight, ChevronRight, Container, Download, Shuffle, X } from 'lucide-react'
-import { filesize } from 'filesize'
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
-import FileTree, { type FileNode } from '@/components/FileTree'
 import Editor from '@monaco-editor/react'
+import { filesize } from 'filesize'
+import { LRUCache as LRU } from 'lru-cache'
+import { ArrowRight, ChevronRight, Container, Download, Shuffle, X } from 'lucide-react'
+import type { editor } from 'monaco-editor'
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import FileTree, { type FileNode } from '@/components/FileTree'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { CopyButton } from '@/components/ui/copy-button'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { Panel, Split, Workspace } from '@/components/ui/toolbar'
-import { useIsDark } from '@/stores/theme.store'
-import { LRUCache as LRU } from 'lru-cache'
 import { API_CONFIG } from '@/config/api.config'
 import { getJSON } from '@/hooks/useApiQuery'
-import type { DockerImageResponse, DockerFileNode, DockerFileListItem } from '@/types/api.types'
-import type { editor } from 'monaco-editor'
+import { useToolState } from '@/hooks/useToolState'
+import { formatDateTime } from '@/lib/utils'
+import { useIsDark } from '@/stores/theme.store'
+import type { DockerFileListItem, DockerFileNode, DockerImageResponse } from '@/types/api.types'
 
 const RANDOM_IMAGES = [
   'docker.io/library/nginx:latest',
@@ -124,6 +124,7 @@ function ImageBrowser() {
     [pulledRef, setContent, setSelected],
   )
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll back to the top when a new file is shown
   useEffect(() => {
     editorRef.current?.setScrollPosition({ scrollTop: 0 })
   }, [content])

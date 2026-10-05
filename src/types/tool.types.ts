@@ -1,5 +1,5 @@
-import type { LazyExoticComponent, ComponentType } from 'react'
 import type { LucideIcon } from 'lucide-react'
+import type { ComponentType, LazyExoticComponent } from 'react'
 
 export const CATEGORIES = {
   DEVELOPMENT: 'Development',

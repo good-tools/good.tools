@@ -1,6 +1,6 @@
-import { create } from 'zustand'
-import xmlFormat from 'xml-formatter'
 import { XMLParser, XMLValidator } from 'fast-xml-parser'
+import xmlFormat from 'xml-formatter'
+import { create } from 'zustand'
 
 const DEFAULT_VALUE = `<?xml version="1.0" encoding="UTF-8"?>
 <greeting>Hello, world!</greeting>`

@@ -1,10 +1,10 @@
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
 import { useEffect, useMemo, useState } from 'react'
-import WiregasmPreferenceTree, { type ModuleNode } from '@/components/WiregasmPreferenceTree'
-import WiregasmModulePreferences, { type Preference } from '@/components/WiregasmModulePreferences'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import WiregasmModulePreferences, { type Preference } from '@/components/WiregasmModulePreferences'
+import WiregasmPreferenceTree, { type ModuleNode } from '@/components/WiregasmPreferenceTree'
 
 const errorMessage = (e: unknown) => (e instanceof Error ? e.message : String(e))
 
@@ -55,6 +55,7 @@ function WiregasmPreferencesModal({
     loadModuleTree().then(setModuleTree, (e: unknown) => setError(errorMessage(e)))
   }, [loadModuleTree, initialized])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: updatedNonce re-fetches the prefs after an update
   useEffect(() => {
     setModulePreferences(null)
     if (!selectedModule) return

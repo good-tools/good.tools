@@ -1,19 +1,19 @@
-import { useToolState } from '@/hooks/useToolState'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Download, Trash2, Wrench } from 'lucide-react'
-import { filesize } from 'filesize'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { PRESETS, type RepairOptions, type RepairResult } from '@goodtools/meshrepair'
 import { OrbitControls } from '@react-three/drei'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { filesize } from 'filesize'
+import { Download, Trash2, Wrench } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { STLLoader } from 'three/addons/loaders/STLLoader.js'
-import { PRESETS, type RepairOptions, type RepairResult } from '@goodtools/meshrepair'
-import { Button } from '@/components/ui/button'
 import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DropZone } from '@/components/ui/drop-zone'
-import { Input, fieldClass } from '@/components/ui/input'
+import { fieldClass, Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { Panel, Split, Workspace } from '@/components/ui/toolbar'
+import { useToolState } from '@/hooks/useToolState'
 import { cn, downloadBlob } from '@/lib/utils'
 import type { MeshRepairRequest, MeshRepairResponse } from '@/workers/meshrepair.worker'
 
@@ -311,7 +311,7 @@ function STLRepair() {
                 min={1}
                 max={1000}
                 value={options.maxHoleSize ?? 100}
-                onChange={(e) => setOption('maxHoleSize', parseInt(e.target.value) || 100)}
+                onChange={(e) => setOption('maxHoleSize', parseInt(e.target.value, 10) || 100)}
               />
               edges
             </label>

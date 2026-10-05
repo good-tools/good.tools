@@ -1,13 +1,13 @@
-import { useToolState } from '@/hooks/useToolState'
-import { useCallback, useEffect, useRef, useState } from 'react'
 import { filesize } from 'filesize'
 import { Download, RefreshCw, Trash2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 import { DropZone } from '@/components/ui/drop-zone'
-import { Input, fieldClass } from '@/components/ui/input'
+import { fieldClass, Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { Panel, Split, Workspace } from '@/components/ui/toolbar'
+import { useToolState } from '@/hooks/useToolState'
 import { cn, downloadBlob } from '@/lib/utils'
 import type { ImageInfo, OutputFormat, VipsRequest, VipsWorkerResponse } from '@/workers/vips.worker'
 
@@ -128,12 +128,12 @@ function ImageConverter() {
     }
   }, [setFormat, setInfo, setResult])
 
-  const send = (msg: VipsRequest) => {
+  const send = useCallback((msg: VipsRequest) => {
     const buffer = msg.buffer.slice(0) // transferred; keep our copy intact
     setBusy(true)
     setError(null)
     workerRef.current?.postMessage({ ...msg, buffer, id: ++requestId.current }, [buffer])
-  }
+  }, [])
 
   // The worker queues messages until wasm-vips is ready, so files dropped during init still load
   const handleFile = useCallback(
@@ -146,7 +146,7 @@ function ImageConverter() {
       setResult(null)
       send({ type: 'load', buffer })
     },
-    [setInfo, setResult, setSource],
+    [setInfo, setResult, setSource, send],
   )
 
   const size = info && outputSize(info, resizeMode, percentage, width, height)

@@ -1,16 +1,16 @@
-import { useMemo } from 'react'
-import { useToolState } from '@/hooks/useToolState'
-import { ArrowLeftRight, Eraser } from 'lucide-react'
 import { Buffer } from 'buffer'
+import { ArrowLeftRight, Eraser } from 'lucide-react'
+import { useMemo } from 'react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { CopyButton } from '@/components/ui/copy-button'
 import { Textarea } from '@/components/ui/input'
-import { Panel, Split, Workspace, paneField } from '@/components/ui/toolbar'
 import { Segmented } from '@/components/ui/segmented'
-import { useBase64Store, type Base64Mode } from '@/stores/base64.store'
+import { Panel, paneField, Split, Workspace } from '@/components/ui/toolbar'
+import { useToolState } from '@/hooks/useToolState'
 import { cn } from '@/lib/utils'
+import { type Base64Mode, useBase64Store } from '@/stores/base64.store'
 
 /** Buffer.from(s, 'base64') silently drops invalid characters, so validate first (standard or URL-safe alphabet). */
 export function parseBase64(input: string): Buffer {

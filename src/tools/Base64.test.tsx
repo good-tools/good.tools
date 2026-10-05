@@ -1,8 +1,8 @@
-import { beforeEach, describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import Base64, { parseBase64 } from './Base64'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { useBase64Store } from '@/stores/base64.store'
+import Base64, { parseBase64 } from './Base64'
 
 beforeEach(() => useBase64Store.getState().resetAll())
 

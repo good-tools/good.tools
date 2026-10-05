@@ -1,5 +1,5 @@
-import type { HTMLAttributes } from 'react'
 import { AlertTriangle, Info, XCircle } from 'lucide-react'
+import type { HTMLAttributes } from 'react'
 import { cn } from '@/lib/utils'
 
 const variants = {

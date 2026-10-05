@@ -1,10 +1,10 @@
-import { Suspense } from 'react'
-import { useToolState } from '@/hooks/useToolState'
 import { Cloud, HardDrive, Info } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Spinner } from '@/components/ui/spinner'
+import { Suspense } from 'react'
 import { ErrorBoundary } from '@/components/layout/ErrorBoundary'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { useToolState } from '@/hooks/useToolState'
 import type { Tool } from '@/types/tool.types'
 
 export default function WrappedTool({ tool }: { tool: Tool }) {

@@ -1,11 +1,12 @@
 /**
  * React Query hooks for the online (internet-tools) APIs
  */
-import { useEffect } from 'react'
+
 import { useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { useLocation, useSearchParams } from 'react-router'
 import { API_CONFIG } from '@/config/api.config'
-import type { DNSResponse, WhoisResponse, MyIPResponse, IPLocationResponse } from '@/types/api.types'
+import type { DNSResponse, IPLocationResponse, MyIPResponse, WhoisResponse } from '@/types/api.types'
 
 export const EXAMPLE_DOMAINS = ['facebook.com', 'good.tools', 'ronin.ae', 'gmail.com', 'apple.com', 'microsoft.com']
 

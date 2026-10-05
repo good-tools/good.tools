@@ -1,11 +1,11 @@
-import { useToolState } from '@/hooks/useToolState'
 import { DiffEditor, default as Editor } from '@monaco-editor/react'
 import { ArrowLeftRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
 import { fieldClass } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Segmented } from '@/components/ui/segmented'
 import { Workspace } from '@/components/ui/toolbar'
+import { useToolState } from '@/hooks/useToolState'
 import { cn } from '@/lib/utils'
 import { useIsDark } from '@/stores/theme.store'
 

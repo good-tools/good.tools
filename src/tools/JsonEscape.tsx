@@ -1,11 +1,11 @@
-import { useMemo } from 'react'
 import { ArrowLeftRight, Eraser } from 'lucide-react'
+import { useMemo } from 'react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { CopyButton } from '@/components/ui/copy-button'
 import { Textarea } from '@/components/ui/input'
-import { Panel, Split, Workspace, paneField } from '@/components/ui/toolbar'
 import { Segmented } from '@/components/ui/segmented'
+import { Panel, paneField, Split, Workspace } from '@/components/ui/toolbar'
 import { useJsonEscapeStore } from '@/stores'
 import type { JsonEscapeMode } from '@/stores/json-escape.store'
 

@@ -1,15 +1,15 @@
-import { useMemo } from 'react'
 import { ArrowLeftRight, Eraser } from 'lucide-react'
+import { useMemo } from 'react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { CopyButton } from '@/components/ui/copy-button'
 import { Textarea } from '@/components/ui/input'
-import { Panel, Split, Workspace, paneField } from '@/components/ui/toolbar'
 import { Segmented } from '@/components/ui/segmented'
+import { Panel, paneField, Split, Workspace } from '@/components/ui/toolbar'
+import { cn } from '@/lib/utils'
 import { useURLStore } from '@/stores'
 import type { URLMode } from '@/stores/url.store'
-import { cn } from '@/lib/utils'
 
 function URL() {
   const { mode, input, plusAsSpace, setMode, setInput, setPlusAsSpace } = useURLStore()

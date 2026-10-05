@@ -1,29 +1,29 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Allotment } from 'allotment'
 import { FileUp, FlaskConical, Info, ListTree, Settings2 } from 'lucide-react'
-import { FileButton } from '@/components/ui/file-button'
-import { Input } from '@/components/ui/input'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import DissectionDump from '@/components/DissectionDump'
 import DissectionTree, {
-  NO_SELECTION,
   type DissectionNode,
   type DissectionSelection,
+  NO_SELECTION,
 } from '@/components/DissectionTree'
-import DissectionDump from '@/components/DissectionDump'
-import { Allotment } from 'allotment'
+import { FileButton } from '@/components/ui/file-button'
+import { Input } from '@/components/ui/input'
 import 'allotment/dist/style.css'
-import PacketVirtualTable, { type PacketRow } from '@/components/PacketVirtualTable'
-import { Button } from '@/components/ui/button'
 import PacketSummaryModal, { type PacketSummary } from '@/components/PacketSummaryModal'
-import { TabButton, TabGroup, TabPanel, TabPanels, Tabs } from '@/components/ui/tabs'
+import PacketVirtualTable, { type PacketRow } from '@/components/PacketVirtualTable'
 import { Alert } from '@/components/ui/alert'
-import { Spinner } from '@/components/ui/spinner'
-import { Toolbar } from '@/components/ui/toolbar'
 import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
-import { useWiregasm } from '@/lib/wiregasm-client'
-import { useToolState } from '@/hooks/useToolState'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { TabButton, TabGroup, TabPanel, TabPanels, Tabs } from '@/components/ui/tabs'
+import { Toolbar } from '@/components/ui/toolbar'
+import type { Preference } from '@/components/WiregasmModulePreferences'
 import WiregasmPreferencesModal from '@/components/WiregasmPreferencesModal'
 import type { ModuleNode } from '@/components/WiregasmPreferenceTree'
-import type { Preference } from '@/components/WiregasmModulePreferences'
+import { useToolState } from '@/hooks/useToolState'
+import { cn } from '@/lib/utils'
+import { useWiregasm } from '@/lib/wiregasm-client'
 
 // Named explicitly: the bundled URLs carry a content hash
 const EXAMPLE_CAPTURES = [
@@ -208,6 +208,7 @@ function PacketDissector() {
     call('version').then(setVersion, () => {})
   }, [call, initialized, setColumns, setVersion])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: dissectionNonce re-fetches the frame after a reload
   useEffect(() => {
     if (!finishedProcessing || selectedFrame < 1 || selectedFrame > totalFrames) return
     let cancelled = false

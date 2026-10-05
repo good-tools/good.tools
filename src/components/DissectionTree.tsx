@@ -29,7 +29,7 @@ interface DissectionSubTreeProps {
 function DissectionSubTree({ id, node, select, selected }: DissectionSubTreeProps) {
   const [open, setOpen] = useState(false)
   const hasChildren = !!node.tree?.length
-  const containsSelection = selected.startsWith(id + '-')
+  const containsSelection = selected.startsWith(`${id}-`)
 
   // Reveal the field picked from the hex dump
   useEffect(() => {

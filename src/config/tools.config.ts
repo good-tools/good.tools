@@ -1,25 +1,25 @@
-import { lazy } from 'react'
 import {
-  FileText,
-  Link,
-  GitCompare,
-  FileKey,
-  Package,
-  Coffee,
-  Container,
-  Search,
-  Globe,
-  Hash,
-  Radio,
-  MapPin,
+  Box,
   Braces,
   Code2,
-  Quote,
-  Box,
+  Coffee,
+  Container,
+  FileKey,
+  FileText,
+  GitCompare,
+  Globe,
+  Hash,
   ImageIcon,
+  Link,
+  MapPin,
+  Package,
+  Quote,
+  Radio,
+  Search,
 } from 'lucide-react'
-import { CATEGORIES, type Tool } from '@/types/tool.types'
+import { lazy } from 'react'
 import { runtimeConfig } from '@/config/runtime.config'
+import { CATEGORIES, type Tool } from '@/types/tool.types'
 
 export const tools: Tool[] = [
   {

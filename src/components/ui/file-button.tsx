@@ -1,4 +1,4 @@
-import { useRef, type ChangeEvent } from 'react'
+import { type ChangeEvent, useRef } from 'react'
 import { Button, type ButtonProps } from './button'
 
 export interface FileButtonProps extends Omit<ButtonProps, 'onClick' | 'asChild'> {

@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import JsonEscape from './JsonEscape'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { useJsonEscapeStore } from '@/stores'
+import JsonEscape from './JsonEscape'
 
 beforeEach(() => {
   useJsonEscapeStore.getState().reset()

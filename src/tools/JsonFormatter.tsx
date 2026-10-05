@@ -1,17 +1,17 @@
-import { useMemo, useState } from 'react'
 import Editor from '@monaco-editor/react'
 import { Allotment } from 'allotment'
+import { useMemo, useState } from 'react'
 import 'allotment/dist/style.css'
-import { ObjectInspector } from 'react-inspector'
 import { Eraser, Minimize2, WandSparkles } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
+import { ObjectInspector } from 'react-inspector'
 import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { CopyButton } from '@/components/ui/copy-button'
+import { Input } from '@/components/ui/input'
 import { Panel, Workspace } from '@/components/ui/toolbar'
-import { useIsDark } from '@/stores/theme.store'
 import { applyJsonPath, useJSONFormatterStore } from '@/stores/json-formatter.store'
+import { useIsDark } from '@/stores/theme.store'
 
 const editorOptions = { wordWrap: 'on' as const, contextmenu: false, minimap: { enabled: false } }
 

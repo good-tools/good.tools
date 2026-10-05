@@ -21,13 +21,19 @@ function HighlightedText({ text, start, size, onOffsetClicked }: HighlightedText
 
   return (
     <>
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: pointer shortcut for byte selection; the dissection tree is the keyboard path */}
+      {/* biome-ignore lint/a11y/useKeyWithClickEvents: pointer shortcut for byte selection; the dissection tree is the keyboard path */}
       <span onClick={(e) => handleClickWithOffset(e, 0)}>{before}</span>
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: pointer shortcut for byte selection; the dissection tree is the keyboard path */}
+      {/* biome-ignore lint/a11y/useKeyWithClickEvents: pointer shortcut for byte selection; the dissection tree is the keyboard path */}
       <span
         onClick={(e) => handleClickWithOffset(e, before.length)}
         className='rounded-xs bg-primary text-primary-foreground'
       >
         {hl}
       </span>
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: pointer shortcut for byte selection; the dissection tree is the keyboard path */}
+      {/* biome-ignore lint/a11y/useKeyWithClickEvents: pointer shortcut for byte selection; the dissection tree is the keyboard path */}
       <span onClick={(e) => handleClickWithOffset(e, before.length + hl.length)}>{end}</span>
     </>
   )
@@ -54,7 +60,7 @@ function DissectionDump({ buffer, selected, select }: DissectionDumpProps) {
       const hex = block.map((v) => v.toString(16).padStart(2, '0'))
       addrLines.push(i.toString(16).padStart(8, '0'))
       // the full-width space keeps every byte 3 chars wide, so offsets stay computable
-      hexLines.push(hex.length > 8 ? hex.slice(0, 8).join(' ') + '\u3000' + hex.slice(8).join(' ') : hex.join(' '))
+      hexLines.push(hex.length > 8 ? `${hex.slice(0, 8).join(' ')}\u3000${hex.slice(8).join(' ')}` : hex.join(' '))
       asciiLines.push(block.map((v) => (v >= 0x20 && v < 0x7f ? String.fromCharCode(v) : '.')).join(''))
     }
     return { addrLines, hexLines, asciiLines }

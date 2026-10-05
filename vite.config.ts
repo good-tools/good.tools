@@ -1,8 +1,8 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
-import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import path from 'node:path'
+import tailwindcss from '@tailwindcss/vite'
+import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import pkg from './package.json' with { type: 'json' }
 
 // Required for SharedArrayBuffer (wasm-vips multi-threading)

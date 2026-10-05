@@ -6,11 +6,11 @@
  * Unsolicited events (`{ event: 'status' | 'ready' | 'error', ... }`) report startup progress.
  * See src/lib/wiregasm-client.ts for the typed client.
  */
-import { Wiregasm, vectorToArray, type WiregasmLoader } from '@goodtools/wiregasm'
+import { vectorToArray, Wiregasm, type WiregasmLoader } from '@goodtools/wiregasm'
 // @ts-expect-error emscripten loader ships without types
 import loadWiregasm from '@goodtools/wiregasm/dist/wiregasm'
-import wasmPath from '@goodtools/wiregasm/dist/wiregasm.wasm.gz?url'
 import dataPath from '@goodtools/wiregasm/dist/wiregasm.data.gz?url'
+import wasmPath from '@goodtools/wiregasm/dist/wiregasm.wasm.gz?url'
 
 declare const self: DedicatedWorkerGlobalScope
 

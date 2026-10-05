@@ -1,12 +1,12 @@
 import { useEffect } from 'react'
-import { Routes, Route, useLocation } from 'react-router'
-import Home from '@/pages/Home'
-import WrappedTool from '@/pages/WrappedTool'
-import NotFound from '@/pages/NotFound'
-import { Layout } from '@/pages/Layout'
-import { availableTools } from '@/config/tools.config'
-import { runtimeConfig } from '@/config/runtime.config'
+import { Route, Routes, useLocation } from 'react-router'
 import { ErrorBoundary } from '@/components/layout/ErrorBoundary'
+import { runtimeConfig } from '@/config/runtime.config'
+import { availableTools } from '@/config/tools.config'
+import Home from '@/pages/Home'
+import { Layout } from '@/pages/Layout'
+import NotFound from '@/pages/NotFound'
+import WrappedTool from '@/pages/WrappedTool'
 
 declare global {
   interface Window {
