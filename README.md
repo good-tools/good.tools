@@ -99,7 +99,7 @@ If you serve `dist/` from somewhere else, send `Cross-Origin-Opener-Policy: same
 
 PRs are welcome. Run `bun run check` before you push. Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/).
 
-Releases are automatic. When CI passes on `master`, semantic-release bumps the version from the commit messages and updates `CHANGELOG.md`. It then creates a GitHub release, publishes the multi-arch image to `ghcr.io/good-tools/good.tools`, and deploys the site. The version is shown in the site header.
+Releases are automatic. PRs are squash-merged, so the PR title must be a Conventional Commit; it decides the next version. [release-please](https://github.com/googleapis/release-please) keeps a release PR open with the next version and changelog. Merging that PR tags the release, deploys the site, and publishes the multi-arch image to `ghcr.io/good-tools/good.tools`. The version is shown in the site header.
 
 ## License
 
