@@ -1,6 +1,6 @@
 import { PDFDocument } from '@cantoo/pdf-lib'
 import { describe, expect, it } from 'vitest'
-import { type LayoutOptions, layoutPages, mergePdfs, mm, moveRect, PAGE_SIZES, resizeRect } from './pdf'
+import { type LayoutOptions, layoutPages, mergePdfs, mm, moveRect, PAGE_SIZES, resizeRect, targetPixels } from './pdf'
 
 const a4: LayoutOptions = { pageSize: 'a4', landscape: false, perPage: 2, margin: 0, size: 'fit' }
 const card = { width: 1000, height: 630 }
@@ -69,5 +69,18 @@ describe('placement', () => {
     expect(resizeRect(r, 10_000, page).width).toBe(400) // right edge
     expect(resizeRect(r, 10_000, { width: 10_000, height: 800 })).toMatchObject({ y: 0, height: 200 }) // bottom
     expect(resizeRect(r, -10_000, page).width).toBeCloseTo(mm(5))
+  })
+})
+
+describe('targetPixels', () => {
+  it('downsamples to the printed size and never upscales', () => {
+    const photo = { width: 4000, height: 3000 }
+    // 3 inches wide at 300 dpi
+    expect(targetPixels(photo, { x: 0, y: 0, width: 216, height: 162 }, 300)).toEqual({ width: 900, height: 675 })
+    expect(targetPixels(photo, { x: 0, y: 0, width: 216, height: 162 }, Number.POSITIVE_INFINITY)).toEqual(photo)
+    expect(targetPixels({ width: 100, height: 50 }, { x: 0, y: 0, width: 500, height: 250 }, 300)).toEqual({
+      width: 100,
+      height: 50,
+    })
   })
 })
