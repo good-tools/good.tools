@@ -1,9 +1,10 @@
 # Dependencies
-node_modules
+**/node_modules
 
 # Build output
-dist
-build
+**/dist
+**/build
+**/.turbo
 
 # Development
 .git
@@ -22,9 +23,9 @@ build
 coverage
 
 # Config files not needed in build
-.env
-.env.*
-!.env.example
+**/.env
+**/.env.*
+!**/.env.example
 biome.json
 
 # OS files
