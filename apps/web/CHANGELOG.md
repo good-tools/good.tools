@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.28.0](https://github.com/good-tools/good.tools/compare/web-v1.27.0...web-v1.28.0) (2026-10-05)
+
+
+### Features
+
+* **web:** show the sidebar on the home page ([#43](https://github.com/good-tools/good.tools/issues/43)) ([a078196](https://github.com/good-tools/good.tools/commit/a0781964b0eea29fa239fb3a7bb88294b13bf09c))
+
+
+### Bug Fixes
+
+* **web:** point the version link at web-v release tags ([#45](https://github.com/good-tools/good.tools/issues/45)) ([e6dbfb7](https://github.com/good-tools/good.tools/commit/e6dbfb7700539e23bc06e1934fca1dda60ca31ef))
+
 ## [1.27.0](https://github.com/good-tools/good.tools/compare/v1.26.0...v1.27.0) (2026-10-05)
 
 
