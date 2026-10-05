@@ -21,6 +21,7 @@ import {
   NotebookPen,
   Package,
   PlugZap,
+  QrCode,
   Quote,
   Radio,
   Search,
@@ -482,6 +483,20 @@ export const tools: Tool[] = [
     component: lazy(() => import('@/tools/PdfPassword')),
     online: false,
     dependencies: [{ name: 'qpdf', url: 'https://qpdf.sourceforge.io' }],
+  },
+  {
+    title: 'QR Code',
+    path: '/qr-code',
+    description: 'Generate QR codes for text, links and Wi-Fi networks, or read one from an image or your camera',
+    icon: QrCode,
+    categories: [CATEGORIES.ENCODING, CATEGORIES.IMAGE],
+    searchTags: ['qr', 'qrcode', 'barcode', 'generator', 'reader', 'scanner', 'wifi', 'camera', 'url', 'png', 'svg'],
+    component: lazy(() => import('@/tools/QrCode')),
+    online: false,
+    dependencies: [
+      { name: 'qrcode', url: 'https://www.npmjs.com/package/qrcode' },
+      { name: 'jsQR', url: 'https://www.npmjs.com/package/jsqr' },
+    ],
   },
 ]
 
