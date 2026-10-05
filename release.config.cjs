@@ -36,7 +36,7 @@ module.exports = {
     [
       "@semantic-release/exec",
       {
-        prepareCmd: "npm run build && tar -czf dist.tar.gz dist/",
+        prepareCmd: "bun run build && tar -czf dist.tar.gz dist/",
         successCmd: 'echo "released=1" >> ' + process.env.GITHUB_OUTPUT,
       },
     ],

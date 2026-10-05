@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useVirtualizer } from '@tanstack/react-virtual'
+import { cn } from '@/lib/utils'
+import { useIsDark } from '@/stores/theme.store'
 
 const fetchSize = 200
 
@@ -33,6 +35,7 @@ function PacketVirtualTable({
   setSelectedFrame,
   dissectionNonce,
 }: PacketVirtualTableProps) {
+  const isDark = useIsDark()
   const tableContainerRef = useRef<HTMLDivElement>(null)
   const preparedColumns = useMemo(
     () =>
@@ -49,7 +52,6 @@ function PacketVirtualTable({
     queryKey: ['packet-data', fileName, filter, dissectionNonce],
     queryFn: async ({ pageParam = 0 }) => {
       const start = pageParam * fetchSize
-      // console.log("fetchPackets", filter, start, fetchSize);
       const fetchedData = await fetchPackets(filter, start, fetchSize)
       return fetchedData
     },
@@ -60,7 +62,6 @@ function PacketVirtualTable({
 
   const flatData = useMemo(() => data?.pages?.flatMap((i) => i) ?? [], [data])
 
-  // console.log(flatData)
   const totalDBRowCount = total ?? 0
   const totalFetched = flatData.length
 
@@ -92,7 +93,7 @@ function PacketVirtualTable({
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => tableContainerRef.current,
-    estimateSize: () => 28,
+    estimateSize: () => 24,
     overscan: 10,
   })
 
@@ -102,76 +103,87 @@ function PacketVirtualTable({
   const paddingTop = virtualRows.length > 0 ? virtualRows?.[0]?.start || 0 : 0
   const paddingBottom = virtualRows.length > 0 ? totalSize - (virtualRows?.[virtualRows.length - 1]?.end || 0) : 0
 
+  const hex = (c: number) => `#${c.toString(16).padStart(6, '0')}`
+
+  // ↑/↓ move the selection while the table has focus
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    const step = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : 0
+    if (!step) return
+    e.preventDefault()
+    const idx = flatData.findIndex((p) => p.number === selectedFrame)
+    const next = flatData[Math.min(Math.max(idx + step, 0), flatData.length - 1)]
+    if (!next) return
+    setSelectedFrame(next.number)
+    rowVirtualizer.scrollToIndex(flatData.indexOf(next))
+  }
+
   return (
-    <div className='flex flex-col font-mono h-full'>
-      <div
-        ref={tableContainerRef}
-        onScroll={(e) => fetchMoreOnBottomReached(e.target as HTMLDivElement)}
-        className='overflow-x-hidden'
-      >
-        <div className='inline-block min-w-full align-middle'>
-          <div className='dark:bg-zinc-800 shadow dark:shadow-zinc-900 ring-1 ring-black dark:ring-zinc-900 ring-opacity-5 md:rounded-lg'>
-            <table className='min-w-full divide-y divide-gray-300'>
-              <thead className='bg-gray-50 dark:bg-zinc-700 sticky top-0'>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => {
-                      return (
-                        <th
-                          key={header.id}
-                          scope='col'
-                          className='px-2 py-1 text-left text-sm font-semibold whitespace-nowrap'
-                        >
-                          {header.isPlaceholder ? null : (
-                            <div>{flexRender(header.column.columnDef.header, header.getContext())}</div>
-                          )}
-                        </th>
-                      )
-                    })}
-                  </tr>
+    <div
+      ref={tableContainerRef}
+      tabIndex={0}
+      aria-label='Packets (use ↑/↓ to select)'
+      onKeyDown={onKeyDown}
+      onScroll={(e) => fetchMoreOnBottomReached(e.target as HTMLDivElement)}
+      className='h-full overflow-auto rounded-md border bg-card font-mono text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring'
+    >
+      <table className='min-w-full'>
+        <thead className='sticky top-0 z-10 bg-muted text-muted-foreground'>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <th
+                  key={header.id}
+                  scope='col'
+                  className='border-b px-2 py-1.5 text-left font-medium whitespace-nowrap'
+                >
+                  {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody className='whitespace-nowrap'>
+          {paddingTop > 0 && (
+            <tr>
+              <td style={{ height: `${paddingTop}px` }} />
+            </tr>
+          )}
+          {virtualRows.map((virtualRow) => {
+            const row = rows[virtualRow.index]
+            const p = flatData[virtualRow.index]
+            if (!row || !p) return null
+            const selected = p.number === selectedFrame
+            return (
+              <tr
+                key={row.id}
+                aria-selected={selected}
+                onClick={() => setSelectedFrame(p.number)}
+                className={cn('h-6 cursor-default', selected && 'bg-primary text-primary-foreground')}
+                // Wireshark's colouring rules are pastel backgrounds meant for light UIs; in dark mode
+                // tint the row instead and keep our own text colour
+                style={
+                  selected || !p.bg
+                    ? undefined
+                    : isDark
+                      ? { backgroundColor: `color-mix(in oklch, ${hex(p.bg)} 16%, var(--card))` }
+                      : { backgroundColor: hex(p.bg), color: p.fg ? hex(p.fg) : undefined }
+                }
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className='px-2'>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
                 ))}
-              </thead>
-              <tbody className='divide-y divide-gray-200 dark:divide-gray-600 whitespace-nowrap'>
-                {paddingTop > 0 && (
-                  <tr>
-                    <td style={{ height: `${paddingTop}px` }} />
-                  </tr>
-                )}
-                {virtualRows.map((virtualRow) => {
-                  const row = rows[virtualRow.index]
-                  const p = flatData[virtualRow.index]
-                  if (!row || !p) return null
-                  const selected = p.number === selectedFrame
-                  return (
-                    <tr
-                      key={row.id}
-                      onClick={() => setSelectedFrame(p.number)}
-                      className='cursor-pointer leading-0'
-                      style={{
-                        backgroundColor: selected ? `blue` : p.bg ? `#${p.bg.toString(16).padStart(6, '0')}` : '',
-                        color: selected ? `white` : p.fg ? `#${p.fg.toString(16).padStart(6, '0')}` : '',
-                      }}
-                    >
-                      {row.getVisibleCells().map((cell) => {
-                        return (
-                          <td key={cell.id} className='px-2 text-sm'>
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </td>
-                        )
-                      })}
-                    </tr>
-                  )
-                })}
-                {paddingBottom > 0 && (
-                  <tr>
-                    <td style={{ height: `${paddingBottom}px` }} />
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+              </tr>
+            )
+          })}
+          {paddingBottom > 0 && (
+            <tr>
+              <td style={{ height: `${paddingBottom}px` }} />
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   )
 }

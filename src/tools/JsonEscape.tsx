@@ -1,82 +1,81 @@
-import { useEffect, useRef } from 'react'
-import TextArea from '@/components/TextArea'
+import { useMemo } from 'react'
+import { ArrowLeftRight, Eraser } from 'lucide-react'
+import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { CopyButton } from '@/components/ui/copy-button'
+import { Textarea } from '@/components/ui/input'
+import { Panel, Split, Workspace, paneField } from '@/components/ui/toolbar'
+import { Segmented } from '@/components/ui/segmented'
 import { useJsonEscapeStore } from '@/stores'
-
-/**
- * Escapes special JSON characters in a string
- */
-function escapeJson(str: string): string {
-  return str
-    .replace(/\\/g, '\\\\')
-    .replace(/"/g, '\\"')
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '\\r')
-    .replace(/\t/g, '\\t')
-}
-
-/**
- * Unescapes JSON escaped characters in a string
- */
-function unescapeJson(str: string): string {
-  try {
-    // Use JSON.parse with a wrapper to handle the unescaping
-    return JSON.parse(`"${str}"`) as string
-  } catch {
-    // If JSON.parse fails, try manual replacement
-    return str
-      .replace(/\\n/g, '\n')
-      .replace(/\\r/g, '\r')
-      .replace(/\\t/g, '\t')
-      .replace(/\\"/g, '"')
-      .replace(/\\\\/g, '\\')
-  }
-}
+import type { JsonEscapeMode } from '@/stores/json-escape.store'
 
 function JsonEscape() {
-  const { input, setInput, reset } = useJsonEscapeStore()
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const { mode, input, setMode, setInput } = useJsonEscapeStore()
 
-  const handleEscape = () => {
-    const escaped = escapeJson(input)
-    setInput(escaped)
+  const result = useMemo((): { output: string; error?: string } => {
+    if (mode === 'escape') return { output: JSON.stringify(input).slice(1, -1) }
+    try {
+      return { output: JSON.parse(`"${input}"`) as string }
+    } catch (e) {
+      return { output: '', error: `Not a valid JSON string body: ${e instanceof Error ? e.message : String(e)}` }
+    }
+  }, [input, mode])
+
+  const swap = () => {
+    setMode(mode === 'escape' ? 'unescape' : 'escape')
+    setInput(result.output)
   }
-
-  const handleUnescape = () => {
-    const unescaped = unescapeJson(input)
-    setInput(unescaped)
-  }
-
-  const handleClear = () => {
-    reset()
-  }
-
-  useEffect(() => {
-    textareaRef.current?.focus()
-  }, [])
 
   return (
-    <div>
-      <TextArea
-        ref={textareaRef}
-        id='json-input'
-        name='json-input'
-        rows={12}
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onCtrlEnter={() => handleEscape()}
-        placeholder='Paste your text here'
-      />
-      <div className='mt-3'>
-        <Button onClick={handleEscape}>Escape</Button>
-        <Button className='ml-2' variant='secondary' onClick={handleUnescape}>
-          Unescape
-        </Button>
-        <Button variant='ghost' className='ml-3' onClick={handleClear}>
-          Clear
-        </Button>
-      </div>
-    </div>
+    <Workspace
+      toolbar={
+        <>
+          <Segmented<JsonEscapeMode>
+            label='Mode'
+            value={mode}
+            onChange={setMode}
+            options={[
+              ['escape', 'Escape'],
+              ['unescape', 'Unescape'],
+            ]}
+          />
+          <Button size='sm' variant='ghost' onClick={swap} disabled={!result.output}>
+            <ArrowLeftRight /> Swap
+          </Button>
+          <Button size='sm' variant='ghost' onClick={() => setInput('')} disabled={!input}>
+            <Eraser /> Clear
+          </Button>
+        </>
+      }
+    >
+      <Alert>{result.error}</Alert>
+      <Split>
+        <Panel title={mode === 'escape' ? 'Text' : 'Escaped'}>
+          <Textarea
+            autoFocus
+            aria-label='Input'
+            className={paneField}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder={
+              mode === 'escape' ? 'Paste text, e.g. He said "hi"' : 'Paste a JSON string body, e.g. a\\"b\\n'
+            }
+          />
+        </Panel>
+        <Panel
+          title={mode === 'escape' ? 'Escaped' : 'Text'}
+          actions={<CopyButton value={result.output} disabled={!result.output} />}
+        >
+          <Textarea
+            readOnly
+            aria-label='Output'
+            className={paneField}
+            value={result.output}
+            placeholder='Result appears here as you type'
+          />
+        </Panel>
+      </Split>
+    </Workspace>
   )
 }
 

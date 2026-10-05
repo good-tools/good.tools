@@ -1,7 +1,6 @@
-import { Bars2Icon, ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
-import clsx from 'clsx'
+import { ChevronRight, Dot } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { NO_SELECTION } from '@/tools/PacketDissector'
+import { cn } from '@/lib/utils'
 
 interface DissectionNode {
   label: string
@@ -18,6 +17,8 @@ interface DissectionSelection {
   length: number
 }
 
+export const NO_SELECTION: DissectionSelection = { id: '', idx: 0, start: 0, length: 0 }
+
 interface DissectionSubTreeProps {
   id: string
   node: DissectionNode
@@ -27,68 +28,59 @@ interface DissectionSubTreeProps {
 
 function DissectionSubTree({ id, node, select, selected }: DissectionSubTreeProps) {
   const [open, setOpen] = useState(false)
+  const hasChildren = !!node.tree?.length
+  const containsSelection = selected.startsWith(id + '-')
 
+  // Reveal the field picked from the hex dump
   useEffect(() => {
-    if (!open) {
-      setOpen(selected.startsWith(id + '-'))
-    }
-  }, [id, selected, open])
+    if (containsSelection) setOpen(true)
+  }, [containsSelection])
 
-  const toggle = () => {
-    if (open && selected.startsWith(id + '-')) {
-      select(NO_SELECTION)
-    }
+  const setExpanded = (next: boolean) => {
+    if (!next && containsSelection) select(NO_SELECTION)
+    setOpen(next)
+  }
 
-    setOpen(!open)
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (!hasChildren) return
+    if (e.key === 'ArrowRight' && !open) setExpanded(true)
+    else if (e.key === 'ArrowLeft' && open) setExpanded(false)
+    else return
+    e.preventDefault()
   }
 
   return (
     <>
       <div
-        className={clsx(
-          'inline-flex items-center w-full',
-          node.length > 0 ? 'cursor-pointer' : '',
-          id === selected ? 'bg-gray-600 text-white' : '',
+        className={cn(
+          'flex w-full items-center rounded-sm',
+          id === selected ? 'bg-primary text-primary-foreground' : 'hover:bg-accent',
         )}
       >
-        {node.tree && node.tree.length > 0 ? (
-          <>
-            {open ? (
-              <ChevronDownIcon
-                onClick={toggle}
-                className='shrink-0 w-4 h-4 text-gray-200 dark:text-gray-600 fill-gray-500'
-              />
-            ) : (
-              <ChevronRightIcon
-                onClick={toggle}
-                className='shrink-0 w-4 h-4 text-gray-200 dark:text-gray-600 fill-gray-500'
-              />
-            )}
-          </>
+        {hasChildren ? (
+          <ChevronRight
+            aria-hidden='true'
+            onClick={() => setExpanded(!open)}
+            className={cn('size-4 shrink-0 cursor-pointer opacity-60 transition-transform', open && 'rotate-90')}
+          />
         ) : (
-          <Bars2Icon className='shrink-0 w-4 h-4 text-gray-200 dark:text-gray-600 fill-gray-500' />
+          <Dot aria-hidden='true' className='size-4 shrink-0 opacity-40' />
         )}
-
-        <span
+        <button
+          type='button'
+          aria-expanded={hasChildren ? open : undefined}
           onClick={() => {
-            if (node.length > 0) {
-              select({
-                id: id,
-                idx: node.data_source_idx,
-                start: node.start,
-                length: node.length,
-              })
-            }
+            if (node.length > 0) select({ id, idx: node.data_source_idx, start: node.start, length: node.length })
+            else if (hasChildren) setExpanded(!open)
           }}
-          onDoubleClick={toggle}
-          className='ml-1 w-full'
+          onDoubleClick={() => hasChildren && setExpanded(!open)}
+          onKeyDown={onKeyDown}
+          className='ml-1 w-full cursor-default py-0.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring'
         >
           {node.label}
-        </span>
+        </button>
       </div>
-      {node.tree && node.tree.length > 0 && open && (
-        <DissectionTree id={id} tree={node.tree} select={select} selected={selected} />
-      )}
+      {hasChildren && open && <DissectionTree id={id} tree={node.tree!} select={select} selected={selected} />}
     </>
   )
 }
@@ -103,9 +95,9 @@ interface DissectionTreeProps {
 
 function DissectionTree({ id, tree, select = () => {}, root = false, selected = '' }: DissectionTreeProps) {
   return (
-    <ul className={clsx(root ? '' : 'pl-2 ml-2 border-l')}>
+    <ul className={cn(!root && 'ml-2 border-l pl-2')}>
       {tree.map((n, i) => (
-        <li className='leading-none' key={`${id}-${i}`}>
+        <li key={`${id}-${i}`}>
           <DissectionSubTree id={`${id}-${i}`} node={n} select={select} selected={selected} />
         </li>
       ))}

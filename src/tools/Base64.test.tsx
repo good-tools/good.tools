@@ -1,147 +1,57 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import Base64 from './Base64'
-import { useBase64Store } from '@/stores'
+import Base64, { parseBase64 } from './Base64'
+import { useBase64Store } from '@/stores/base64.store'
 
-// Reset store state before each test
-beforeEach(() => {
-  useBase64Store.getState().resetAll()
-})
+beforeEach(() => useBase64Store.getState().resetAll())
+
+const result = () => screen.getByLabelText('Result')
 
 describe('Base64', () => {
-  describe('Encoder', () => {
-    it('renders encoder tab by default', () => {
-      render(<Base64 />)
-      expect(screen.getByRole('button', { name: /encode$/i })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /encode inline/i })).toBeInTheDocument()
-      expect(screen.getByPlaceholderText(/paste your data/i)).toBeInTheDocument()
-    })
-
-    it('encodes plain text to base64 when Encode button is clicked', async () => {
-      const user = userEvent.setup()
-      render(<Base64 />)
-
-      const input = screen.getByPlaceholderText(/paste your data/i)
-      await user.type(input, 'Hello, World!')
-      await user.click(screen.getByRole('button', { name: /^encode$/i }))
-
-      // Check that Result section appears with encoded value
-      expect(screen.getByText('SGVsbG8sIFdvcmxkIQ==')).toBeInTheDocument()
-    })
-
-    it('encodes inline - replaces input with encoded value', async () => {
-      const user = userEvent.setup()
-      render(<Base64 />)
-
-      const input = screen.getByPlaceholderText(/paste your data/i)
-      await user.type(input, 'test')
-      await user.click(screen.getByRole('button', { name: /encode inline/i }))
-
-      // Input should now contain the base64 encoded value
-      expect(input).toHaveValue('dGVzdA==')
-    })
-
-    it('clears input and output when Clear button is clicked', async () => {
-      const user = userEvent.setup()
-      render(<Base64 />)
-
-      const input = screen.getByPlaceholderText(/paste your data/i)
-      await user.type(input, 'Hello')
-      await user.click(screen.getByRole('button', { name: /^encode$/i }))
-
-      // Verify output exists
-      expect(screen.getByText('SGVsbG8=')).toBeInTheDocument()
-
-      // Click clear
-      await user.click(screen.getByRole('button', { name: /clear/i }))
-
-      // Input should be empty and output should be gone
-      expect(input).toHaveValue('')
-      expect(screen.queryByText('SGVsbG8=')).not.toBeInTheDocument()
-    })
+  it('encodes as you type, including unicode', async () => {
+    render(<Base64 />)
+    await userEvent.type(screen.getByLabelText('Text to encode'), 'héllo €')
+    expect(result()).toHaveValue('aMOpbGxvIOKCrA==')
   })
 
-  describe('Decoder', () => {
-    it('renders decoder tab when clicked', async () => {
-      const user = userEvent.setup()
-      render(<Base64 />)
-
-      // Click on Decoder tab
-      await user.click(screen.getByRole('tab', { name: /decoder/i }))
-
-      expect(screen.getByPlaceholderText(/paste your base64 encoded data/i)).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /^decode$/i })).toBeInTheDocument()
-    })
-
-    it('decodes base64 to plain text when Decode button is clicked', async () => {
-      const user = userEvent.setup()
-      render(<Base64 />)
-
-      // Switch to decoder tab
-      await user.click(screen.getByRole('tab', { name: /decoder/i }))
-
-      const input = screen.getByPlaceholderText(/paste your base64 encoded data/i)
-      await user.type(input, 'SGVsbG8sIFdvcmxkIQ==')
-      await user.click(screen.getByRole('button', { name: /^decode$/i }))
-
-      // Check decoded output appears
-      expect(screen.getByText('Hello, World!')).toBeInTheDocument()
-    })
-
-    it('decodes inline - replaces input with decoded value', async () => {
-      const user = userEvent.setup()
-      render(<Base64 />)
-
-      // Switch to decoder tab
-      await user.click(screen.getByRole('tab', { name: /decoder/i }))
-
-      const input = screen.getByPlaceholderText(/paste your base64 encoded data/i)
-      await user.type(input, 'dGVzdA==')
-      await user.click(screen.getByRole('button', { name: /decode inline/i }))
-
-      // Input should now contain the decoded value
-      expect(input).toHaveValue('test')
-    })
-
-    it('clears input and output when Clear button is clicked', async () => {
-      const user = userEvent.setup()
-      render(<Base64 />)
-
-      // Switch to decoder tab
-      await user.click(screen.getByRole('tab', { name: /decoder/i }))
-
-      const input = screen.getByPlaceholderText(/paste your base64 encoded data/i)
-      await user.type(input, 'SGVsbG8=')
-      await user.click(screen.getByRole('button', { name: /^decode$/i }))
-
-      // Verify output exists
-      expect(screen.getByText('Hello')).toBeInTheDocument()
-
-      // Click clear
-      await user.click(screen.getByRole('button', { name: /clear/i }))
-
-      // Input should be empty and output should be gone
-      expect(input).toHaveValue('')
-      expect(screen.queryByText('Hello')).not.toBeInTheDocument()
-    })
+  it('supports URL-safe output', async () => {
+    useBase64Store.setState({ input: '??>>' })
+    render(<Base64 />)
+    expect(result()).toHaveValue('Pz8+Pg==')
+    await userEvent.click(screen.getByLabelText('URL-safe'))
+    expect(result()).toHaveValue('Pz8-Pg')
   })
 
-  describe('Tab Navigation', () => {
-    it('can switch between Encoder and Decoder tabs', async () => {
-      const user = userEvent.setup()
-      render(<Base64 />)
+  it('decodes and swaps back', async () => {
+    useBase64Store.setState({ mode: 'decode', input: 'SGVsbG8sIFdvcmxkIQ==' })
+    render(<Base64 />)
+    expect(result()).toHaveValue('Hello, World!')
+    await userEvent.click(screen.getByRole('button', { name: /swap/i }))
+    expect(useBase64Store.getState()).toMatchObject({ mode: 'encode', input: 'Hello, World!' })
+  })
 
-      // Initially on Encoder tab
-      expect(screen.getByPlaceholderText(/paste your data/i)).toBeInTheDocument()
+  it('shows an error for invalid input instead of garbage', () => {
+    useBase64Store.setState({ mode: 'decode', input: 'abc$' })
+    render(<Base64 />)
+    expect(screen.getByRole('alert')).toHaveTextContent('Invalid base64 character "$"')
+    expect(result()).toHaveValue('')
+  })
 
-      // Switch to Decoder
-      await user.click(screen.getByRole('tab', { name: /decoder/i }))
-      expect(screen.getByPlaceholderText(/paste your base64 encoded data/i)).toBeInTheDocument()
+  it('falls back to hex for binary data', () => {
+    useBase64Store.setState({ mode: 'decode', input: '/w==' })
+    render(<Base64 />)
+    expect(result()).toHaveValue('ff')
+    expect(screen.getByRole('status')).toHaveTextContent(/not valid UTF-8/)
+  })
+})
 
-      // Switch back to Encoder
-      await user.click(screen.getByRole('tab', { name: /encoder/i }))
-      expect(screen.getByPlaceholderText(/paste your data/i)).toBeInTheDocument()
-    })
+describe('parseBase64', () => {
+  it('accepts whitespace and URL-safe alphabet', () => {
+    expect(parseBase64('SGVs\nbG8=').toString()).toBe('Hello')
+    expect(parseBase64('Pz8-Pg').toString()).toBe('??>>')
+  })
+  it('rejects bad padding', () => {
+    expect(() => parseBase64('a===')).toThrow()
   })
 })

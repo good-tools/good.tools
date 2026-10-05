@@ -1,139 +1,93 @@
-import { useEffect, useRef } from 'react'
-import { Tab } from '@headlessui/react'
-import { CodeGroup } from '@/components/Code'
-import TabButton from '@/components/TabButton'
-import TextArea from '@/components/TextArea'
+import { useMemo } from 'react'
+import { ArrowLeftRight, Eraser } from 'lucide-react'
+import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { CopyButton } from '@/components/ui/copy-button'
+import { Textarea } from '@/components/ui/input'
+import { Panel, Split, Workspace, paneField } from '@/components/ui/toolbar'
+import { Segmented } from '@/components/ui/segmented'
 import { useURLStore } from '@/stores'
-
-function Encoder() {
-  const { encoderInput, setEncoderInput, encoderOutput, setEncoderOutput, resetEncoder } = useURLStore()
-  const decodedRef = useRef<HTMLTextAreaElement>(null)
-
-  const encode = () => {
-    const val = encodeURIComponent(encoderInput)
-    setEncoderOutput(val)
-  }
-
-  const inline = () => {
-    const val = encodeURIComponent(encoderInput)
-    setEncoderInput(val)
-  }
-
-  const clear = () => {
-    resetEncoder()
-  }
-
-  useEffect(() => {
-    decodedRef.current?.focus()
-  }, [])
-
-  return (
-    <div>
-      <TextArea
-        ref={decodedRef}
-        id='decoded'
-        name='decoded'
-        rows={8}
-        value={encoderInput}
-        onChange={(e) => setEncoderInput(e.target.value)}
-        onCtrlEnter={() => encode()}
-        placeholder={'Paste your data'}
-      />
-      <Button className='mt-3' onClick={() => encode()}>
-        Encode
-      </Button>
-      <Button className='ml-2' variant='secondary' onClick={() => inline()}>
-        Encode Inline
-      </Button>
-      <Button variant='ghost' className={'ml-3'} onClick={clear}>
-        Clear
-      </Button>
-      {encoderOutput && (
-        <CodeGroup title={'Result'}>
-          <code>{encoderOutput}</code>
-        </CodeGroup>
-      )}
-    </div>
-  )
-}
-
-function Decoder() {
-  const { decoderInput, setDecoderInput, decoderOutput, setDecoderOutput, resetDecoder } = useURLStore()
-  const encodedRef = useRef<HTMLTextAreaElement>(null)
-
-  const decode = () => {
-    try {
-      const val = decodeURIComponent(decoderInput)
-      setDecoderOutput(val)
-    } catch (error) {
-      console.error('Failed to decode URL:', error)
-    }
-  }
-
-  const inline = () => {
-    try {
-      const val = decodeURIComponent(decoderInput)
-      setDecoderInput(val)
-    } catch (error) {
-      console.error('Failed to decode URL:', error)
-    }
-  }
-
-  const clear = () => {
-    resetDecoder()
-  }
-
-  useEffect(() => {
-    encodedRef.current?.focus()
-  }, [])
-
-  return (
-    <div>
-      <TextArea
-        ref={encodedRef}
-        id='encoded'
-        name='encoded'
-        rows={8}
-        value={decoderInput}
-        onChange={(e) => setDecoderInput(e.target.value)}
-        onCtrlEnter={() => decode()}
-        placeholder={'Paste your URL encoded data'}
-      />
-      <Button className='mt-3' onClick={() => decode()}>
-        Decode
-      </Button>
-      <Button className='ml-2' variant='secondary' onClick={() => inline()}>
-        Decode Inline
-      </Button>
-      <Button variant='ghost' className={'ml-3'} onClick={clear}>
-        Clear
-      </Button>
-      {decoderOutput && (
-        <CodeGroup title={'Result'}>
-          <code>{decoderOutput}</code>
-        </CodeGroup>
-      )}
-    </div>
-  )
-}
+import type { URLMode } from '@/stores/url.store'
+import { cn } from '@/lib/utils'
 
 function URL() {
+  const { mode, input, plusAsSpace, setMode, setInput, setPlusAsSpace } = useURLStore()
+
+  const result = useMemo((): { output: string; error?: string } => {
+    if (mode === 'encode') return { output: encodeURIComponent(input) }
+    try {
+      return { output: decodeURIComponent(plusAsSpace ? input.replace(/\+/g, ' ') : input) }
+    } catch {
+      return {
+        output: '',
+        error: 'Malformed percent-encoding: every "%" must be followed by two hex digits forming valid UTF-8.',
+      }
+    }
+  }, [input, mode, plusAsSpace])
+
+  const swap = () => {
+    setMode(mode === 'encode' ? 'decode' : 'encode')
+    setInput(result.output)
+  }
+
   return (
-    <Tab.Group>
-      <Tab.List className='flex space-x-4'>
-        <TabButton>Encoder</TabButton>
-        <TabButton>Decoder</TabButton>
-      </Tab.List>
-      <Tab.Panels className='mt-2'>
-        <Tab.Panel>
-          <Encoder />
-        </Tab.Panel>
-        <Tab.Panel>
-          <Decoder />
-        </Tab.Panel>
-      </Tab.Panels>
-    </Tab.Group>
+    <Workspace
+      toolbar={
+        <>
+          <Segmented<URLMode>
+            label='Mode'
+            value={mode}
+            onChange={setMode}
+            options={[
+              ['encode', 'Encode'],
+              ['decode', 'Decode'],
+            ]}
+          />
+          <Button size='sm' variant='ghost' onClick={swap} disabled={!result.output}>
+            <ArrowLeftRight /> Swap
+          </Button>
+          <Button size='sm' variant='ghost' onClick={() => setInput('')} disabled={!input}>
+            <Eraser /> Clear
+          </Button>
+          {mode === 'decode' && (
+            <Checkbox
+              className='ml-auto'
+              checked={plusAsSpace}
+              onChange={(e) => setPlusAsSpace(e.target.checked)}
+              title='Treat + as space'
+              description='Decode form data (application/x-www-form-urlencoded), where spaces are encoded as +'
+            />
+          )}
+        </>
+      }
+    >
+      <Alert>{result.error}</Alert>
+      <Split>
+        <Panel title={mode === 'encode' ? 'Text' : 'URL-encoded'}>
+          <Textarea
+            autoFocus
+            aria-label={mode === 'encode' ? 'Text to encode' : 'URL-encoded text to decode'}
+            className={paneField}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder={mode === 'encode' ? 'Type or paste text…' : 'Paste URL-encoded text, e.g. a%20b%26c'}
+          />
+        </Panel>
+        <Panel
+          title={mode === 'encode' ? 'URL-encoded' : 'Text'}
+          actions={<CopyButton value={result.output} disabled={!result.output} />}
+        >
+          <Textarea
+            readOnly
+            aria-label='Result'
+            className={cn(paneField, 'break-all')}
+            value={result.output}
+            placeholder='Result appears here as you type'
+          />
+        </Panel>
+      </Split>
+    </Workspace>
   )
 }
 

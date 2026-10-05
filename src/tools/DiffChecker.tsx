@@ -1,53 +1,109 @@
 import { useState } from 'react'
 import { DiffEditor, default as Editor } from '@monaco-editor/react'
-import { Tab } from '@headlessui/react'
-import TabButton from '@/components/TabButton'
-import { useDarkModeContext } from '@/components/ModeToggle'
+import { ArrowLeftRight } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { fieldClass } from '@/components/ui/input'
+import { Segmented } from '@/components/ui/segmented'
+import { Workspace } from '@/components/ui/toolbar'
+import { cn } from '@/lib/utils'
+import { useIsDark } from '@/stores/theme.store'
+
+const LANGUAGES = [
+  'plaintext',
+  'json',
+  'xml',
+  'yaml',
+  'html',
+  'css',
+  'markdown',
+  'javascript',
+  'typescript',
+  'python',
+  'go',
+  'java',
+  'sql',
+  'shell',
+  'ini',
+  'dockerfile',
+]
+
+type View = 'original' | 'modified' | 'diff'
 
 function DiffChecker() {
-  const { darkMode } = useDarkModeContext()
+  const dark = useIsDark()
+  const theme = dark ? 'vs-dark' : 'light'
   const [original, setOriginal] = useState('')
   const [changed, setChanged] = useState('')
-
-  function handleEditorDidMount(editor: { updateOptions: (options: { readOnly: boolean }) => void }) {
-    editor.updateOptions({ readOnly: true })
-  }
+  const [language, setLanguage] = useState('plaintext')
+  const [view, setView] = useState<View>('original')
 
   return (
-    <Tab.Group>
-      <Tab.List className='flex space-x-4'>
-        <TabButton>Original</TabButton>
-        <TabButton>Modified</TabButton>
-        <TabButton>Diff</TabButton>
-      </Tab.List>
-      <Tab.Panels className='mt-2'>
-        <Tab.Panel>
-          <Editor
-            height='65vh'
-            value={original}
-            theme={darkMode ? 'vs-dark' : 'light'}
-            onChange={(v) => setOriginal(v || '')}
+    <Workspace
+      toolbar={
+        <>
+          <Segmented<View>
+            label='View'
+            value={view}
+            onChange={setView}
+            options={[
+              ['original', 'Original'],
+              ['modified', 'Modified'],
+              ['diff', 'Diff'],
+            ]}
           />
-        </Tab.Panel>
-        <Tab.Panel>
-          <Editor
-            height='65vh'
-            theme={darkMode ? 'vs-dark' : 'light'}
-            value={changed}
-            onChange={(v) => setChanged(v || '')}
-          />
-        </Tab.Panel>
-        <Tab.Panel>
+          <Button
+            size='sm'
+            variant='ghost'
+            onClick={() => {
+              setOriginal(changed)
+              setChanged(original)
+            }}
+          >
+            <ArrowLeftRight /> Swap sides
+          </Button>
+          <div className='ml-auto flex items-center gap-2'>
+            <Label htmlFor='diff-language'>Language</Label>
+            <select
+              id='diff-language'
+              className={cn(fieldClass, 'h-7 w-32 py-0 text-xs')}
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+            >
+              {LANGUAGES.map((l) => (
+                <option key={l}>{l}</option>
+              ))}
+            </select>
+          </div>
+        </>
+      }
+    >
+      <div className='min-h-0 flex-1 overflow-hidden rounded-md border'>
+        {view === 'diff' ? (
           <DiffEditor
-            height='65vh'
-            theme={darkMode ? 'vs-dark' : 'light'}
+            height='100%'
             original={original}
             modified={changed}
-            onMount={handleEditorDidMount}
+            language={language}
+            theme={theme}
+            options={{ readOnly: true, originalEditable: false }}
           />
-        </Tab.Panel>
-      </Tab.Panels>
-    </Tab.Group>
+        ) : (
+          <Editor
+            key={view}
+            height='100%'
+            value={view === 'original' ? original : changed}
+            language={language}
+            theme={theme}
+            onChange={(v) => (view === 'original' ? setOriginal : setChanged)(v ?? '')}
+            options={{
+              ariaLabel: view === 'original' ? 'Original text' : 'Modified text',
+              minimap: { enabled: false },
+            }}
+          />
+        )}
+      </div>
+    </Workspace>
   )
 }
 

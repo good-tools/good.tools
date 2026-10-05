@@ -1,152 +1,121 @@
+import { useMemo, useState } from 'react'
 import Editor from '@monaco-editor/react'
 import { Allotment } from 'allotment'
-import { useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { useDarkModeContext } from '@/components/ModeToggle'
-import { Tag } from '@/components/Tag'
-
 import 'allotment/dist/style.css'
-import TextInput from '@/components/TextInput'
-import jp from 'jsonpath'
 import { ObjectInspector } from 'react-inspector'
-import { cn } from '@/lib/utils'
-import CheckBox from '@/components/CheckBox'
-import { useJSONFormatterStore } from '@/stores'
+import { Eraser, Minimize2, WandSparkles } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Alert } from '@/components/ui/alert'
+import { CopyButton } from '@/components/ui/copy-button'
+import { Panel, Workspace } from '@/components/ui/toolbar'
+import { useIsDark } from '@/stores/theme.store'
+import { applyJsonPath, useJSONFormatterStore } from '@/stores/json-formatter.store'
+
+const editorOptions = { wordWrap: 'on' as const, contextmenu: false, minimap: { enabled: false } }
 
 function JsonFormatter() {
-  const { darkMode } = useDarkModeContext()
-
-  const { value, setValue, parsed, setParsed, filtered, setFiltered, valid, setValid, query, setQuery, tree, setTree } =
-    useJSONFormatterStore()
-
-  const handleTreeChange = () => {
-    setTree(!tree)
-  }
-
-  useEffect(() => {
-    if (query.length <= 0) {
-      setFiltered(parsed)
-      return
-    }
-
-    try {
-      setFiltered(jp.query(parsed, query))
-    } catch {
-      // Invalid JSONPath query
-    }
-  }, [query, parsed, setFiltered])
-
-  const checkValidityAndSetValue = (val: string | undefined) => {
-    if (!val) {
-      setValue('')
-      return
-    }
-
-    setValue(val)
-
-    if (val === '') {
-      setParsed(null)
-      return
-    }
-
-    setParsed(null)
-
-    try {
-      const p: unknown = JSON.parse(val)
-      setParsed(p)
-      setValid(true)
-    } catch {
-      setValid(false)
-    }
-  }
+  const dark = useIsDark()
+  const { value, setValue, parsed, error, query, setQuery, tree, setTree } = useJSONFormatterStore()
+  // Monaco's JSON validator gives a line/column even when JSON.parse's message doesn't
+  const [where, setWhere] = useState<string | null>(null)
+  const { result, error: queryError } = useMemo(() => applyJsonPath(parsed, query), [parsed, query])
+  const output = result === undefined ? '' : JSON.stringify(result, null, 2)
 
   const format = () => {
-    if (parsed != null) {
-      setValue(JSON.stringify(parsed, null, 2))
-    }
+    if (parsed !== undefined) setValue(JSON.stringify(parsed, null, 2))
+  }
+  const minify = () => {
+    if (parsed !== undefined) setValue(JSON.stringify(parsed))
   }
 
-  const tiny = () => {
-    if (parsed != null) {
-      setValue(JSON.stringify(parsed))
+  // Capture phase so Monaco doesn't also handle Ctrl+Enter (insert line)
+  const ctrlEnter = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault()
+      e.stopPropagation()
+      format()
     }
-  }
-
-  const clear = () => {
-    setValue('{}')
   }
 
   return (
-    <div className='h-[60vh] w-full'>
-      <Allotment>
-        <Allotment.Pane>
-          <div>
-            <div className='mb-3'>
-              <Button onClick={() => format()}>Format</Button>
-              <Button className='ml-3' variant='secondary' onClick={() => tiny()}>
-                Minify
-              </Button>
-              <Button variant='ghost' className={'ml-3'} onClick={clear}>
-                Clear
-              </Button>
-              {!valid && (
-                <div className='inline ml-3'>
-                  <Tag color='rose'>INVALID</Tag>
+    <Workspace
+      toolbar={
+        <>
+          <Button size='sm' onClick={format} disabled={parsed === undefined} title='Format (Ctrl+Enter)'>
+            <WandSparkles /> Format
+          </Button>
+          <Button size='sm' variant='outline' onClick={minify} disabled={parsed === undefined}>
+            <Minimize2 /> Minify
+          </Button>
+          <Button size='sm' variant='ghost' onClick={() => setValue('')}>
+            <Eraser /> Clear
+          </Button>
+        </>
+      }
+    >
+      <Alert>{error && `Invalid JSON: ${error}${where && !/line \d+/.test(error) ? ` (${where})` : ''}`}</Alert>
+      <div className='min-h-0 flex-1'>
+        <Allotment>
+          <Allotment.Pane minSize={240}>
+            <Panel title='Input' className='mr-1 h-full'>
+              <div className='h-full' onKeyDownCapture={ctrlEnter}>
+                <Editor
+                  height='100%'
+                  value={value}
+                  theme={dark ? 'vs-dark' : 'light'}
+                  defaultLanguage='json'
+                  onChange={(v) => setValue(v ?? '')}
+                  onValidate={(markers) =>
+                    setWhere(markers[0] ? `line ${markers[0].startLineNumber}, column ${markers[0].startColumn}` : null)
+                  }
+                  options={{ ...editorOptions, ariaLabel: 'JSON input' }}
+                />
+              </div>
+            </Panel>
+          </Allotment.Pane>
+          <Allotment.Pane minSize={240}>
+            <Panel
+              title='Output'
+              className='ml-1 h-full'
+              actions={<CopyButton value={output} disabled={!output} size='icon-sm' />}
+            >
+              <div className='flex h-full flex-col'>
+                <div className='flex shrink-0 items-center gap-2 border-b px-2 py-1'>
+                  <Input
+                    aria-label='JSONPath query'
+                    className='h-7 font-mono'
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder='$.message'
+                  />
+                  <Checkbox checked={tree} onChange={() => setTree(!tree)} title='Tree' className='shrink-0' />
                 </div>
-              )}
-            </div>
-            <Editor
-              height={'64vh'}
-              value={value}
-              theme={darkMode ? 'vs-dark' : 'light'}
-              defaultLanguage='json'
-              onChange={(v) => checkValidityAndSetValue(v)}
-              options={{
-                wordWrap: 'on' as const,
-                contextmenu: false,
-                minimap: {
-                  enabled: false,
-                },
-              }}
-            />
-          </div>
-        </Allotment.Pane>
-        <Allotment.Pane>
-          <div className={cn('pl-2 justify-items-center', tree ? 'h-full overflow-y-auto' : '')}>
-            <div className='mb-2 grid grid-cols-3 gap-2'>
-              <TextInput
-                type='text'
-                name='query'
-                id='query'
-                className='p-1 col-span-2'
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder='JSONPath query (example: $.message)'
-              />
-              <CheckBox checked={tree} onChange={handleTreeChange} title='Tree View' />
-            </div>
-            {tree ? (
-              <ObjectInspector data={filtered} theme={darkMode ? 'chromeDark' : 'chromeLight'} />
-            ) : (
-              <Editor
-                value={JSON.stringify(filtered, null, 2)}
-                theme={darkMode ? 'vs-dark' : 'light'}
-                height={'64vh'}
-                defaultLanguage='json'
-                options={{
-                  readOnly: true,
-                  wordWrap: 'on' as const,
-                  contextmenu: false,
-                  minimap: {
-                    enabled: false,
-                  },
-                }}
-              />
-            )}
-          </div>
-        </Allotment.Pane>
-      </Allotment>
-    </div>
+                {queryError && <Alert className='m-1.5 shrink-0'>{`Invalid JSONPath: ${queryError}`}</Alert>}
+                <div className='min-h-0 flex-1 overflow-auto'>
+                  {tree ? (
+                    <div className='p-2'>
+                      {result !== undefined && (
+                        <ObjectInspector data={result} expandLevel={1} theme={dark ? 'chromeDark' : 'chromeLight'} />
+                      )}
+                    </div>
+                  ) : (
+                    <Editor
+                      height='100%'
+                      value={output}
+                      theme={dark ? 'vs-dark' : 'light'}
+                      language='json'
+                      options={{ ...editorOptions, readOnly: true, ariaLabel: 'JSON output' }}
+                    />
+                  )}
+                </div>
+              </div>
+            </Panel>
+          </Allotment.Pane>
+        </Allotment>
+      </div>
+    </Workspace>
   )
 }
 

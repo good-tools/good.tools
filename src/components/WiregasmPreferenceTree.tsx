@@ -1,6 +1,6 @@
-import { Bars2Icon, ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
-import clsx from 'clsx'
+import { ChevronRight, Dot } from 'lucide-react'
 import { useState } from 'react'
+import { cn } from '@/lib/utils'
 
 interface ModuleNode {
   name: string
@@ -10,74 +10,70 @@ interface ModuleNode {
   submodules: ModuleNode[]
 }
 
-interface SubTreeProps {
-  id: string
+interface TreeProps {
   nodes: ModuleNode[]
   select: (node: ModuleNode) => void
   selected: ModuleNode | null
-  root?: boolean
+  /** Expand every branch (e.g. while filtering) */
+  expandAll: boolean
 }
 
-function SubTree({ id, nodes, select, selected, root = false }: SubTreeProps) {
+function TreeNode({ node, select, selected, expandAll }: Omit<TreeProps, 'nodes'> & { node: ModuleNode }) {
   const [open, setOpen] = useState(false)
+  const hasChildren = node.submodules.length > 0
+  const expanded = hasChildren && (open || expandAll)
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (!hasChildren || expandAll) return
+    if (e.key === 'ArrowRight' && !open) setOpen(true)
+    else if (e.key === 'ArrowLeft' && open) setOpen(false)
+    else return
+    e.preventDefault()
+  }
 
   return (
-    <ul className={clsx('text-sm', root ? '' : 'border-l', root ? '' : 'pl-2 ml-2')}>
+    <li>
+      <div className='flex items-center'>
+        {hasChildren ? (
+          <ChevronRight
+            aria-hidden='true'
+            onClick={() => setOpen(!open)}
+            className={cn('size-4 shrink-0 cursor-pointer opacity-60 transition-transform', expanded && 'rotate-90')}
+          />
+        ) : (
+          <Dot aria-hidden='true' className='size-4 shrink-0 opacity-40' />
+        )}
+        <button
+          type='button'
+          aria-expanded={hasChildren ? expanded : undefined}
+          aria-current={selected?.name === node.name || undefined}
+          onClick={() => select(node)}
+          onDoubleClick={() => hasChildren && setOpen(!open)}
+          onKeyDown={onKeyDown}
+          className={cn(
+            'ml-1 w-full truncate rounded-sm px-1 py-0.5 text-left outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring',
+            selected?.name === node.name && 'bg-accent font-medium text-accent-foreground',
+          )}
+        >
+          {node.title}
+        </button>
+      </div>
+      {expanded && <Tree nodes={node.submodules} select={select} selected={selected} expandAll={expandAll} nested />}
+    </li>
+  )
+}
+
+function Tree({ nodes, nested = false, ...props }: TreeProps & { nested?: boolean }) {
+  return (
+    <ul className={cn('text-sm', nested && 'ml-2 border-l pl-2')}>
       {nodes
         .filter((n) => n.use_gui)
-        .map((n, i) => (
-          <li key={`${id}-${i}`}>
-            {n.submodules.length > 0 ? (
-              <>
-                <div className='inline-flex items-center cursor-pointer'>
-                  <div onClick={() => setOpen(!open)}>
-                    {open ? (
-                      <ChevronDownIcon className='w-4 h-4 text-gray-200 dark:text-gray-600 fill-gray-500' />
-                    ) : (
-                      <ChevronRightIcon className='w-4 h-4 text-gray-200 dark:text-gray-600 fill-gray-500' />
-                    )}
-                  </div>
-                  <span
-                    className={clsx(
-                      'ml-1',
-                      selected && selected.name === n.name ? 'font-bold text-zinc-600 dark:text-zinc-300' : '',
-                    )}
-                    onClick={() => select(n)}
-                    onDoubleClick={() => setOpen(!open)}
-                  >
-                    {n.title}
-                  </span>
-                </div>
-                {open && <SubTree id={n.name} nodes={n.submodules} select={select} selected={selected} />}
-              </>
-            ) : (
-              <div onClick={() => select(n)} className='inline-flex items-center cursor-pointer'>
-                <Bars2Icon className='w-4 h-4 text-gray-200 dark:text-gray-600 fill-gray-500' />
-                <span
-                  className={clsx(
-                    'ml-1',
-                    selected && selected.name === n.name ? 'font-bold text-zinc-600 dark:text-zinc-300' : '',
-                  )}
-                >
-                  {n.title}
-                </span>
-              </div>
-            )}
-          </li>
+        .map((n) => (
+          <TreeNode key={n.name} node={n} {...props} />
         ))}
     </ul>
   )
 }
 
-interface WiregasmPreferenceTreeProps {
-  tree: ModuleNode[]
-  select: (node: ModuleNode) => void
-  selected: ModuleNode | null
-}
-
-function WiregasmPreferenceTree({ tree, select, selected }: WiregasmPreferenceTreeProps) {
-  return <SubTree id='root' nodes={tree} select={select} selected={selected} root={true} />
-}
-
-export default WiregasmPreferenceTree
+export default Tree
 export type { ModuleNode }

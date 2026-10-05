@@ -1,12 +1,8 @@
-import { Layers, Code, Binary, Shield, Globe, Box, Image, type LucideIcon } from 'lucide-react'
+import { Layers, Code, Binary, Shield, Globe, Box, Image } from 'lucide-react'
 import { CATEGORIES, type CategoryName, type Tool, type ToolCategory } from '@/types/tool.types'
 
-// Re-export for convenience
 export { CATEGORIES, type CategoryName } from '@/types/tool.types'
 
-/**
- * Category definitions with icons
- */
 export const categories: ToolCategory[] = [
   { name: 'All', icon: Layers },
   { name: CATEGORIES.DEVELOPMENT, icon: Code },
@@ -17,76 +13,38 @@ export const categories: ToolCategory[] = [
   { name: CATEGORIES.IMAGE, icon: Image },
 ]
 
-/**
- * Get all category names (excluding 'All')
- */
-export function getCategoryNames(): CategoryName[] {
-  return Object.values(CATEGORIES)
-}
-
-/**
- * Filter tools by category
- * @param tools - Array of tools
- * @param category - Category to filter by (or 'All' for no filter)
- * @returns Filtered tools array
- */
 export function getToolsByCategory(tools: Tool[], category: CategoryName | 'All'): Tool[] {
-  if (category === 'All') {
-    return tools
-  }
-  return tools.filter((tool) => tool.categories.includes(category))
+  return category === 'All' ? tools : tools.filter((tool) => tool.categories.includes(category))
 }
 
 /**
- * Get the primary category for a tool (first in the list)
- * Useful for display purposes when only one category can be shown
- * @param tool - The tool
- * @returns The primary category name
- */
-export function getPrimaryCategory(tool: Tool): CategoryName {
-  return tool.categories[0] ?? CATEGORIES.DEVELOPMENT
-}
-
-/**
- * Get the icon component for a category
- * @param category - Category name
- * @returns Lucide icon component
- */
-export function getCategoryIcon(category: CategoryName | 'All'): LucideIcon {
-  const categoryObj = categories.find((cat) => cat.name === category)
-  return categoryObj?.icon ?? Layers
-}
-
-/**
- * Search tools by query string
- * Matches against title, description, and searchTags
- * @param tools - Array of tools
- * @param query - Search query
- * @returns Filtered tools array
+ * Case-insensitive match on title, description, tags and categories; every word in the query must match.
+ * Results are ranked: title prefix > title match > tag match > description-only match.
  */
 export function searchTools(tools: Tool[], query: string): Tool[] {
-  if (!query.trim()) {
-    return tools
+  const q = query.trim().toLowerCase()
+  const words = q.split(/\s+/).filter(Boolean)
+  if (words.length === 0) return tools
+  const score = (tool: Tool) => {
+    const title = tool.title.toLowerCase()
+    if (title.startsWith(q)) return 0
+    if (words.every((w) => title.includes(w))) return 1
+    if (words.some((w) => tool.searchTags.some((t) => t.startsWith(w)))) return 2
+    return 3
   }
+  return tools
+    .filter((tool) => {
+      const haystack = [tool.title, tool.description, ...tool.searchTags, ...tool.categories].join(' ').toLowerCase()
+      return words.every((w) => haystack.includes(w))
+    })
+    .map((tool) => ({ tool, score: score(tool) }))
+    .sort((a, b) => a.score - b.score)
+    .map(({ tool }) => tool)
+}
 
-  const lowerQuery = query.toLowerCase()
-
-  return tools.filter((tool) => {
-    // Match title
-    if (tool.title.toLowerCase().includes(lowerQuery)) {
-      return true
-    }
-
-    // Match description
-    if (tool.description.toLowerCase().includes(lowerQuery)) {
-      return true
-    }
-
-    // Match search tags
-    if (tool.searchTags.some((tag) => tag.toLowerCase().includes(lowerQuery))) {
-      return true
-    }
-
-    return false
-  })
+/** Groups tools by their primary category, in category order, omitting empty groups. */
+export function groupByCategory(tools: Tool[]): [CategoryName, Tool[]][] {
+  return Object.values(CATEGORIES)
+    .map((name): [CategoryName, Tool[]] => [name, tools.filter((t) => t.categories[0] === name)])
+    .filter(([, list]) => list.length > 0)
 }

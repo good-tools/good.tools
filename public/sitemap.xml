@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://good.tools/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://good.tools/base64</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://good.tools/url</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://good.tools/diff-checker</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://good.tools/certificate-decoder</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://good.tools/protobuf-decoder</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://good.tools/java-deserialize</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://good.tools/docker-browser</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://good.tools/whois</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://good.tools/dns</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://good.tools/hash</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://good.tools/packet-dissector</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://good.tools/stl-repair</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://good.tools/whats-my-ip</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://good.tools/ip-location</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://good.tools/json</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://good.tools/json-escape</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://good.tools/xml</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://good.tools/image-converter</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+</urlset>

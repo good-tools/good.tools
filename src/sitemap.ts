@@ -1,17 +1,15 @@
-import { createWriteStream } from 'fs'
-import { SitemapStream } from 'sitemap'
-import { ROUTES } from './config/routes.config'
+// Writes public/sitemap.xml from the tool registry. Run with: bun src/sitemap.ts
+import { writeFileSync } from 'node:fs'
+import { tools } from '@/config/tools.config'
 
 const hostname = process.env.SITEMAP_HOSTNAME || 'https://good.tools'
-
-const sitemap = new SitemapStream({ hostname: hostname })
-
-const writeStream = createWriteStream('./public/sitemap.xml')
-sitemap.pipe(writeStream)
-
-sitemap.write({ url: '/', changefreq: 'daily', priority: 1 })
-Object.values(ROUTES).forEach((route) => {
-  sitemap.write({ url: route, changefreq: 'monthly', priority: 0.8 })
-})
-
-sitemap.end()
+const urls = [
+  `  <url><loc>${hostname}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>`,
+  ...tools.map(
+    (t) => `  <url><loc>${hostname}${t.path}</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>`,
+  ),
+]
+writeFileSync(
+  'public/sitemap.xml',
+  `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`,
+)

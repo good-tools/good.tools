@@ -1,30 +1,18 @@
-import { Link } from 'react-router-dom'
-import { Helmet } from 'react-helmet-async'
-import { Home } from 'lucide-react'
+import { Link } from 'react-router'
 import { Button } from '@/components/ui/button'
 
-function NotFound() {
+export default function NotFound() {
   return (
-    <>
-      <Helmet>
-        <title>404 - Page Not Found · good.tools</title>
-      </Helmet>
-      <div className='min-h-screen bg-background flex items-center justify-center px-4'>
-        <div className='text-center animate-in'>
-          <h1 className='text-6xl md:text-8xl font-bold gradient-text mb-4'>404</h1>
-          <p className='text-xl md:text-2xl text-muted-foreground mb-8'>
-            Oops! The page you're looking for doesn't exist.
-          </p>
-          <Button asChild size='lg'>
-            <Link to='/'>
-              <Home className='w-5 h-5 mr-2' />
-              Back to Home
-            </Link>
-          </Button>
-        </div>
-      </div>
-    </>
+    <div className='flex h-full flex-col items-center justify-center gap-3 px-4 py-24 text-center'>
+      <title>Page not found · good.tools</title>
+      <p className='font-mono text-sm text-muted-foreground'>404</p>
+      <h1 className='text-xl font-semibold'>This page doesn't exist</h1>
+      <p className='text-sm text-muted-foreground'>
+        Press <kbd className='font-sans'>/</kbd> to search for a tool, or head back home.
+      </p>
+      <Button asChild variant='outline' className='mt-2'>
+        <Link to='/'>Back to all tools</Link>
+      </Button>
+    </div>
   )
 }
-
-export default NotFound

@@ -1,41 +1,23 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import '@/assets/styles/index.css'
-import 'focus-visible'
-import App from '@/App'
-import { HelmetProvider } from 'react-helmet-async'
-import { DarkModeProvider } from '@/components/ModeToggle'
-import { BrowserRouter } from 'react-router-dom'
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { BrowserRouter } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import '@/assets/styles/index.css'
+import '@/stores/theme.store'
+import App from '@/App'
 
-// Create React Query client
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
+    queries: { staleTime: 5 * 60 * 1000, retry: 1, refetchOnWindowFocus: false },
   },
 })
 
-const rootElement = document.getElementById('root')
-
-if (!rootElement) {
-  throw new Error('Root element not found')
-}
-
-const root = ReactDOM.createRoot(rootElement)
-root.render(
-  <React.StrictMode>
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
-        <DarkModeProvider>
-          <HelmetProvider>
-            <App />
-          </HelmetProvider>
-        </DarkModeProvider>
+        <App />
       </QueryClientProvider>
     </BrowserRouter>
-  </React.StrictMode>,
+  </StrictMode>,
 )

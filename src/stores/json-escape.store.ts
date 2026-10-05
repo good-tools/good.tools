@@ -1,17 +1,20 @@
 import { create } from 'zustand'
 
-/**
- * JSON Escape/Unescape store
- * Simple store for managing the text area input
- */
+export type JsonEscapeMode = 'escape' | 'unescape'
+
+/** JSON Escape/Unescape store */
 interface JsonEscapeStore {
+  mode: JsonEscapeMode
   input: string
+  setMode: (mode: JsonEscapeMode) => void
   setInput: (value: string) => void
   reset: () => void
 }
 
 export const useJsonEscapeStore = create<JsonEscapeStore>((set) => ({
+  mode: 'escape',
   input: '',
-  setInput: (value) => set({ input: value }),
-  reset: () => set({ input: '' }),
+  setMode: (mode) => set({ mode }),
+  setInput: (input) => set({ input }),
+  reset: () => set({ mode: 'escape', input: '' }),
 }))

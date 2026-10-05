@@ -1,11 +1,14 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import * as x509 from '@peculiar/x509'
-import moment from 'moment'
-import { CodeGroup } from '@/components/Code'
+import { Eraser, FileUp } from 'lucide-react'
+import { Alert } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import TextArea from '@/components/TextArea'
-import { cn } from '@/lib/utils'
-import FileButton from '@/components/FileButton'
+import { CopyButton } from '@/components/ui/copy-button'
+import { FileButton } from '@/components/ui/file-button'
+import { Textarea } from '@/components/ui/input'
+import { Panel, Split, Workspace, paneField } from '@/components/ui/toolbar'
+import { formatDateTime, formatRelative } from '@/lib/utils'
 
 const EXAMPLE_CERT = `-----BEGIN CERTIFICATE-----
 MIIFzjCCBLagAwIBAgIQCAID3TIok1it+qMlOD7pcTANBgkqhkiG9w0BAQsFADA8
@@ -52,6 +55,7 @@ interface DecodedCert {
   publicKeyPem: string
   extensions: Array<{ name: string; oid: string; critical: boolean; details: Record<string, string | boolean> }>
   subjectAltNames: string[]
+  raw: ArrayBuffer
 }
 
 // OID to name mapping for extensions
@@ -93,14 +97,6 @@ function parseExtensionDetails(ext: x509.Extension): Record<string, string | boo
         // authorityKeyIdentifier
         const aki = new x509.AuthorityKeyIdentifierExtension(ext.rawData)
         if (aki.keyId) details.keyIdentifier = aki.keyId
-        break
-      }
-      case '2.5.29.17': {
-        // subjectAltName
-        const san = new x509.SubjectAlternativeNameExtension(ext.rawData)
-        const names: string[] = []
-        san.names.items.forEach((name) => names.push(name.value))
-        details.altNames = names.join(', ')
         break
       }
       case '2.5.29.15': {
@@ -148,32 +144,18 @@ function parseExtensionDetails(ext: x509.Extension): Record<string, string | boo
       }
     }
   } catch {
-    // If we can't parse extension details, just return empty
+    // Unparseable extension: show name/OID/critical only
   }
 
   return details
 }
 
-function parseCertificate(pem: string): DecodedCert {
-  const cert = new x509.X509Certificate(pem)
+const SAN_OID = '2.5.29.17'
 
-  // Get subject alt names
-  const subjectAltNames: string[] = []
-  const sanExt = cert.extensions.find((e) => e.type === '2.5.29.17') // subjectAltName OID
-  if (sanExt) {
-    const san = new x509.SubjectAlternativeNameExtension(sanExt.rawData)
-    san.names.items.forEach((name) => {
-      subjectAltNames.push(name.value)
-    })
-  }
-
-  // Parse extensions with full details
-  const extensions = cert.extensions.map((ext) => ({
-    name: EXTENSION_NAMES[ext.type] || ext.type,
-    oid: ext.type,
-    critical: ext.critical,
-    details: parseExtensionDetails(ext),
-  }))
+function parseCertificate(input: string | ArrayBuffer): DecodedCert {
+  const cert = new x509.X509Certificate(input)
+  const subjectAltNames =
+    cert.getExtension(x509.SubjectAlternativeNameExtension)?.names.items.map((name) => name.value) ?? []
 
   return {
     subject: cert.subject,
@@ -182,165 +164,193 @@ function parseCertificate(pem: string): DecodedCert {
     notAfter: cert.notAfter,
     serialNumber: cert.serialNumber,
     publicKeyAlgorithm: cert.publicKey.algorithm.name,
-    // eslint-disable-next-line @typescript-eslint/no-base-to-string
     publicKeyPem: cert.publicKey.toString('pem'),
-    extensions,
+    extensions: cert.extensions.map((ext) => ({
+      name: EXTENSION_NAMES[ext.type] || ext.type,
+      oid: ext.type,
+      critical: ext.critical,
+      details: ext.type === SAN_OID ? { altNames: subjectAltNames.join(', ') } : parseExtensionDetails(ext),
+    })),
     subjectAltNames,
+    raw: cert.rawData,
   }
+}
+
+const errorMessage = (e: unknown) => (e instanceof Error ? e.message : 'Failed to decode certificate')
+
+const hex = (buf: ArrayBuffer) =>
+  Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, '0').toUpperCase()).join(':')
+
+/** SHA-1/SHA-256 fingerprints of the DER bytes; ignores results for a certificate that's no longer shown. */
+function useFingerprints(raw: ArrayBuffer | undefined) {
+  const [fp, setFp] = useState<{ raw?: ArrayBuffer; sha1?: string; sha256?: string }>({})
+  useEffect(() => {
+    if (!raw) return
+    let current = true
+    void Promise.all([crypto.subtle.digest('SHA-1', raw), crypto.subtle.digest('SHA-256', raw)]).then(([a, b]) => {
+      if (current) setFp({ raw, sha1: hex(a), sha256: hex(b) })
+    })
+    return () => {
+      current = false
+    }
+  }, [raw])
+  return fp.raw === raw ? fp : {}
+}
+
+export function validityStatus(notBefore: Date, notAfter: Date, now = Date.now()) {
+  if (now < notBefore.getTime()) return { label: 'Not yet valid', variant: 'warning' } as const
+  if (now > notAfter.getTime()) return { label: 'Expired', variant: 'destructive' } as const
+  return { label: 'Valid', variant: 'success' } as const
+}
+
+function Row({ label, children, copy }: { label: string; children: ReactNode; copy?: string }) {
+  return (
+    <div className='flex min-h-7 items-start gap-2 border-b py-1 pr-1 pl-2.5'>
+      <dt className='w-36 shrink-0 pt-0.5 break-words text-muted-foreground'>{label}</dt>
+      <dd className='min-w-0 flex-1 pt-0.5 break-all'>{children}</dd>
+      {copy !== undefined && <CopyButton size='icon-sm' label={`Copy ${label}`} value={copy} className='-my-0.5' />}
+    </div>
+  )
+}
+
+function Details({ cert }: { cert: DecodedCert }) {
+  const fp = useFingerprints(cert.raw)
+  const status = validityStatus(cert.notBefore, cert.notAfter)
+  return (
+    <dl className='text-xs'>
+      <Row label='Subject' copy={cert.subject}>
+        <span className='font-mono'>{cert.subject}</span>
+      </Row>
+      <Row label='Issuer' copy={cert.issuer}>
+        <span className='font-mono'>{cert.issuer}</span>
+      </Row>
+      <Row label='Status'>
+        <Badge variant={status.variant}>{status.label}</Badge>
+      </Row>
+      <Row label='Not before'>
+        {formatDateTime(cert.notBefore)}{' '}
+        <span className='text-muted-foreground'>({formatRelative(cert.notBefore)})</span>
+      </Row>
+      <Row label='Not after'>
+        {formatDateTime(cert.notAfter)} <span className='text-muted-foreground'>({formatRelative(cert.notAfter)})</span>
+      </Row>
+      {cert.subjectAltNames.length > 0 && (
+        <Row label='SANs' copy={cert.subjectAltNames.join('\n')}>
+          <span className='font-mono'>{cert.subjectAltNames.join(', ')}</span>
+        </Row>
+      )}
+      <Row label='Serial' copy={cert.serialNumber}>
+        <span className='font-mono'>{cert.serialNumber}</span>
+      </Row>
+      <Row label='SHA-256' copy={fp.sha256 ?? ''}>
+        <span className='font-mono'>{fp.sha256}</span>
+      </Row>
+      <Row label='SHA-1' copy={fp.sha1 ?? ''}>
+        <span className='font-mono'>{fp.sha1}</span>
+      </Row>
+      <Row label='Public key' copy={cert.publicKeyPem}>
+        {cert.publicKeyAlgorithm}
+      </Row>
+      {cert.extensions.map((ext, i) => (
+        <Row key={i} label={ext.name}>
+          <div className='flex flex-wrap items-center gap-1.5'>
+            {ext.name !== ext.oid && <span className='font-mono text-muted-foreground'>{ext.oid}</span>}
+            {ext.critical && <Badge variant='outline'>critical</Badge>}
+          </div>
+          {Object.keys(ext.details).length > 0 && (
+            <ul className='mt-0.5 font-mono text-muted-foreground'>
+              {Object.entries(ext.details)
+                .filter(([, value]) => value !== false)
+                .map(([key, value]) => (
+                  <li key={key}>
+                    {key} = {String(value)}
+                  </li>
+                ))}
+            </ul>
+          )}
+        </Row>
+      ))}
+    </dl>
+  )
 }
 
 function CertificateDecoder() {
   const [encoded, setEncoded] = useState('')
-  const [decoded, setDecoded] = useState<DecodedCert | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const encodedRef = useRef<HTMLTextAreaElement>(null)
+  const [fileError, setFileError] = useState('')
 
-  const decode = () => {
+  const result = useMemo((): { decoded?: DecodedCert; error?: string } => {
+    if (!encoded.trim()) return {}
     try {
-      setError(null)
-      const data = parseCertificate(encoded)
-      setDecoded(data)
+      return { decoded: parseCertificate(encoded.trim()) }
+    } catch (e) {
+      return { error: errorMessage(e) }
+    }
+  }, [encoded])
+
+  const reset = (value: string) => {
+    setEncoded(value)
+    setFileError('')
+  }
+
+  // Accepts PEM text or binary DER; DER is converted to PEM so the textarea always shows text.
+  const loadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]
+    if (!f) return
+    const bytes = await f.arrayBuffer()
+    const text = new TextDecoder().decode(bytes)
+    if (text.includes('-----BEGIN')) return reset(text)
+    try {
+      reset(new x509.X509Certificate(bytes).toString('pem'))
     } catch (err) {
-      console.error('Failed to decode certificate:', err)
-      setError(err instanceof Error ? err.message : 'Failed to decode certificate')
-      setDecoded(null)
+      reset('')
+      setFileError(`Not a PEM or DER certificate: ${errorMessage(err)}`)
     }
   }
 
-  const loadFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0]
-    if (!f) return
-
-    const reader = new FileReader()
-    reader.addEventListener('load', (event) => {
-      setEncoded(event.target?.result as string)
-      setDecoded(null)
-      setError(null)
-    })
-    reader.readAsText(f)
-  }
-
-  const loadExample = () => {
-    setEncoded(EXAMPLE_CERT)
-    setDecoded(null)
-    setError(null)
-  }
-
-  const clear = () => {
-    setEncoded('')
-    setDecoded(null)
-    setError(null)
-  }
-
-  useEffect(() => {
-    encodedRef.current?.focus()
-  }, [])
-
-  // Extract CN from subject for display
-  const displayName = decoded
-    ? decoded.subjectAltNames.length > 0
-      ? decoded.subjectAltNames.join(', ')
-      : decoded.subject
-    : ''
+  const { decoded } = result
 
   return (
-    <div>
-      <TextArea
-        ref={encodedRef}
-        id='encoded'
-        name='encoded'
-        rows={8}
-        value={encoded}
-        onCtrlEnter={() => decode()}
-        onChange={(e) => setEncoded(e.target.value)}
-        className='font-mono text-xs'
-        placeholder={'Paste your PEM encoded certificate here'}
-      />
-      <div className='mt-3'>
-        <Button onClick={() => decode()}>Decode</Button>
-        <FileButton variant='ghost' className={'ml-5'} onFileSelected={loadFile}>
-          Load File
-        </FileButton>
-        <Button variant='ghost' className={'ml-3'} onClick={loadExample}>
-          Load Example
-        </Button>
-        <Button variant='ghost' className={'ml-3'} onClick={clear}>
-          Clear
-        </Button>
-      </div>
-      {error && (
-        <div className='mt-3 p-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg'>{error}</div>
-      )}
-      {decoded !== null && (
-        <div className='mt-3 overflow-hidden w-full dark:bg-zinc-800 shadow dark:shadow-zinc-900 sm:rounded-lg'>
-          <div className='px-4 py-5 sm:px-6'>
-            <h3 className='text-lg font-medium leading-6'>{displayName}</h3>
-          </div>
-          <div className='border-t border-gray-200 dark:border-zinc-700 px-4 py-5 sm:px-6'>
-            <dl className='grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2'>
-              <div className='sm:col-span-1'>
-                <dt className='text-sm font-medium text-gray-500'>Subject</dt>
-                <dd className='mt-1 text-sm'>{decoded.subject}</dd>
-              </div>
-              <div className='sm:col-span-1'>
-                <dt className='text-sm font-medium text-gray-500'>Issuer</dt>
-                <dd className='mt-1 text-sm'>{decoded.issuer}</dd>
-              </div>
-              <div className='sm:col-span-1'>
-                <dt className='text-sm font-medium text-gray-500'>Valid From</dt>
-                <dd className='mt-1 text-sm'>
-                  {moment(decoded.notBefore).format('dddd, MMMM Do YYYY, h:mm:ss A')}
-                  <div className={cn(moment(decoded.notBefore).isBefore(moment()) ? 'text-green-500' : 'text-red-500')}>
-                    ({moment(decoded.notBefore).fromNow()})
-                  </div>
-                </dd>
-              </div>
-              <div className='sm:col-span-1'>
-                <dt className='text-sm font-medium text-gray-500'>Valid To</dt>
-                <dd className='mt-1 text-sm'>
-                  {moment(decoded.notAfter).format('dddd, MMMM Do YYYY, h:mm:ss A')}
-                  <div className={cn(moment(decoded.notAfter).isAfter(moment()) ? 'text-green-500' : 'text-red-500')}>
-                    ({moment(decoded.notAfter).fromNow()})
-                  </div>
-                </dd>
-              </div>
-              <div className='sm:col-span-1'>
-                <dt className='text-sm font-medium text-gray-500'>Serial</dt>
-                <dd className='mt-1 text-sm'>{decoded.serialNumber}</dd>
-              </div>
-              <div className='sm:col-span-1'>
-                <dt className='text-sm font-medium text-gray-500'>Extensions</dt>
-                <dd className='mt-1 text-sm'>
-                  {decoded.extensions.map((ext, i) => (
-                    <div key={`ex-${i}`} className='mb-3'>
-                      <span className='font-bold'>
-                        {ext.name} {ext.name !== ext.oid && <span className='text-gray-500'>({ext.oid})</span>}
-                      </span>
-                      <ul className='ml-4 text-gray-600 dark:text-gray-400'>
-                        <li>critical = {String(ext.critical)}</li>
-                        {Object.entries(ext.details).map(([key, value]) => (
-                          <li key={key}>
-                            {key} = {String(value)}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </dd>
-              </div>
-              <div className='sm:col-span-2'>
-                <dt className='text-sm font-medium text-gray-500'>Public Key ({decoded.publicKeyAlgorithm})</dt>
-                <dd className='mt-1 text-sm'>
-                  <CodeGroup>
-                    <code>{decoded.publicKeyPem}</code>
-                  </CodeGroup>
-                </dd>
-              </div>
-            </dl>
-          </div>
-        </div>
-      )}
-    </div>
+    <Workspace
+      toolbar={
+        <>
+          <Button size='sm' variant='outline' onClick={() => reset(EXAMPLE_CERT)}>
+            Load example
+          </Button>
+          <FileButton
+            size='sm'
+            variant='ghost'
+            accept='.pem,.crt,.cer,.der,.cert'
+            onFileSelected={(e) => void loadFile(e)}
+          >
+            <FileUp /> Load file
+          </FileButton>
+          <Button size='sm' variant='ghost' onClick={() => reset('')} disabled={!encoded}>
+            <Eraser /> Clear
+          </Button>
+        </>
+      }
+    >
+      <Alert>{fileError || result.error}</Alert>
+      <Split>
+        <Panel title='Certificate (PEM)'>
+          <Textarea
+            autoFocus
+            aria-label='Certificate (PEM)'
+            className={paneField}
+            value={encoded}
+            onChange={(e) => reset(e.target.value)}
+            placeholder={'-----BEGIN CERTIFICATE-----\nMIIF...'}
+          />
+        </Panel>
+        <Panel title='Details'>
+          {decoded ? (
+            <Details cert={decoded} />
+          ) : (
+            <p className='p-2.5 text-xs text-muted-foreground'>Paste a certificate to decode it</p>
+          )}
+        </Panel>
+      </Split>
+    </Workspace>
   )
 }
 
