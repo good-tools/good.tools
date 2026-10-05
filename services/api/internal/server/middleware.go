@@ -85,13 +85,36 @@ func securityHeaders(next http.Handler) http.Handler {
 	})
 }
 
+// originAllowed matches origin exactly or against a pattern whose "*" stands for one DNS label
+// (letters, digits, hyphens), e.g. https://pr-*.good.tools.
+func originAllowed(origins []string, origin string) bool {
+	for _, o := range origins {
+		prefix, suffix, ok := strings.Cut(o, "*")
+		if !ok {
+			if o == origin {
+				return true
+			}
+			continue
+		}
+		label, found := strings.CutPrefix(origin, prefix)
+		if !found {
+			continue
+		}
+		label, found = strings.CutSuffix(label, suffix)
+		if found && label != "" && strings.Trim(label, "abcdefghijklmnopqrstuvwxyz0123456789-") == "" {
+			return true
+		}
+	}
+	return false
+}
+
 // cors allows the configured origins (or "*"); with none configured, no CORS headers
 // are sent and browsers only allow same-origin calls.
 func cors(origins []string, next http.Handler) http.Handler {
 	wildcard := slices.Contains(origins, "*")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
-		allowed := origin != "" && (wildcard || slices.Contains(origins, origin))
+		allowed := origin != "" && (wildcard || originAllowed(origins, origin))
 		if allowed {
 			h := w.Header()
 			if wildcard {

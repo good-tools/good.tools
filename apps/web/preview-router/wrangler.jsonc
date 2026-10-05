@@ -1,0 +1,13 @@
+// pr-<n>.good.tools → preview alias of the good-tools Worker; www → apex. Rarely changes, so it's
+// deployed by hand: npx wrangler deploy -c apps/web/preview-router/wrangler.jsonc
+// Needs a proxied wildcard DNS record (* AAAA 100::) in the good.tools zone.
+{
+  "name": "good-tools-previews",
+  "main": "index.js",
+  "compatibility_date": "2026-10-01",
+  // fetching another Worker's workers.dev URL on the same account
+  "compatibility_flags": ["global_fetch_strictly_public"],
+  "routes": [{ "pattern": "*.good.tools/*", "zone_name": "good.tools" }],
+  "workers_dev": false,
+  "vars": { "PREVIEW_HOST": "good-tools.osama-642.workers.dev" }
+}

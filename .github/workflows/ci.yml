@@ -62,31 +62,42 @@ jobs:
           name: web-dist
           path: apps/web/dist
 
+      # pr-<n> aliases are served on pr-<n>.good.tools (apps/web/preview-router); a branch without
+      # an open PR gets a branch-named alias on workers.dev only
       - name: Upload the preview
         id: upload
         if: env.CLOUDFLARE_API_TOKEN != ''
         working-directory: apps/web
-        run: |
-          alias=$(printf '%s' "$BRANCH" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9' '-' | sed 's/--*/-/g; s/^-//' | cut -c1-40 | sed 's/-$//')
-          out=$(npx --yes wrangler@4.147.0 versions upload --preview-alias "$alias" --message "$BRANCH@${GITHUB_SHA::7}")
-          echo "$out"
-          echo "url=$(grep -oE 'Alias URL: https://[^ ]+' <<< "$out" | cut -d' ' -f3)" >> "$GITHUB_OUTPUT"
-
-      - name: Comment the preview URL on the PR
-        if: steps.upload.outputs.url != ''
         env:
           GH_TOKEN: ${{ github.token }}
-          URL: ${{ steps.upload.outputs.url }}
         run: |
           pr=$(gh pr list -R "$GITHUB_REPOSITORY" --head "$BRANCH" --state open --json number --jq '.[0].number')
-          [ -n "$pr" ] || { echo "No open PR for $BRANCH; preview at $URL"; exit 0; }
+          if [ -n "$pr" ]; then
+            alias="pr-$pr"
+          else
+            alias=$(printf '%s' "$BRANCH" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9' '-' | sed 's/--*/-/g; s/^-//' | cut -c1-40 | sed 's/-$//')
+          fi
+          out=$(npx --yes wrangler@4.147.0 versions upload --preview-alias "$alias" --message "$BRANCH@${GITHUB_SHA::7}")
+          echo "$out"
+          url=$(grep -oE 'Alias URL: https://[^ ]+' <<< "$out" | cut -d' ' -f3)
+          [ -n "$pr" ] && url="https://pr-$pr.good.tools"
+          echo "Preview: $url"
+          { echo "pr=$pr"; echo "url=$url"; } >> "$GITHUB_OUTPUT"
+
+      - name: Comment the preview URL on the PR
+        if: steps.upload.outputs.pr != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ steps.upload.outputs.pr }}
+          URL: ${{ steps.upload.outputs.url }}
+        run: |
           # The marker must be on its own line: GitHub renders a line that starts with HTML as raw HTML
           body=$(printf '**Preview:** [%s](%s) for `%s`\n\n<!-- preview -->' "${URL#https://}" "$URL" "${GITHUB_SHA::7}")
-          id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$pr/comments" --paginate --jq '.[] | select(.body | contains("<!-- preview -->")) | .id' | head -1)
+          id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate --jq '.[] | select(.body | contains("<!-- preview -->")) | .id' | head -1)
           if [ -n "$id" ]; then
             gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -f body="$body" > /dev/null
           else
-            gh pr comment "$pr" -R "$GITHUB_REPOSITORY" --body "$body"
+            gh pr comment "$PR" -R "$GITHUB_REPOSITORY" --body "$body"
           fi
 
   api:

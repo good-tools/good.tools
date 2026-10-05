@@ -6,7 +6,7 @@ primary_region = "iad"
   dockerfile = "Dockerfile"
 
 [env]
-  CORS_ORIGINS = "https://good.tools,http://localhost:3000"
+  CORS_ORIGINS = "https://good.tools,https://pr-*.good.tools,http://localhost:3000"
   TRUST_PROXY = "fly"
   # Sized for a shared-cpu-1x@256MB machine with a 1 GB volume
   GOMEMLIMIT = "200MiB"

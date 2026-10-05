@@ -162,6 +162,21 @@ func TestCORS(t *testing.T) {
 	if w.Code != 204 || w.Header().Get("Access-Control-Allow-Methods") == "" {
 		t.Errorf("preflight: %d %v", w.Code, w.Header())
 	}
+	pr := newServer(t, map[string]string{"CORS_ORIGINS": "https://good.tools,https://pr-*.good.tools"})
+	for origin, want := range map[string]bool{
+		"https://pr-29.good.tools":      true,
+		"https://pr-.good.tools":        false, // empty label
+		"https://pr-1.evil.good.tools":  false, // more than one label
+		"https://pr-1.good.tools.evil":  false,
+		"http://pr-1.good.tools":        false,
+		"https://pr-1_x.good.tools":     false,
+		"https://pr-29.good.tools:8443": false,
+	} {
+		got := get(pr, "/v1/my-ip", "Origin", origin).Header().Get("Access-Control-Allow-Origin") == origin
+		if got != want {
+			t.Errorf("origin %s: allowed=%v, want %v", origin, got, want)
+		}
+	}
 	star := newServer(t, map[string]string{"CORS_ORIGINS": "*"})
 	if w := get(star, "/v1/my-ip", "Origin", "https://x.test"); w.Header().Get("Access-Control-Allow-Origin") != "*" {
 		t.Error("wildcard")
