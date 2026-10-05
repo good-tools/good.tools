@@ -33,7 +33,7 @@ Environment variables only.
 | `PORT` | `8080` | |
 | `DATA_DIR` | `/data` | geolocation databases (`geo/`) and cached image layers (`layers/`). Falls back to a temporary directory, with a warning, if it isn't writable. |
 | `STATIC_DIR` | empty | directory of the built web app (`apps/web/dist`). Empty = API only. |
-| `CORS_ORIGINS` | empty | comma-separated allowed origins, or `*`. Empty = no CORS headers (same-origin only). |
+| `CORS_ORIGINS` | empty | comma-separated allowed origins, or `*`. A `*` inside an origin matches one subdomain label, e.g. `https://pr-*.good.tools`. Empty = no CORS headers (same-origin only). |
 | `TRUST_PROXY` | `none` | where the client IP comes from: `none` (socket address), `fly` (`Fly-Client-IP`), `xff` (first `X-Forwarded-For` entry). Only enable behind a proxy that sets the header. |
 | `RATE_LIMIT` | `60` | API requests per minute per client IP (token bucket, burst of the same size). `0` disables. Static files aren't limited. |
 | `MAXMIND_LICENSE_KEY` | empty | use MaxMind GeoLite2 instead of DB-IP Lite |
