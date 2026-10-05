@@ -36,6 +36,13 @@
       "include-component-in-tag": true,
       "changelog-path": "CHANGELOG.md",
       "initial-version": "0.1.0"
+    },
+    "services/api": {
+      "release-type": "go",
+      "component": "api",
+      "include-component-in-tag": true,
+      "changelog-path": "CHANGELOG.md",
+      "initial-version": "0.1.0"
     }
   }
 }
