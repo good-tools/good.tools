@@ -12,6 +12,7 @@
     "@goodtools/protobuf-decoder": "workspace:*",
     "@goodtools/wiregasm": "^2.0.0",
     "@headlessui/react": "^2.2.10",
+    "@huggingface/transformers": "4.3.0",
     "@modelcontextprotocol/sdk": "^1.32.0",
     "@monaco-editor/react": "^4.7.0",
     "@neslinesli93/qpdf-wasm": "^0.3.0",
@@ -36,6 +37,7 @@
     "marked": "^18.1.0",
     "mermaid": "^12.1.0",
     "node-forge": "^1.4.0",
+    "onnxruntime-web": "1.31.0-dev.20260914-8d85527a0",
     "pdfjs-dist": "^6.4.299",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
@@ -50,8 +52,8 @@
     "zustand": "^5.0.15"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "bun run sitemap && tsc --noEmit && vite build",
+    "dev": "bun src/whisper-assets.ts && vite",
+    "build": "bun run sitemap && bun src/whisper-assets.ts && tsc --noEmit && vite build",
     "preview": "vite preview",
     "sitemap": "bun src/sitemap.ts",
     "test": "vitest run",

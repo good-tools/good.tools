@@ -1,7 +1,7 @@
 import path from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { defaultClientConditions, defineConfig } from 'vite'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import pkg from './package.json' with { type: 'json' }
 
@@ -19,6 +19,9 @@ export default defineConfig({
   },
 
   resolve: {
+    // ONNX Runtime's default bundle embeds a 26 MB wasm, over Cloudflare's 25 MiB per-file limit;
+    // this condition picks its build that loads the runtime from paths we set (see whisper.worker.ts)
+    conditions: ['onnxruntime-web-use-extern-wasm', ...defaultClientConditions],
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),
       ws: path.resolve(import.meta.dirname, './src/ws-mock.ts'),
