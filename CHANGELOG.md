@@ -5,6 +5,15 @@
 
 * add image converter ([#8](https://github.com/good-tools/good.tools/issues/8)) ([828cf69](https://github.com/good-tools/good.tools/commit/828cf69c832516b95f3733a8399b52e0b79000fa))
 
+## [1.24.0](https://github.com/good-tools/good.tools/compare/v1.23.2...v1.24.0) (2026-10-05)
+
+
+### Features
+
+* add MCP Browser; black favicon ([#13](https://github.com/good-tools/good.tools/issues/13)) ([a20632a](https://github.com/good-tools/good.tools/commit/a20632a86cf34c0a4aaef38ef9c434f482386bf4))
+* modernize stack, redesign UI and fix tool bugs ([#12](https://github.com/good-tools/good.tools/issues/12)) ([57fbee2](https://github.com/good-tools/good.tools/commit/57fbee26c85ffbf31f79a77709cc7bb94b3af2d4))
+* Packet Dissector on wiregasm 2.0 (Wireshark 4.6.9) ([#10](https://github.com/good-tools/good.tools/issues/10)) ([f2fc078](https://github.com/good-tools/good.tools/commit/f2fc0787ede4cb41270b0f1e8b9ba3d55fc2711a))
+
 ## [1.23.1](https://github.com/good-tools/good.tools/compare/v1.23.0...v1.23.1) (2026-01-25)
 
 
