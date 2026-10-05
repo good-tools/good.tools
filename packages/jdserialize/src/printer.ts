@@ -1,4 +1,4 @@
-import { type ClassDescription, ClassDescriptionType, Constants, resolveJavaType } from './deserializer'
+import { type ClassDescription, ClassDescriptionType, Constants, resolveJavaType, StringContent } from './deserializer'
 
 function indent(level: number) {
   let buf = ''
@@ -56,7 +56,8 @@ class ClassPrinter {
 
       cd.annotations.forEach((c) => {
         ps.print(`${indent(indentlevel)}// ${indent(1)}`)
-        ps.println(c.toString())
+        // TC_NULL annotations (e.g. RMI codebases) are stored as null; other content has no toString
+        ps.println(c == null ? 'null' : c instanceof StringContent ? JSON.stringify(c.data) : c.constructor.name)
       })
     }
     if (cd.type === ClassDescriptionType.NORMALCLASS) {

@@ -505,10 +505,29 @@ class Deserializer {
     return new EnumContent(handle, cd, so.data)
   }
 
+  /** Java's byte/short/int field values are signed; the unsigned readers are for lengths, handles and type codes. */
+  readSignedByte(): number {
+    const val = this.data.readInt8(this.idx)
+    this.idx += 1
+    return val
+  }
+
+  readSignedShort(): number {
+    const val = this.data.readInt16BE(this.idx)
+    this.idx += 2
+    return val
+  }
+
+  readSignedInt(): number {
+    const val = this.data.readInt32BE(this.idx)
+    this.idx += 4
+    return val
+  }
+
   readFieldValue(type: string) {
     switch (type) {
       case FieldType.BYTE:
-        return this.readByte()
+        return this.readSignedByte()
       case FieldType.CHAR:
         return this.readChar()
       case FieldType.DOUBLE:
@@ -516,11 +535,11 @@ class Deserializer {
       case FieldType.FLOAT:
         return this.readFloat()
       case FieldType.INTEGER:
-        return this.readInt()
+        return this.readSignedInt()
       case FieldType.LONG:
         return this.readLong()
       case FieldType.SHORT:
-        return this.readShort()
+        return this.readSignedShort()
       case FieldType.BOOLEAN:
         return this.readBoolean()
       case FieldType.ARRAY:
@@ -664,6 +683,11 @@ class Deserializer {
 
     while (this.hasMoreContent()) {
       const tc = this.readByte()
+      // ObjectOutputStream.reset() writes TC_RESET between top-level objects
+      if (tc === Constants.TC_RESET) {
+        this.reset()
+        continue
+      }
       const content = this.readContent(tc, true)
 
       if (content != null) {
@@ -679,11 +703,8 @@ class Deserializer {
     const classes = new Map<string, ClassDescription>()
     const classnames = new Set<string>()
 
-    this.handles.forEach((c) => {
-      if (!(c instanceof ClassDescription)) {
-        return
-      }
-      const cd = c as ClassDescription
+    // handles are cleared by TC_RESET, so use every class description read from the stream
+    this.classDescriptions.forEach((cd) => {
       classes.set(cd.name, cd)
       classnames.add(cd.name)
     })
