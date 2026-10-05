@@ -28,7 +28,7 @@ const isReadable = (mime?: string): boolean =>
   mime !== undefined && (mime.includes('text/') || mime.includes('application/json'))
 
 const downloadUrl = (ref: string, path: string) =>
-  `${API_CONFIG.imageBrowserUrl}/download?${new URLSearchParams({ ref, path })}`
+  `${API_CONFIG.baseUrl}/image/file?${new URLSearchParams({ ref, path })}`
 
 const listCache = new LRU<string, FileNode[]>({ max: 100 })
 const contentCache = new LRU<string, string>({ max: 50 })
@@ -138,10 +138,9 @@ function ImageBrowser() {
 
       try {
         const fileList = await getJSON<DockerFileListItem[]>(
-          '/list',
+          '/image/list',
           { ref: pulledRef, path },
           'Failed to list files',
-          API_CONFIG.imageBrowserUrl,
         )
         const result = fileList
           .map((d) => ({ id: `${path}/${d.name}`, ...d }))
@@ -164,12 +163,7 @@ function ImageBrowser() {
     setError(null)
     setLoading(true)
     try {
-      const result = await getJSON<DockerImageResponse>(
-        '/image',
-        { ref: image },
-        'Failed to pull image',
-        API_CONFIG.imageBrowserUrl,
-      )
+      const result = await getJSON<DockerImageResponse>('/image', { ref: image }, 'Failed to pull image')
       setPulledRef(image)
       setData(result)
     } catch (e) {

@@ -1,5 +1,5 @@
 /**
- * React Query hooks for the online (internet-tools) APIs
+ * React Query hooks for the good.tools API (services/api)
  */
 
 import { useQuery } from '@tanstack/react-query'
@@ -18,7 +18,7 @@ export async function getJSON<T>(
   path: string,
   params: Record<string, string> | undefined,
   fallbackMessage: string,
-  base: string = API_CONFIG.internetToolsBaseUrl,
+  base: string = API_CONFIG.baseUrl,
 ): Promise<T> {
   const response = await fetch(`${base}${path}${params ? `?${new URLSearchParams(params)}` : ''}`)
   if (!response.ok) {

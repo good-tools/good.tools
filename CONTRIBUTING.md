@@ -26,7 +26,7 @@ bun run dev        # http://localhost:3000
 
 [Biome](https://biomejs.dev) does linting and formatting in one fast pass; its configuration is in `biome.json`. Install the Biome editor extension and turn on format-on-save, and you'll rarely think about it. If a rule is wrong for a specific line, suppress it with `// biome-ignore <rule>: <reason>`. The reason is required.
 
-Online tools (DNS, WHOIS, IP, Docker Browser) call `https://internet-tools.fly.dev` and `https://image-browser.fly.dev` in dev. See `apps/web/.env.example` to point them elsewhere.
+Online tools (DNS, WHOIS, IP, Docker Browser) call `https://api.good.tools` in dev. To use a local API instead, run `services/api` (see its README) and set `VITE_API_URL` in `apps/web/.env` (see `apps/web/.env.example`).
 
 ## Native code (WebAssembly)
 
