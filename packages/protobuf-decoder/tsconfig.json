@@ -1,8 +1,14 @@
 {
   "compilerOptions": {
-    "target": "ES5",
-    "lib": ["ES2015"],
-    "types": ["jest", "node"],
-    "esModuleInterop": true
-  }
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": ["node", "vitest/globals"],
+    "strict": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "include": ["src", "*.config.ts"]
 }

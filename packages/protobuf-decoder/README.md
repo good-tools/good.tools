@@ -4,7 +4,19 @@ Read raw protobuf buffers and return a readable representation of the data
 
 The protobuf encoding format can be found [here](https://developers.google.com/protocol-buffers/docs/encoding).
 
-Demo it on [good.tools](https://good.tools/protobuf-decoder).
+Demo it on [good.tools](https://good.tools/protobuf-decoder). Part of the [good.tools monorepo](https://github.com/good-tools/good.tools/tree/master/packages/protobuf-decoder).
+
+## Install
+
+```bash
+npm install @goodtools/protobuf-decoder
+```
+
+Ships ESM and CommonJS builds with type declarations. In browsers, provide a `Buffer` polyfill (e.g. the [`buffer`](https://www.npmjs.com/package/buffer) package).
+
+### Upgrading from 1.x
+
+2.0 adds an `exports` map, so only the package entry point can be imported; deep imports such as `@goodtools/protobuf-decoder/dist/main.js` no longer resolve. The API is unchanged.
 
 ## Usage
 

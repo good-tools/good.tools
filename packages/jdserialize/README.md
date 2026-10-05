@@ -2,7 +2,19 @@
 
 jdserialize is a JavaScript port of https://github.com/unsynchronized/jdeserialize with an added object normalizer for easier data interpretation.
 
-Demo it on [good.tools](https://good.tools/java-deserialize).
+Demo it on [good.tools](https://good.tools/java-deserialize). Part of the [good.tools monorepo](https://github.com/good-tools/good.tools/tree/master/packages/jdserialize).
+
+## Install
+
+```bash
+npm install @goodtools/jdserialize
+```
+
+Ships ESM and CommonJS builds with type declarations. In browsers, provide a `Buffer` polyfill (e.g. the [`buffer`](https://www.npmjs.com/package/buffer) package).
+
+### Upgrading from 1.x
+
+2.0 adds an `exports` map, so only the package entry point can be imported; deep imports such as `@goodtools/jdserialize/dist/main.js` no longer resolve. The API is unchanged.
 
 ## Usage
 

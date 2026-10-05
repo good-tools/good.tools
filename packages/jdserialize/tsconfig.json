@@ -1,8 +1,19 @@
 {
   "compilerOptions": {
-    "target": "ES5",
-    "lib": ["ES2015"],
-    "types": ["jest", "node"],
-    "esModuleInterop": true
-  }
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": ["node", "vitest/globals"],
+    "strict": true,
+    // ponytail: this port predates strict mode; enabling null checks means reworking the
+    // deserializer's nullable fields (~30 sites). Turn it on when the code is next touched.
+    "strictNullChecks": false,
+    "isolatedModules": true,
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "include": ["src", "*.config.ts"],
+  // the tests probe deserialized objects dynamically; vitest still runs them
+  "exclude": ["src/**/*.test.ts"]
 }
