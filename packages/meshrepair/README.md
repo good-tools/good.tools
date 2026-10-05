@@ -1,6 +1,6 @@
 # MeshRepair
 
-[![Release](https://github.com/good-tools/meshrepair/actions/workflows/cd.yml/badge.svg)](https://github.com/good-tools/meshrepair/actions/workflows/cd.yml)
+Part of the [good.tools monorepo](https://github.com/good-tools/good.tools/tree/master/packages/meshrepair); try it at [good.tools/stl-repair](https://good.tools/stl-repair).
 [![npm](https://img.shields.io/npm/v/@goodtools/meshrepair)](https://www.npmjs.com/package/@goodtools/meshrepair)
 
 The high-performance, WebAssembly-powered mesh repair engine for the browser.
@@ -195,65 +195,29 @@ interface RepairResult {
 }
 ```
 
-## Build
+## Building from source
 
-### Prerequisites
+The WebAssembly is compiled from `native/` (C++ with [VCGlib](https://github.com/cnr-isti-vclab/vcglib)) with Emscripten. VCGlib is pinned and checksum-verified in `upstream.json` and managed by [`wasmpatch`](../../tools/wasmpatch), which also handles any patches to it.
 
-- Docker
-- Node.js 22+
-
-### Building
+From the repository root:
 
 ```bash
-# Build the Docker image with Emscripten
-npm run build:builder
-
-# Build the WASM library
-npm run build:emscripten
-
-# Build the TypeScript wrapper
-npm install
-npm run build
+bun install
+bun run build          # builds everything; Turborepo skips unchanged packages
 ```
 
-### Local Build (without Docker)
+`bun run --cwd packages/meshrepair build:wasm` produces `wasm/meshrepair.{js,wasm}` the cheapest way available:
 
-Requires Emscripten SDK, Meson, and Ninja installed locally.
+1. **Nothing to do** if `wasm/` was built from the same inputs (C++ sources, pins, patches, build tooling).
+2. **Reuse a release:** if a published version was built from the same inputs, download its binaries. No toolchain needed.
+3. **Compile** with Emscripten from `PATH` (`emcc`, `meson`, `ninja`), or else inside the pinned builder image ([`tools/wasmpatch/Dockerfile.emsdk`](../../tools/wasmpatch/Dockerfile.emsdk)), which needs only Docker.
 
-```bash
-npm run build:emscripten-local
-npm run build
-```
+Tests (`bun run --cwd packages/meshrepair test`) run against the built WebAssembly. Locally they're skipped when it hasn't been built; CI always builds it first.
 
-## Contributing
+## Releases
 
-This project uses [Changesets](https://github.com/changesets/changesets) for version management and changelog generation.
-
-### Adding a Changeset
-
-When making changes that should be included in the next release:
-
-```bash
-npm run changeset
-```
-
-Select the package, choose the change type (major/minor/patch), and write a summary. This creates a changeset file that will be included in the next release.
-
-### Change Types
-
-- **major**: Breaking changes (e.g., API changes, renamed exports)
-- **minor**: New features (backward compatible)
-- **patch**: Bug fixes
+Releases are cut by [release-please](https://github.com/googleapis/release-please) from Conventional Commits, together with the rest of the good.tools monorepo, and published to npm with provenance.
 
 ## License
 
-MeshRepair is licensed under the [GNU General Public License v3.0](LICENSE), the same license as [VCGlib](https://github.com/cnr-isti-vclab/vcglib).
-
-VCGlib is developed by the [Visual Computing Lab](http://vcg.isti.cnr.it) at ISTI-CNR.
-
-## Credits
-
-- [VCGlib](https://github.com/cnr-isti-vclab/vcglib) - The underlying mesh processing library
-- [MeshLab](https://www.meshlab.net/) - VCGlib's flagship application
-- [Emscripten](https://emscripten.org/) - C++ to WebAssembly compiler
-- [Wiregasm](https://github.com/good-tools/wiregasm) - Architectural inspiration
+[GPL-3.0-or-later](LICENSE), like VCGlib.
