@@ -1,6 +1,8 @@
 /** Background removal with U²-Netp (Apache-2.0) on onnxruntime-web, off the main thread. */
 import type * as Ort from 'onnxruntime-web'
+import jspiMjsUrl from 'onnxruntime-web/ort-wasm-simd-threaded.jspi.mjs?url'
 import jspiWasmUrl from 'onnxruntime-web/ort-wasm-simd-threaded.jspi.wasm?url'
+import mjsUrl from 'onnxruntime-web/ort-wasm-simd-threaded.mjs?url'
 import wasmUrl from 'onnxruntime-web/ort-wasm-simd-threaded.wasm?url'
 import modelUrl from '@/assets/models/u2netp.onnx?url'
 import { SIZE, toInput, toMask } from '@/lib/remove-background'
@@ -42,6 +44,8 @@ function load() {
     const gpu = 'Suspending' in WebAssembly && !!(await navigator.gpu?.requestAdapter().catch(() => null))
     const ort = gpu ? await import('onnxruntime-web/jspi') : await import('onnxruntime-web/wasm')
     const [wasm, model] = (await download([gpu ? jspiWasmUrl : wasmUrl, modelUrl])) as [ArrayBuffer, ArrayBuffer]
+    // vite.config.ts picks ORT's builds that load their glue from wasmPaths instead of bundling it
+    ort.env.wasm.wasmPaths = { mjs: gpu ? jspiMjsUrl : mjsUrl }
     ort.env.wasm.wasmBinary = wasm
     const session = await ort.InferenceSession.create(new Uint8Array(model), {
       executionProviders: gpu ? ['webgpu', 'wasm'] : ['wasm'],

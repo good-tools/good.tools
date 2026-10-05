@@ -1,7 +1,7 @@
 import path from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { defineConfig, type Plugin } from 'vite'
+import { defaultClientConditions, defineConfig, type Plugin } from 'vite'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import { VitePWA } from 'vite-plugin-pwa'
 import pkg from './package.json' with { type: 'json' }
@@ -68,6 +68,12 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: { cacheName: 'assets', expiration: { maxEntries: 500, purgeOnQuotaError: true } },
           },
+          // Speech to Text's runtime and model (src/whisper-assets.ts); their paths change with their versions
+          {
+            urlPattern: ({ sameOrigin, url }) => sameOrigin && url.pathname.startsWith('/whisper/'),
+            handler: 'CacheFirst',
+            options: { cacheName: 'models', expiration: { maxEntries: 50, purgeOnQuotaError: true } },
+          },
         ],
       },
     }),
@@ -78,6 +84,9 @@ export default defineConfig({
   },
 
   resolve: {
+    // ONNX Runtime's default bundle embeds a 26 MB wasm, over Cloudflare's 25 MiB per-file limit;
+    // this condition picks its build that loads the runtime from paths we set (see whisper.worker.ts)
+    conditions: ['onnxruntime-web-use-extern-wasm', ...defaultClientConditions],
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),
       ws: path.resolve(import.meta.dirname, './src/ws-mock.ts'),
