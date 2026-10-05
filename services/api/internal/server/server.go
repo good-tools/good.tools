@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/good-tools/good.tools/services/api/internal/netx"
 	"io"
 	"log/slog"
 	"mime"
@@ -15,6 +14,8 @@ import (
 	"path"
 	"strconv"
 	"time"
+
+	"github.com/good-tools/good.tools/services/api/internal/netx"
 
 	libwhois "github.com/likexian/whois"
 
