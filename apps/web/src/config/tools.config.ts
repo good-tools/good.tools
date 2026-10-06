@@ -37,6 +37,7 @@ import {
   Radio,
   Regex,
   Search,
+  Signature,
 } from 'lucide-react'
 import { lazy } from 'react'
 import { runtimeConfig } from '@/config/runtime.config'
@@ -607,6 +608,20 @@ export const tools: Tool[] = [
     dependencies: [
       { name: 'pdf.js', url: 'https://mozilla.github.io/pdf.js/' },
       { name: 'fflate', url: 'https://www.npmjs.com/package/fflate' },
+    ],
+  },
+  {
+    title: 'Sign PDF',
+    path: '/sign-pdf',
+    description: 'Draw, type or upload a signature and place it anywhere on a PDF, with an optional date',
+    icon: Signature,
+    categories: [CATEGORIES.PDF],
+    searchTags: ['sign pdf', 'esign', 'signature', 'sign', 'pdf', 'e-signature', 'initials', 'date', 'fill'],
+    component: lazy(() => import('@/tools/SignPdf')),
+    online: false,
+    dependencies: [
+      { name: '@cantoo/pdf-lib', url: 'https://www.npmjs.com/package/@cantoo/pdf-lib' },
+      { name: 'pdf.js', url: 'https://mozilla.github.io/pdf.js/' },
     ],
   },
   {
