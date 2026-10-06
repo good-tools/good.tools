@@ -1,6 +1,6 @@
-import { useVirtualizer } from '@tanstack/react-virtual'
 import { Download, FlaskConical, FolderOpen, Play } from 'lucide-react'
 import { useRef, useState } from 'react'
+import { ResultTable } from '@/components/ResultTable'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { CodeEditor } from '@/components/ui/code-editor'
@@ -196,7 +196,11 @@ export default function SqlQuery() {
             }
           >
             {result ? (
-              <ResultTable result={result.data} />
+              <ResultTable
+                columns={result.data.columns}
+                numRows={result.data.numRows}
+                cell={(r, c) => cellText(result.data.get(r, c))}
+              />
             ) : (
               <p className='p-2.5 text-[13px] text-muted-foreground'>Load a file and run a query to see results here</p>
             )}
@@ -204,54 +208,5 @@ export default function SqlQuery() {
         </div>
       </div>
     </Workspace>
-  )
-}
-
-function ResultTable({ result }: { result: Result }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const v = useVirtualizer({
-    count: result.numRows,
-    getScrollElement: () => ref.current,
-    estimateSize: () => 24,
-    overscan: 20,
-  })
-  const items = v.getVirtualItems()
-  const top = items[0]?.start ?? 0
-  const bottom = v.getTotalSize() - (items.at(-1)?.end ?? 0)
-
-  return (
-    <div ref={ref} className='h-full overflow-auto font-mono text-xs'>
-      <table className='min-w-full border-separate border-spacing-0'>
-        <thead className='sticky top-0 z-10 bg-muted text-muted-foreground'>
-          <tr>
-            <th scope='col' className='w-px border-b px-2 py-1 text-right font-medium'>
-              #
-            </th>
-            {result.columns.map((c, i) => (
-              <th key={i} scope='col' className='border-b px-2 py-1 text-left font-medium whitespace-nowrap'>
-                {c}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className='whitespace-nowrap'>
-          {top > 0 && <tr style={{ height: top }} />}
-          {items.map((row) => (
-            <tr key={row.index} className='h-6 hover:bg-muted/50'>
-              <td className='border-b px-2 text-right text-muted-foreground'>{row.index + 1}</td>
-              {result.columns.map((_, c) => {
-                const text = cellText(result.get(row.index, c))
-                return (
-                  <td key={c} title={text ?? undefined} className='max-w-96 truncate border-b px-2'>
-                    {text ?? <span className='text-muted-foreground italic'>NULL</span>}
-                  </td>
-                )
-              })}
-            </tr>
-          ))}
-          {bottom > 0 && <tr style={{ height: bottom }} />}
-        </tbody>
-      </table>
-    </div>
   )
 }
