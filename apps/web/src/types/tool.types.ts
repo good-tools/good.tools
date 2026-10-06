@@ -4,6 +4,7 @@ import type { ComponentType, LazyExoticComponent } from 'react'
 export const CATEGORIES = {
   DEVELOPMENT: 'Development',
   ENCODING: 'Encoding',
+  TEXT: 'Text',
   SECURITY: 'Security',
   NETWORK: 'Network',
   '3D': '3D & CAD',
