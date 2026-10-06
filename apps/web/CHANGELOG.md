@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.29.0](https://github.com/good-tools/good.tools/compare/web-v1.28.0...web-v1.29.0) (2026-10-06)
+
+
+### Features
+
+* **web:** add Compress PDF ([#56](https://github.com/good-tools/good.tools/issues/56)) ([50e3d31](https://github.com/good-tools/good.tools/commit/50e3d318ee06c49da404a2f0113fc4386db77a7a))
+* **web:** add Cron Expression explainer ([#57](https://github.com/good-tools/good.tools/issues/57)) ([e5c53f1](https://github.com/good-tools/good.tools/commit/e5c53f10608beb11f3afbc26e35b7cc21eb8d6bc))
+* **web:** add Organize PDF ([#47](https://github.com/good-tools/good.tools/issues/47)) ([6f8e2d8](https://github.com/good-tools/good.tools/commit/6f8e2d8ebffe0e431a31f291955d34c7dc52b8fa))
+* **web:** add Password Generator ([#52](https://github.com/good-tools/good.tools/issues/52)) ([33bf62e](https://github.com/good-tools/good.tools/commit/33bf62e219660e67b52258152cbe12dd410e3bb2))
+* **web:** add QR Code generator and reader ([#48](https://github.com/good-tools/good.tools/issues/48)) ([748ddfd](https://github.com/good-tools/good.tools/commit/748ddfd36060d9952fa8b8ed07eca849e0ba0286))
+* **web:** add Regex Tester ([#49](https://github.com/good-tools/good.tools/issues/49)) ([ec03b2b](https://github.com/good-tools/good.tools/commit/ec03b2b673a9483054c72db154a40fdb10071911))
+* **web:** add Remove Background ([#53](https://github.com/good-tools/good.tools/issues/53)) ([e920e42](https://github.com/good-tools/good.tools/commit/e920e427538a00bc5211271aade6a35f6801aa2e))
+* **web:** add Speech to Text ([#59](https://github.com/good-tools/good.tools/issues/59)) ([7ed2ae2](https://github.com/good-tools/good.tools/commit/7ed2ae209df9a430f01d58e62047eee430b283ce))
+* **web:** add SQL Query tool ([#58](https://github.com/good-tools/good.tools/issues/58)) ([3db6165](https://github.com/good-tools/good.tools/commit/3db6165deeb0f204eedd3e41f94d8ccd81a73179))
+* **web:** add Timestamp Converter ([#51](https://github.com/good-tools/good.tools/issues/51)) ([84a0ddf](https://github.com/good-tools/good.tools/commit/84a0ddf9fc60f711809817cec8c9cb0cbd9535c1))
+* **web:** add UUID / ULID Generator ([#54](https://github.com/good-tools/good.tools/issues/54)) ([3896285](https://github.com/good-tools/good.tools/commit/3896285993a04dcbd136c7fb445d9ccc33ebab65))
+* **web:** add Video & Audio Converter ([#61](https://github.com/good-tools/good.tools/issues/61)) ([711b8e2](https://github.com/good-tools/good.tools/commit/711b8e2d3993777887d3f1ca2d9661bafe132866))
+* **web:** add YAML / JSON / TOML converter ([#50](https://github.com/good-tools/good.tools/issues/50)) ([7425431](https://github.com/good-tools/good.tools/commit/74254310e76199b2dd9de15707d4315d446c81b5))
+* **web:** generate and read barcodes in the QR Code tool ([#62](https://github.com/good-tools/good.tools/issues/62)) ([8a3078a](https://github.com/good-tools/good.tools/commit/8a3078aef8210558958ef9257e2c38a04ecc4de3))
+* **web:** open SQLite databases in SQL Query ([#64](https://github.com/good-tools/good.tools/issues/64)) ([45156e2](https://github.com/good-tools/good.tools/commit/45156e20e8532ea96cbfd735109f050c451d4aff))
+* **web:** suggest three tools of the day on the home page ([#65](https://github.com/good-tools/good.tools/issues/65)) ([fe3a6d2](https://github.com/good-tools/good.tools/commit/fe3a6d2ab2f4d5079871b69f05f403b47645c73b))
+* **web:** work offline as an installable app ([#60](https://github.com/good-tools/good.tools/issues/60)) ([e53f2c6](https://github.com/good-tools/good.tools/commit/e53f2c6f2ef3fa8fb0d9056586d2953754631f9a))
+
 ## [1.28.0](https://github.com/good-tools/good.tools/compare/web-v1.27.0...web-v1.28.0) (2026-10-05)
 
 
