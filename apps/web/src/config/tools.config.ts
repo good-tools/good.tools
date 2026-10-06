@@ -10,6 +10,7 @@ import {
   Container,
   Database,
   Eraser,
+  FileCode,
   FileImage,
   FileKey,
   FileLock,
@@ -412,6 +413,53 @@ export const tools: Tool[] = [
       {
         name: 'xml-formatter',
         url: 'https://www.npmjs.com/package/xml-formatter',
+      },
+    ],
+  },
+  {
+    title: 'Code Beautifier / Minifier',
+    path: '/code-formatter',
+    description: 'Beautify or minify JavaScript, TypeScript, HTML, CSS and SCSS, and format SQL in many dialects',
+    icon: FileCode,
+    categories: [CATEGORIES.DEVELOPMENT],
+    searchTags: [
+      'beautify',
+      'minify',
+      'js minifier',
+      'css minifier',
+      'html formatter',
+      'sql formatter',
+      'prettier',
+      'javascript',
+      'typescript',
+      'scss',
+    ],
+    component: lazy(() => import('@/tools/CodeFormatter')),
+    online: false,
+    dependencies: [
+      {
+        name: '@monaco-editor/react',
+        url: 'https://www.npmjs.com/package/@monaco-editor/react',
+      },
+      {
+        name: 'prettier',
+        url: 'https://www.npmjs.com/package/prettier',
+      },
+      {
+        name: 'terser',
+        url: 'https://www.npmjs.com/package/terser',
+      },
+      {
+        name: 'csso',
+        url: 'https://www.npmjs.com/package/csso',
+      },
+      {
+        name: 'html-minifier-terser',
+        url: 'https://www.npmjs.com/package/html-minifier-terser',
+      },
+      {
+        name: 'sql-formatter',
+        url: 'https://www.npmjs.com/package/sql-formatter',
       },
     ],
   },
