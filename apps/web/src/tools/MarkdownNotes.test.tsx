@@ -5,6 +5,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mergeNotebooks, useNotesStatus, useNotesStore } from '@/stores/notes.store'
 import MarkdownNotes from './MarkdownNotes'
 
+const printDocument = vi.hoisted(() => vi.fn())
+vi.mock('@/lib/print-document', () => ({ printDocument }))
+
 const note = (id: string, body: string, updated: number) => ({ id, body, updated })
 
 beforeEach(() => {
@@ -69,4 +72,11 @@ it('merges two tabs: newer edit of each note wins, deletions stick', () => {
     notes: [note('x', 'x edited in A', 5), note('y', 'y edited in B', 6)],
     deleted: ['z'],
   })
+})
+
+it('exports the active note to the print dialog, titled after the note', async () => {
+  render(<MarkdownNotes />)
+  await userEvent.click(screen.getByRole('button', { name: /export pdf/i }))
+  await vi.waitFor(() => expect(printDocument).toHaveBeenCalled())
+  expect(printDocument).toHaveBeenCalledWith('Alpha', expect.stringContaining('<h2 data-line="3" id="part-one">'))
 })
