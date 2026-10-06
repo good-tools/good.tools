@@ -13,14 +13,15 @@ Free, fast, privacy-focused developer tools that run in your browser.
 
 | Category        | Tools |
 | --------------- | ----- |
-| **Development** | Diff Checker, JSON Formatter, JSON Escape, XML Formatter, YAML / JSON / TOML Converter, Markdown Notes, Regex Tester, Cron Expression, Timestamp Converter, UUID / ULID Generator, SQL Query (DuckDB), MCP Browser, Docker Browser |
+| **Development** | Diff Checker, JSON Formatter, JSON Escape, XML Formatter, YAML / JSON / TOML Converter, Markdown Notes, Regex Tester, Cron Expression, Timestamp Converter, UUID / ULID Generator, CSV / Excel ↔ JSON, Code Beautifier / Minifier, Color Picker & Converter, SQL Query (DuckDB), MCP Browser, Docker Browser |
 | **Encoding**    | Base64, URL Encoder/Decoder, Protobuf Decoder, QR Code & Barcode |
+| **Text**        | Word Counter, Case Converter, Lorem Ipsum Generator |
 | **Security**    | JWT Decoder, Certificate Decoder, Java Object Deserializer, Hash Calculator, Password Generator |
 | **Network**     | Packet Dissector (Wireshark), DNS Lookup, WHOIS, What's My IP, IP to Location |
-| **Image**       | Image Converter, Remove Background |
+| **Image**       | Image Converter, Remove Background, Color Picker & Converter |
 | **Media**       | Video & Audio Converter (FFmpeg), Speech to Text (Whisper) |
 | **3D & CAD**    | STL Repair |
-| **PDF**         | Images to PDF, Merge PDF, Organize PDF, Compress PDF, PDF to Text (OCR), Protect / Unlock PDF |
+| **PDF**         | Images to PDF, Merge PDF, Organize PDF, Compress PDF, Edit PDF, Sign PDF, PDF to Images, PDF to Word, Word to PDF, PDF to Text (OCR), Protect / Unlock PDF |
 
 ## Development
 
