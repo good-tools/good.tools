@@ -1,0 +1,313 @@
+/* Print stylesheet for exported markdown (Markdown Notes → Export PDF). Always light, document typography. */
+@page {
+  size: auto;
+  margin: 20mm 19mm 22mm;
+
+  @bottom-left {
+    font:
+      8pt Inter,
+      system-ui,
+      sans-serif;
+    color: #8a8a8a;
+    vertical-align: top;
+    padding-top: 6mm;
+  }
+  @bottom-right {
+    content: counter(page) " / " counter(pages);
+    font:
+      8pt Inter,
+      system-ui,
+      sans-serif;
+    color: #8a8a8a;
+    vertical-align: top;
+    padding-top: 6mm;
+  }
+}
+
+:root {
+  color-scheme: light;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  --fg: #1f2328;
+  --muted: #59636e;
+  --rule: #d8dee4;
+  --soft: #f6f8fa;
+  --hl-keyword: #cf222e;
+  --hl-string: #0a3069;
+  --hl-comment: #6e7781;
+  --hl-number: #0550ae;
+  --hl-title: #8250df;
+  --hl-attr: #953800;
+  --hl-add: #116329;
+  --hl-del: #82071e;
+}
+
+html,
+body {
+  margin: 0;
+  background: #fff;
+  color: var(--fg);
+}
+
+.doc {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.6;
+  font-feature-settings: "cv11", "ss01";
+  max-width: 165mm;
+  margin: 0 auto;
+  overflow-wrap: break-word;
+  orphans: 3;
+  widows: 3;
+  hyphens: auto;
+}
+
+.doc > :first-child {
+  margin-top: 0;
+}
+.doc :is(p, ul, ol, blockquote, pre, table, hr, figure) {
+  margin: 0 0 0.9em;
+}
+
+/* Headings: clear scale, kept with what follows */
+.doc :is(h1, h2, h3, h4, h5, h6) {
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  margin: 1.6em 0 0.55em;
+  break-after: avoid;
+  break-inside: avoid;
+  hyphens: manual;
+}
+.doc h1 {
+  font-size: 22pt;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.7em;
+  padding-bottom: 0.3em;
+  border-bottom: 1.5pt solid var(--fg);
+}
+.doc h2 {
+  font-size: 15pt;
+  padding-bottom: 0.25em;
+  border-bottom: 0.75pt solid var(--rule);
+}
+.doc h3 {
+  font-size: 12.5pt;
+}
+.doc h4 {
+  font-size: 11pt;
+}
+.doc :is(h5, h6) {
+  font-size: 10pt;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.doc a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 0.5pt;
+  text-underline-offset: 2pt;
+  text-decoration-color: #8c959f;
+}
+.doc strong {
+  font-weight: 650;
+}
+
+/* Lists, including task lists */
+.doc :is(ul, ol) {
+  padding-left: 1.5em;
+}
+.doc li + li,
+.doc li > :is(ul, ol) {
+  margin-top: 0.2em;
+}
+.doc li > :is(ul, ol) {
+  margin-bottom: 0;
+}
+.doc li::marker {
+  color: var(--muted);
+}
+.doc li:has(> input[type="checkbox"]) {
+  list-style: none;
+  margin-left: -1.3em;
+}
+.doc input[type="checkbox"] {
+  appearance: none;
+  width: 0.85em;
+  height: 0.85em;
+  margin: 0 0.45em 0 0;
+  vertical-align: -0.04em;
+  border: 0.75pt solid var(--muted);
+  border-radius: 2pt;
+  display: inline-grid;
+  place-content: center;
+}
+.doc input[type="checkbox"]:checked {
+  background: var(--fg);
+  border-color: var(--fg);
+}
+.doc input[type="checkbox"]:checked::before {
+  content: "";
+  width: 0.45em;
+  height: 0.25em;
+  margin-top: -0.1em;
+  border: solid #fff;
+  border-width: 0 0 1.5pt 1.5pt;
+  transform: rotate(-45deg);
+}
+
+.doc blockquote {
+  margin-left: 0;
+  margin-right: 0;
+  padding: 0.1em 0 0.1em 1em;
+  border-left: 2.5pt solid var(--rule);
+  color: var(--muted);
+  break-inside: avoid;
+}
+.doc blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.doc hr {
+  border: 0;
+  border-top: 0.75pt solid var(--rule);
+  margin: 1.6em 0;
+}
+
+.doc :is(img, svg, figure) {
+  break-inside: avoid;
+}
+.doc img {
+  max-width: 100%;
+  max-height: 110mm;
+  object-fit: contain;
+}
+
+/* Code */
+.doc :is(code, pre) {
+  font-family: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 8.5pt;
+  font-variant-ligatures: none;
+}
+.doc :not(pre) > code {
+  padding: 0.1em 0.3em;
+  border-radius: 3pt;
+  background: var(--soft);
+  border: 0.5pt solid var(--rule);
+  overflow-wrap: anywhere;
+}
+.doc pre {
+  padding: 0.75em 1em;
+  border: 0.75pt solid var(--rule);
+  border-radius: 4pt;
+  background: var(--soft);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  break-inside: avoid;
+  hyphens: none;
+}
+/* A block longer than a page would leave a gap if pushed to the next one, so it flows (printDocument marks it) */
+.doc pre.long {
+  break-inside: auto;
+  orphans: 4;
+  widows: 4;
+}
+.doc pre > code {
+  font-size: inherit;
+}
+.doc pre.mermaid {
+  border: 0;
+  background: none;
+  padding: 0;
+  text-align: center;
+  white-space: normal;
+}
+.doc pre.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Tables: full width, ruled, zebra rows */
+.doc table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9.5pt;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
+  break-inside: avoid;
+}
+.doc thead {
+  display: table-header-group;
+}
+.doc tr {
+  break-inside: avoid;
+}
+.doc :is(th, td) {
+  padding: 0.4em 0.7em;
+  border: 0.75pt solid var(--rule);
+  vertical-align: top;
+}
+.doc th:not([align]) {
+  text-align: left;
+}
+.doc th {
+  font-weight: 650;
+  background: #eef1f4;
+}
+.doc tbody tr:nth-child(even) {
+  background: var(--soft);
+}
+
+/* Syntax highlighting (highlight.js classes), GitHub light palette */
+.doc .hljs-comment,
+.doc .hljs-quote,
+.doc .hljs-meta {
+  color: var(--hl-comment);
+}
+.doc .hljs-comment {
+  font-style: italic;
+}
+.doc :is(.hljs-keyword, .hljs-selector-tag, .hljs-type, .hljs-doctag, .hljs-template-tag) {
+  color: var(--hl-keyword);
+}
+.doc :is(.hljs-string, .hljs-regexp, .hljs-meta .hljs-string) {
+  color: var(--hl-string);
+}
+.doc
+  :is(
+    .hljs-number,
+    .hljs-literal,
+    .hljs-symbol,
+    .hljs-bullet,
+    .hljs-built_in,
+    .hljs-selector-id,
+    .hljs-selector-class
+  ) {
+  color: var(--hl-number);
+}
+.doc :is(.hljs-title, .hljs-section, .hljs-name) {
+  color: var(--hl-title);
+}
+.doc :is(.hljs-attr, .hljs-attribute, .hljs-variable, .hljs-template-variable, .hljs-property, .hljs-params) {
+  color: var(--hl-attr);
+}
+.doc .hljs-addition {
+  color: var(--hl-add);
+}
+.doc .hljs-deletion {
+  color: var(--hl-del);
+}
+.doc .hljs-strong {
+  font-weight: 650;
+}
+.doc .hljs-emphasis {
+  font-style: italic;
+}
+.doc pre.mermaid[data-error] {
+  white-space: pre-wrap;
+  text-align: left;
+}

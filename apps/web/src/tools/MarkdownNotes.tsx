@@ -1,5 +1,5 @@
 import type { OnMount } from '@monaco-editor/react'
-import { Download, FilePlus, FolderOpen, PanelLeft, TableOfContents, Trash2 } from 'lucide-react'
+import { Download, FilePlus, FileText, FolderOpen, PanelLeft, TableOfContents, Trash2 } from 'lucide-react'
 import { useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -19,34 +19,48 @@ type MonacoEditor = Parameters<OnMount>[0]
 const diagrams = new Map<string, string>()
 let diagramSeq = 0
 
+/** Renders the ```mermaid blocks under root into SVG; cached diagrams are applied synchronously. */
+async function renderDiagrams(root: ParentNode, dark: boolean, cancelled = () => false) {
+  const pending: [HTMLElement, string][] = []
+  for (const el of root.querySelectorAll<HTMLElement>('pre.mermaid')) {
+    const key = `${dark}:${el.textContent}`
+    const svg = diagrams.get(key)
+    if (svg) el.innerHTML = svg
+    else pending.push([el, key])
+  }
+  if (!pending.length) return
+  const { default: mermaid } = await import('mermaid')
+  mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: dark ? 'dark' : 'neutral' })
+  for (const [el, key] of pending) {
+    try {
+      const { svg } = await mermaid.render(`mermaid-${++diagramSeq}`, key.slice(key.indexOf(':') + 1))
+      diagrams.set(key, svg)
+      if (!cancelled()) el.innerHTML = svg
+    } catch (e) {
+      if (!cancelled()) el.dataset.error = e instanceof Error ? e.message : String(e)
+    }
+  }
+}
+
 function useMermaid(container: React.RefObject<HTMLElement | null>, html: string, dark: boolean) {
   // biome-ignore lint/correctness/useExhaustiveDependencies: re-scan the DOM whenever the preview html changes
   useLayoutEffect(() => {
-    const pending: [HTMLElement, string][] = []
-    for (const el of container.current?.querySelectorAll<HTMLElement>('pre.mermaid') ?? []) {
-      const key = `${dark}:${el.textContent}`
-      const svg = diagrams.get(key)
-      if (svg) el.innerHTML = svg
-      else pending.push([el, key])
-    }
-    if (!pending.length) return
+    if (!container.current) return
     let cancelled = false
-    void import('mermaid').then(async ({ default: mermaid }) => {
-      mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: dark ? 'dark' : 'neutral' })
-      for (const [el, key] of pending) {
-        try {
-          const { svg } = await mermaid.render(`mermaid-${++diagramSeq}`, key.slice(key.indexOf(':') + 1))
-          diagrams.set(key, svg)
-          if (!cancelled) el.innerHTML = svg
-        } catch (e) {
-          if (!cancelled) el.dataset.error = e instanceof Error ? e.message : String(e)
-        }
-      }
-    })
+    void renderDiagrams(container.current, dark, () => cancelled)
     return () => {
       cancelled = true
     }
   }, [container, html, dark])
+}
+
+/** Opens the print dialog for a note, rendered as an always-light document ("Save as PDF" in the dialog). */
+async function exportPdf(note: Note) {
+  const page = document.createElement('div')
+  page.innerHTML = renderMarkdown(note.body).html
+  await renderDiagrams(page, false)
+  const { printDocument } = await import('@/lib/print-document')
+  await printDocument(noteTitle(note), page.innerHTML)
 }
 
 /** Keeps the preview scrolled to the part of the note the editor shows, and the other way round. */
@@ -183,6 +197,9 @@ function Notes() {
           </FileButton>
           <Button size='sm' variant='ghost' onClick={() => download(noteTitle(active), active.body)}>
             <Download /> Download .md
+          </Button>
+          <Button size='sm' variant='ghost' title='Print or save as PDF' onClick={() => void exportPdf(active)}>
+            <FileText /> Export PDF
           </Button>
           <Button
             size='sm'
