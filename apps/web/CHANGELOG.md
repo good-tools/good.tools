@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.30.0](https://github.com/good-tools/good.tools/compare/web-v1.29.0...web-v1.30.0) (2026-10-06)
+
+
+### Features
+
+* **web:** add Case Converter and Lorem Ipsum Generator ([#77](https://github.com/good-tools/good.tools/issues/77)) ([8e59292](https://github.com/good-tools/good.tools/commit/8e592929eb99543f307251c29ede400b7f9b0fee))
+* **web:** add Code Beautifier / Minifier ([#75](https://github.com/good-tools/good.tools/issues/75)) ([1f74189](https://github.com/good-tools/good.tools/commit/1f741891217e590b00aa90f7c99aa5aa7d9a94e2))
+* **web:** add Color Picker & Converter ([#66](https://github.com/good-tools/good.tools/issues/66)) ([76e3129](https://github.com/good-tools/good.tools/commit/76e312932b22a4796930060cd5eccb5cc9919403))
+* **web:** add CSV / Excel ↔ JSON ([#73](https://github.com/good-tools/good.tools/issues/73)) ([7720fc9](https://github.com/good-tools/good.tools/commit/7720fc9b3c8204bbafdd0e72f95706d3d72d47b0))
+* **web:** add Edit PDF ([#69](https://github.com/good-tools/good.tools/issues/69)) ([72123b8](https://github.com/good-tools/good.tools/commit/72123b822bd3000836dbd0676e8f6d1f914f0cfc))
+* **web:** add PDF to Images ([#67](https://github.com/good-tools/good.tools/issues/67)) ([3a51726](https://github.com/good-tools/good.tools/commit/3a51726ee47955eb24dc7b90c08635ceeaf76293))
+* **web:** add PDF to Word ([#76](https://github.com/good-tools/good.tools/issues/76)) ([827c8dc](https://github.com/good-tools/good.tools/commit/827c8dcf66482d5679d9c83d844a7d4f6fe9065f))
+* **web:** add Sign PDF ([#68](https://github.com/good-tools/good.tools/issues/68)) ([b6cdde7](https://github.com/good-tools/good.tools/commit/b6cdde700be8a68f22e34088ebbb1284fd732e31))
+* **web:** add Word Counter ([#70](https://github.com/good-tools/good.tools/issues/70)) ([d7c18e2](https://github.com/good-tools/good.tools/commit/d7c18e293a97f490f56fab133d8a7f1686500301))
+* **web:** add Word to PDF ([#74](https://github.com/good-tools/good.tools/issues/74)) ([c9edf40](https://github.com/good-tools/good.tools/commit/c9edf40292fe47da7cdce33b0d5e4438e91d8f35))
+* **web:** export Markdown Notes to PDF ([#72](https://github.com/good-tools/good.tools/issues/72)) ([a204305](https://github.com/good-tools/good.tools/commit/a204305a59cf0d287cdd9794440ffd3974334259))
+
 ## [1.29.0](https://github.com/good-tools/good.tools/compare/web-v1.28.0...web-v1.29.0) (2026-10-06)
 
 
