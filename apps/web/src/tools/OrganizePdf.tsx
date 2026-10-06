@@ -10,8 +10,6 @@ import {
   Undo2,
   X,
 } from 'lucide-react'
-import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist'
-import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 import { useState } from 'react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -23,9 +21,8 @@ import { Spinner } from '@/components/ui/spinner'
 import { Panel, Workspace } from '@/components/ui/toolbar'
 import { useToolState } from '@/hooks/useToolState'
 import { openPdf, organizePdf, type PageEdit, parsePageRange, renamePdf } from '@/lib/pdf'
+import { renderPages } from '@/lib/pdf-render'
 import { cn, downloadBlob } from '@/lib/utils'
-
-GlobalWorkerOptions.workerSrc = workerUrl
 
 interface Page extends PageEdit {
   id: string
@@ -42,28 +39,6 @@ const pagesOf = (count: number): Page[] =>
 
 /** Bumped per open and clear, so a slower earlier open (or its thumbnails) stops writing state. */
 let generation = 0
-
-/** Renders every page small (pdf.js, which runs in its own worker), one at a time, as JPEG data URLs. */
-async function renderThumbs(gen: number, bytes: Uint8Array, onThumb: (index: number, url: string) => void) {
-  // pdf.js transfers the buffer to its worker; keep ours for saving
-  const task = getDocument({ data: bytes.slice() })
-  try {
-    const doc = await task.promise
-    for (let n = 1; n <= doc.numPages && gen === generation; n++) {
-      const page = await doc.getPage(n)
-      const base = page.getViewport({ scale: 1 })
-      const viewport = page.getViewport({ scale: 320 / Math.max(base.width, base.height) })
-      const canvas = Object.assign(document.createElement('canvas'), {
-        width: Math.ceil(viewport.width),
-        height: Math.ceil(viewport.height),
-      })
-      await page.render({ canvas, viewport }).promise
-      if (gen === generation) onThumb(n - 1, canvas.toDataURL('image/jpeg', 0.8))
-    }
-  } finally {
-    void task.destroy()
-  }
-}
 
 function OrganizePdf() {
   const [doc, setDoc] = useToolState<Doc | null>('organize-pdf:doc', null)
@@ -88,12 +63,16 @@ function OrganizePdf() {
       setPages(pagesOf(count))
       setThumbs([])
       setBusy(false)
-      await renderThumbs(gen, bytes, (i, url) =>
-        setThumbs((t) => {
-          const next = [...t]
-          next[i] = url
-          return next
-        }),
+      await renderPages(
+        bytes,
+        320,
+        (i, url) =>
+          setThumbs((t) => {
+            const next = [...t]
+            next[i] = url
+            return next
+          }),
+        () => gen === generation,
       )
     } catch (e) {
       if (gen !== generation) return
