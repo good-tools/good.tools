@@ -40,6 +40,7 @@ import {
   Regex,
   Search,
   Signature,
+  WholeWord,
 } from 'lucide-react'
 import { lazy } from 'react'
 import { runtimeConfig } from '@/config/runtime.config'
@@ -358,6 +359,25 @@ export const tools: Tool[] = [
       { name: 'dompurify', url: 'https://www.npmjs.com/package/dompurify' },
       { name: 'mermaid', url: 'https://www.npmjs.com/package/mermaid' },
     ],
+  },
+  {
+    title: 'Word Counter',
+    path: '/word-counter',
+    description: 'Count words, characters, sentences and paragraphs, with reading time and keyword density',
+    icon: WholeWord,
+    categories: [CATEGORIES.TEXT],
+    searchTags: [
+      'word count',
+      'character count',
+      'letter counter',
+      'reading time',
+      'speaking time',
+      'keyword density',
+      'text',
+      'statistics',
+    ],
+    component: lazy(() => import('@/tools/WordCounter')),
+    online: false,
   },
   {
     title: 'JSON Escape',
