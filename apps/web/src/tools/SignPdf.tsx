@@ -344,7 +344,7 @@ function SignPdf() {
       await renderPages(
         bytes,
         1400,
-        (i, url) =>
+        (i, { url }) =>
           setImages((t) => {
             const next = [...t]
             next[i] = url

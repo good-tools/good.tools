@@ -66,7 +66,7 @@ function OrganizePdf() {
       await renderPages(
         bytes,
         320,
-        (i, url) =>
+        (i, { url }) =>
           setThumbs((t) => {
             const next = [...t]
             next[i] = url
