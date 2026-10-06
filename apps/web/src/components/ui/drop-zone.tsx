@@ -74,10 +74,12 @@ export function DropZone({ onFiles, accept, multiple, disabled, className, child
 export function DropTarget({
   onFiles,
   label = 'Drop to add',
+  className,
   children,
 }: {
   onFiles: (files: File[]) => void
   label?: string
+  className?: string
   children: ReactNode
 }) {
   const [over, setOver] = useState(false)
@@ -86,7 +88,7 @@ export function DropTarget({
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: drop-only convenience; every tool also has a file button
     <div
-      className='relative'
+      className={cn('relative', className)}
       onDragOver={(e) => {
         if (!hasFiles(e)) return
         e.preventDefault()
