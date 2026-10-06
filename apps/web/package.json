@@ -34,6 +34,7 @@
     "clsx": "^2.1.1",
     "croner": "^10.0.1",
     "cronstrue": "^3.29.0",
+    "docx-preview": "^0.4.1",
     "dompurify": "^3.4.16",
     "fast-xml-parser": "^5.11.2",
     "fflate": "^0.8.2",
