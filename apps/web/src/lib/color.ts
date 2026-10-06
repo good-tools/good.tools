@@ -144,7 +144,10 @@ export function parseColor(input: string): Rgba {
   const [main, slash, extra] = fn[2]!.split('/')
   if (extra !== undefined) throw new Error(`Invalid ${name}() value: "${input.trim()}"`)
   const parts = main!.trim().split(/\s*,\s*|\s+/)
-  if (slash !== undefined) parts.push(slash.trim())
+  if (slash !== undefined) {
+    if (parts.length !== 3) throw new Error(`Invalid ${name}() value: "${input.trim()}"`)
+    parts.push(slash.trim())
+  }
   if (parts.length < 3 || parts.length > 4) throw new Error(`${name}() needs 3 components plus an optional alpha`)
   const alpha = parts[3] === undefined ? 1 : num(parts[3], 1)
   const [p0, p1, p2] = parts

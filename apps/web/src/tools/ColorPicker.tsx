@@ -89,7 +89,8 @@ function ColorField({
         aria-label={`${label} picker`}
         className='h-7 w-9 cursor-pointer rounded-md border bg-background p-0.5'
         value={color ? toHex({ ...color, alpha: 1 }) : '#000000'}
-        onChange={(e) => onChange(e.target.value)}
+        // The native input is opaque-only: keep the current alpha
+        onChange={(e) => onChange(toHex({ ...parseColor(e.target.value), alpha: color?.alpha ?? 1 }))}
       />
       {typeof window !== 'undefined' && window.EyeDropper && (
         <Button size='icon-sm' variant='ghost' onClick={pick} aria-label={`Pick ${label.toLowerCase()} from screen`}>

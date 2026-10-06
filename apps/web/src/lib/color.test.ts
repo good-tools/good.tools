@@ -44,7 +44,17 @@ describe('parseColor', () => {
   ])('%s -> %s', (input, expected) => expect(hex(input)).toBe(expected))
 
   it('rejects invalid input', () => {
-    for (const s of ['', 'notacolor', '#12345', 'rgb(1 2)', 'rgb(a b c)', 'hsl(10 20% 30% / 1 / 2)', 'rgb(1px 2 3)'])
+    for (const s of [
+      '',
+      'notacolor',
+      '#12345',
+      'rgb(1 2)',
+      'rgb(a b c)',
+      'hsl(10 20% 30% / 1 / 2)',
+      'rgb(1px 2 3)',
+      'rgb(1 2 / 0.5)',
+      'rgb(1, 2, 3, 0.5 / 0.5)',
+    ])
       expect(() => parseColor(s)).toThrow()
   })
 })

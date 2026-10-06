@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { clearToolState } from '@/hooks/useToolState'
@@ -27,8 +27,13 @@ describe('ColorPicker', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Not a CSS color')
   })
 
-  it('sets the color from the tints strip', async () => {
+  it('keeps alpha from the native picker and sets the color from the tints strip', async () => {
     render(<ColorPicker />)
+    await userEvent.clear(screen.getByLabelText('Color'))
+    await userEvent.type(screen.getByLabelText('Color'), '#ff000080')
+    fireEvent.input(screen.getByLabelText('Color picker'), { target: { value: '#00ff00' } })
+    expect(screen.getByLabelText('Color')).toHaveValue('#00ff0080')
+
     const swatches = screen.getAllByRole('button', { name: /^Use #/ })
     expect(swatches).toHaveLength(11)
     const lightest = swatches[0]!.title
