@@ -123,12 +123,14 @@ export default defineConfig({
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),
       ws: path.resolve(import.meta.dirname, './src/ws-mock.ts'),
+      // Not in the package's exports map, so it can't be imported by its package path
+      'zeroperl.wasm': path.resolve(import.meta.dirname, './node_modules/@6over3/zeroperl-ts/dist/esm/zeroperl.wasm'),
     },
   },
 
   worker: {
     format: 'es',
-    plugins: () => [nodePolyfills({ include: ['buffer'], globals: { Buffer: true } })],
+    plugins: () => [gzipAsset(), nodePolyfills({ include: ['buffer'], globals: { Buffer: true } })],
   },
 
   build: {
