@@ -127,7 +127,7 @@ function FormatSelect({
   return (
     <label className='flex items-center gap-1.5 text-xs text-muted-foreground'>
       {label}
-      <select className={selectClass} value={value} onChange={(e) => onChange(e.target.value)}>
+      <select aria-label={label} className={selectClass} value={value} onChange={(e) => onChange(e.target.value)}>
         {formats.map((f) => (
           <option key={f.id} value={f.id}>
             {f.label}
