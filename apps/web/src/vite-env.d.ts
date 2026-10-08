@@ -9,6 +9,24 @@ declare module '*?gzip' {
   export default url
 }
 
+/** pandoc-wasm's loader-free core (aliased in vite.config.ts; the package only exports its auto-loading entry) */
+declare module 'pandoc-wasm/src/core.js' {
+  interface ConvertResult {
+    stdout: string
+    stderr: string
+    warnings: { verbosity?: string; pretty?: string }[]
+    files: Record<string, Blob>
+  }
+  export function createPandocInstance(wasm: ArrayBuffer): Promise<{
+    convert(
+      options: Record<string, unknown>,
+      stdin: string | null,
+      files: Record<string, Blob | string>,
+    ): Promise<ConvertResult>
+    query(options: { query: string; format?: string }): unknown
+  }>
+}
+
 interface ImportMetaEnv {
   readonly VITE_ENABLE_TELEMETRY?: string
   readonly VITE_GA_TRACKING_ID?: string

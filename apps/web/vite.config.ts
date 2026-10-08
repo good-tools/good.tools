@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 import { gzipSync } from 'node:zlib'
 import tailwindcss from '@tailwindcss/vite'
@@ -122,13 +123,15 @@ export default defineConfig({
     conditions: process.env.VITEST ? undefined : ['onnxruntime-web-use-extern-wasm', ...defaultClientConditions],
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),
+      // The Document Converter loads pandoc's wasm itself (gzipped) and only needs the package's core
+      'pandoc-wasm/src': path.dirname(createRequire(import.meta.url).resolve('pandoc-wasm')),
       ws: path.resolve(import.meta.dirname, './src/ws-mock.ts'),
     },
   },
 
   worker: {
     format: 'es',
-    plugins: () => [nodePolyfills({ include: ['buffer'], globals: { Buffer: true } })],
+    plugins: () => [gzipAsset(), nodePolyfills({ include: ['buffer'], globals: { Buffer: true } })],
   },
 
   build: {
