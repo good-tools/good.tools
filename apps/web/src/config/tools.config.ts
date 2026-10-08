@@ -570,7 +570,7 @@ export const tools: Tool[] = [
     title: 'Image Converter',
     path: '/image-converter',
     description:
-      'Convert and resize images to JPEG, PNG, WebP or AVIF with quality control, removing location metadata',
+      'Convert, resize and compress images to JPEG, PNG, WebP or AVIF with a before/after comparison, removing location metadata',
     icon: ImageIcon,
     categories: [CATEGORIES.IMAGE],
     searchTags: [
@@ -584,6 +584,11 @@ export const tools: Tool[] = [
       'heic',
       'resize',
       'compress',
+      'compress image',
+      'optimize',
+      'optimise',
+      'squoosh',
+      'compare',
       'exif',
       'format',
       'photo',
