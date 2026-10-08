@@ -24,6 +24,11 @@ export function useToolState<T>(key: string, initial: T | (() => T)) {
   return [value, set] as const
 }
 
+/** Hand a value to another tool: it picks it up the next time it mounts (e.g. "Open in STL Repair"). */
+export function setToolState<T>(key: string, value: T) {
+  cache.set(key, value)
+}
+
 /** Test helper */
 export function clearToolState() {
   cache.clear()

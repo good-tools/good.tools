@@ -15,3 +15,10 @@ interface ImportMetaEnv {
   readonly VITE_DISABLE_ONLINE_TOOLS?: string
   readonly VITE_API_URL?: string
 }
+
+/** OpenCascade import (STEP / IGES / BREP); the result is typed as OcctResult in src/lib/cad.ts */
+declare module 'occt-import-js' {
+  export default function occtimportjs(module?: { locateFile?: (path: string) => string }): Promise<{
+    ReadFile(format: 'step' | 'iges' | 'brep', content: Uint8Array, params: object | null): unknown
+  }>
+}
