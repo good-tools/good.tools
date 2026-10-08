@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0](https://github.com/good-tools/good.tools/compare/api-v0.2.0...api-v0.3.0) (2026-10-08)
+
+
+### Features
+
+* **web:** add Email Security Checker ([#83](https://github.com/good-tools/good.tools/issues/83)) ([97bf2f1](https://github.com/good-tools/good.tools/commit/97bf2f161f7e8fa0e6d8705f43fe87999ad9fef1))
+* **web:** add HTTP & TLS Inspector ([#84](https://github.com/good-tools/good.tools/issues/84)) ([e76c446](https://github.com/good-tools/good.tools/commit/e76c446a9bc1997d5820642da24bc021b8f5b549))
+
 ## [0.2.0](https://github.com/good-tools/good.tools/compare/api-v0.1.0...api-v0.2.0) (2026-10-05)
 
 

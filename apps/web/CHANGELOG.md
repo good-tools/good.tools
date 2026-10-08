@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.31.0](https://github.com/good-tools/good.tools/compare/web-v1.30.0...web-v1.31.0) (2026-10-08)
+
+
+### Features
+
+* **web:** add Binary Explorer ([#80](https://github.com/good-tools/good.tools/issues/80)) ([eccea6b](https://github.com/good-tools/good.tools/commit/eccea6beb0f167e05f9aec0da372603767bdcf64))
+* **web:** add CSR & Certificate Toolkit ([#89](https://github.com/good-tools/good.tools/issues/89)) ([ad88b6b](https://github.com/good-tools/good.tools/commit/ad88b6bc8a2d71fe8a67ba6a9e3e1174dfa825ef))
+* **web:** add Document Converter ([#87](https://github.com/good-tools/good.tools/issues/87)) ([016e273](https://github.com/good-tools/good.tools/commit/016e273c2b5b48d7e74303f6dcfc324d7ac45596))
+* **web:** add Email Security Checker ([#83](https://github.com/good-tools/good.tools/issues/83)) ([97bf2f1](https://github.com/good-tools/good.tools/commit/97bf2f161f7e8fa0e6d8705f43fe87999ad9fef1))
+* **web:** add File Identifier ([#82](https://github.com/good-tools/good.tools/issues/82)) ([7c14844](https://github.com/good-tools/good.tools/commit/7c1484430b8698b2611ab026407e1e7363c01318))
+* **web:** add HTTP & TLS Inspector ([#84](https://github.com/good-tools/good.tools/issues/84)) ([e76c446](https://github.com/good-tools/good.tools/commit/e76c446a9bc1997d5820642da24bc021b8f5b549))
+* **web:** add Metadata Viewer & Stripper ([#88](https://github.com/good-tools/good.tools/issues/88)) ([8f33075](https://github.com/good-tools/good.tools/commit/8f33075da473c9e68e24f95114e85be0396aec0b))
+* **web:** add STEP / IGES Viewer ([#86](https://github.com/good-tools/good.tools/issues/86)) ([f7736c6](https://github.com/good-tools/good.tools/commit/f7736c65d22d921aa74811193c2bbc16ef4e09ee))
+* **web:** add YARA Rule Tester ([#79](https://github.com/good-tools/good.tools/issues/79)) ([e88cb41](https://github.com/good-tools/good.tools/commit/e88cb413e305000714194c21db4456dbef03bcc9))
+* **web:** compare and optimize in Image Converter ([#81](https://github.com/good-tools/good.tools/issues/81)) ([f6426b3](https://github.com/good-tools/good.tools/commit/f6426b3afdab025ad2bc536492329448c3311654))
+* **web:** reveal hidden data in Metadata Viewer ([#91](https://github.com/good-tools/good.tools/issues/91)) ([1987c82](https://github.com/good-tools/good.tools/commit/1987c82f2f82e9d85b8a318294961acf5173ecd3))
+
 ## [1.30.0](https://github.com/good-tools/good.tools/compare/web-v1.29.0...web-v1.30.0) (2026-10-06)
 
 
