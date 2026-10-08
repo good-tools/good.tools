@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { DropZone } from '@/components/ui/drop-zone'
 import { fieldClass, Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
-import { Panel, Split, Workspace } from '@/components/ui/toolbar'
+import { Panel, Workspace } from '@/components/ui/toolbar'
 import { useToolState } from '@/hooks/useToolState'
 import { cn, downloadBlob } from '@/lib/utils'
 import {
@@ -71,17 +71,131 @@ function outputSize(info: ImageInfo, mode: ResizeMode, pct: number, w: number | 
   }
 }
 
-function Preview({ title, url, footer }: { title: string; url?: string; footer: React.ReactNode }) {
+interface View {
+  x: number
+  y: number
+  zoom: number
+}
+
+const FIT: View = { x: 0, y: 0, zoom: 1 }
+
+/** Zoom by `factor` keeping the point (`px`, `py`) of the viewport under the cursor. Zoom stays within 1–32×. */
+export function zoomAt(view: View, factor: number, px: number, py: number): View {
+  const zoom = Math.min(32, Math.max(1, view.zoom * factor))
+  if (zoom === 1) return FIT
+  const k = zoom / view.zoom
+  return { zoom, x: px - (px - view.x) * k, y: py - (py - view.y) * k }
+}
+
+/** Both images in one viewport with a draggable split; wheel zooms and dragging pans both at once. */
+function Compare({ before, after, afterLabel }: { before?: string; after?: string; afterLabel: string }) {
+  const [split, setSplit] = useState(50)
+  const [view, setView] = useState(FIT)
+  const box = useRef<HTMLDivElement>(null)
+
+  // React's wheel listener is passive, so preventDefault (stop the page scrolling) needs a native one
+  useEffect(() => {
+    const el = box.current
+    if (!el) return
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault()
+      const r = el.getBoundingClientRect()
+      setView((v) => zoomAt(v, Math.exp(-e.deltaY / 300), e.clientX - r.left, e.clientY - r.top))
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [])
+
+  const drag = (e: React.PointerEvent, move: (dx: number, dy: number, width: number) => void) => {
+    e.preventDefault()
+    const el = e.currentTarget as HTMLElement
+    el.setPointerCapture(e.pointerId)
+    let { clientX: lx, clientY: ly } = e
+    const width = box.current?.clientWidth ?? 1
+    el.onpointermove = (m) => {
+      move(m.clientX - lx, m.clientY - ly, width)
+      lx = m.clientX
+      ly = m.clientY
+    }
+    el.onpointerup = () => {
+      el.onpointermove = null
+    }
+  }
+
+  const layer = (url: string | undefined, alt: string, clip?: string) => (
+    <div className='absolute inset-0 overflow-hidden' style={{ clipPath: clip }}>
+      {url && (
+        <img
+          src={url}
+          alt={alt}
+          draggable={false}
+          className='size-full origin-top-left object-contain'
+          style={{
+            transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})`,
+            imageRendering: view.zoom >= 4 ? 'pixelated' : undefined,
+          }}
+        />
+      )}
+    </div>
+  )
+  const chip = 'pointer-events-none absolute top-2 rounded bg-background/80 px-1.5 py-0.5 text-[11px] font-medium'
+
   return (
-    <Panel title={title} actions={<span className='px-1.5 text-xs text-muted-foreground'>{footer}</span>}>
-      <div className='flex h-full items-center justify-center bg-muted/30 p-2'>
-        {url ? (
-          <img src={url} alt={title} className='max-h-full max-w-full object-contain' />
-        ) : (
-          <span className='text-xs text-muted-foreground'>Converting…</span>
-        )}
+    <div
+      ref={box}
+      role='group'
+      aria-label='Before and after: scroll to zoom, drag to pan, double-click to fit'
+      className='relative h-full cursor-grab touch-none overflow-hidden bg-muted/30 select-none active:cursor-grabbing'
+      onPointerDown={(e) =>
+        drag(e, (dx, dy) => setView((v) => (v.zoom === 1 ? v : { ...v, x: v.x + dx, y: v.y + dy })))
+      }
+      onDoubleClick={() => setView(FIT)}
+    >
+      {layer(before, 'Original')}
+      {layer(after, afterLabel, `inset(0 0 0 ${split}%)`)}
+      {!after && (
+        <span
+          className='absolute inset-y-0 right-0 flex items-center justify-center text-xs text-muted-foreground'
+          style={{ left: `${split}%` }}
+        >
+          Converting…
+        </span>
+      )}
+      <span className={cn(chip, 'left-2')}>Original</span>
+      <span className={cn(chip, 'right-2')}>{afterLabel}</span>
+      <div
+        role='slider'
+        tabIndex={0}
+        aria-label='Comparison split'
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(split)}
+        className='group absolute inset-y-0 -ml-2 w-4 cursor-ew-resize focus-visible:outline-none'
+        style={{ left: `${split}%` }}
+        onPointerDown={(e) => {
+          e.stopPropagation()
+          drag(e, (dx, _, width) => setSplit((s) => Math.min(100, Math.max(0, s + (dx / width) * 100))))
+        }}
+        onKeyDown={(e) => {
+          const step = e.key === 'ArrowLeft' ? -2 : e.key === 'ArrowRight' ? 2 : 0
+          if (step) setSplit((s) => Math.min(100, Math.max(0, s + step)))
+        }}
+      >
+        <div className='mx-auto h-full w-px bg-foreground/70' />
+        <div className='absolute top-1/2 left-1/2 h-8 w-2 -translate-1/2 rounded-full border bg-background shadow-sm group-focus-visible:ring-2 group-focus-visible:ring-ring/50' />
       </div>
-    </Panel>
+      {view.zoom > 1 && (
+        <Button
+          size='sm'
+          variant='outline'
+          className='absolute right-2 bottom-2'
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={() => setView(FIT)}
+        >
+          {Math.round(view.zoom * 100)}% · Fit
+        </Button>
+      )}
+    </div>
   )
 }
 
@@ -118,7 +232,11 @@ function ImageConverter() {
   const sourceRef = useRef(source)
   sourceRef.current = source
 
-  const originalUrl = useObjectUrl(source?.buffer, source?.type ?? '')
+  // Show the browser-decoded PNG when the original (e.g. HEIC) can't be displayed directly
+  const originalUrl = useObjectUrl(
+    source?.decoded ?? source?.buffer,
+    source?.decoded ? 'image/png' : (source?.type ?? ''),
+  )
   const resultUrl = useObjectUrl(result?.buffer, result ? mimeOf(result.format) : '')
 
   useEffect(() => {
@@ -348,35 +466,37 @@ function ImageConverter() {
       }
     >
       <Alert>{error}</Alert>
-      <Split>
-        <Preview
-          title={info ? `Original · ${info.width}×${info.height}` : 'Original'}
-          url={originalUrl}
-          footer={
-            <span className='flex min-w-0 items-center gap-2'>
-              <span className='max-w-48 truncate' title={source.name}>
-                {source.name}
-              </span>
-              {filesize(source.buffer.byteLength, { base: 2 })}
+      <Panel
+        title={
+          <span className='flex min-w-0 items-center gap-2'>
+            <span className='max-w-48 truncate normal-case' title={source.name}>
+              {source.name}
             </span>
-          }
-        />
-        <Preview
-          title={result ? `Converted · ${result.format.toUpperCase()}` : 'Converted'}
-          url={resultUrl}
-          footer={
-            result && (
+            {info && <span className='font-mono'>{`${info.width}×${info.height}`}</span>}
+          </span>
+        }
+        actions={
+          <span className='px-1.5 font-mono text-xs text-muted-foreground'>
+            {filesize(source.buffer.byteLength, { base: 2 })}
+            {result && (
               <>
-                {filesize(result.buffer.byteLength, { base: 2 })}{' '}
+                {' → '}
+                <span className='text-foreground'>{filesize(result.buffer.byteLength, { base: 2 })}</span>{' '}
                 <span className={change < 0 ? 'text-success' : 'text-destructive'}>
-                  ({change < 0 ? '' : '+'}
-                  {change.toFixed(1)}%)
+                  {change < 0 ? `${(-change).toFixed(1)}% smaller` : `${change.toFixed(1)}% larger`}
                 </span>
               </>
-            )
-          }
+            )}
+          </span>
+        }
+        className='flex-1'
+      >
+        <Compare
+          before={originalUrl}
+          after={resultUrl}
+          afterLabel={result ? result.format.toUpperCase() : format.toUpperCase()}
         />
-      </Split>
+      </Panel>
     </Workspace>
   )
 }
