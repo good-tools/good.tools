@@ -89,7 +89,7 @@ async function readHidden(name: string, data: Uint8Array, loader: ExifToolLoader
   const images = res.success ? parseEmbedded(res.data[0] ?? {}) : []
   const trailing = trailingData(data)
   // MPF images live after the JPEG's end too; ExifTool already listed them
-  const jpg = trailing && !images.some((i) => i.name.startsWith('MPImage')) ? trailingJpeg(trailing.data) : undefined
+  const jpg = trailing && !images.some((i) => i.name.includes('MPImage')) ? trailingJpeg(trailing.data) : undefined
   if (jpg) images.push({ name: 'Trailing data:JPEG', data: jpg })
   return { images, trailing, text: pngText(data), recovery: recoverPng(data) }
 }

@@ -360,7 +360,9 @@ function HiddenData({ file, meta }: { file: File; meta: Metadata }) {
           ))}
         </div>
       )}
-      {h?.trailing && <Trailing trailing={h.trailing} stem={stem} />}
+      {h?.trailing && (
+        <Trailing trailing={h.trailing} stem={stem} mpf={h.images.some((i) => i.name.includes('MPImage'))} />
+      )}
       {h?.recovery && <Recovered rec={h.recovery} stem={stem} />}
       {h?.trailing && !h.recovery && file.type === 'image/png' && (
         <p className='border-b px-2.5 py-1 text-[11px] text-muted-foreground'>
@@ -446,14 +448,17 @@ function Preview({
 
 const DUMP_BYTES = 256
 
-function Trailing({ trailing, stem }: { trailing: NonNullable<Hidden['trailing']>; stem: string }) {
+function Trailing({ trailing, stem, mpf }: { trailing: NonNullable<Hidden['trailing']>; stem: string; mpf: boolean }) {
   const rows = useMemo(() => hexRows(trailing.data.subarray(0, DUMP_BYTES)), [trailing])
   return (
     <div className='border-b'>
       <div className='flex min-h-8 items-center gap-2 py-0.5 pr-1 pl-2.5 text-[13px]'>
         <span className='flex-1 text-warning'>
           {filesize(trailing.data.length, { base: 2 })} after the end of the image (offset{' '}
-          {trailing.offset.toLocaleString()}). Editors that crop by overwriting can leave the original here.
+          {trailing.offset.toLocaleString()}).{' '}
+          {mpf
+            ? 'It holds the MPF images shown above.'
+            : 'Editors that crop by overwriting can leave the original here.'}
         </span>
         <Button
           size='icon-sm'
