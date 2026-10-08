@@ -6,6 +6,15 @@
 import { PDFDict, PDFName, PDFRef, PDFStream } from '@cantoo/pdf-lib'
 import { parseMetadata, writeMetadata } from '@uswriting/exiftool'
 import { strFromU8, strToU8, unzipSync, zipSync } from 'fflate'
+import {
+  type Hidden,
+  imageEnd,
+  parseEmbedded,
+  pngText,
+  recoverPng,
+  trailingData,
+  trailingJpeg,
+} from '@/lib/hidden-data'
 import { openPdf } from '@/lib/pdf'
 
 /** Lets the browser fetch the wasm from our own URL (the package fetches ./zeroperl.wasm next to the page). */
@@ -23,6 +32,8 @@ export interface Metadata {
   groups: MetaGroup[]
   /** Human-readable GPS position when the file carries one */
   location?: string
+  /** Embedded previews, trailing bytes and PNG text (images only) */
+  hidden?: Hidden
 }
 
 /** ExifTool's own bookkeeping and the WASI file system, not the file's metadata */
@@ -58,11 +69,29 @@ export async function readMetadata(name: string, data: Uint8Array, loader: ExifT
   )
   if (!res.success) throw new Error(res.error || 'ExifTool could not read this file')
   const meta = groupTags(res.data[0] ?? {})
-  if (!isOffice(name, data)) return meta
+  if (isPdf(data)) return meta
+  if (!isOffice(name, data)) {
+    meta.hidden = await readHidden(name, data, loader)
+    return meta
+  }
   // ExifTool only sees the first ZIP entry here; show the document properties instead
   const props = officeProps(unzipSync(data, { filter: (f) => f.name.startsWith('docProps/') }))
   meta.groups = meta.groups.filter((g) => g.name !== 'ZIP').concat(props.tags.length ? [props] : [])
   return meta
+}
+
+async function readHidden(name: string, data: Uint8Array, loader: ExifToolLoader): Promise<Hidden> {
+  // The "Preview" family: EXIF/IFD1 thumbnails, MPF images, Photoshop and XMP thumbnails, raw previews
+  const res = await parseMetadata<Record<string, unknown>[]>(
+    { name, data },
+    { args: ['-json', '-b', '-a', '-G1', '-preview:all'], transform: JSON.parse, ...loader },
+  )
+  const images = res.success ? parseEmbedded(res.data[0] ?? {}) : []
+  const trailing = trailingData(data)
+  // MPF images live after the JPEG's end too; ExifTool already listed them
+  const jpg = trailing && !images.some((i) => i.name.startsWith('MPImage')) ? trailingJpeg(trailing.data) : undefined
+  if (jpg) images.push({ name: 'Trailing data:JPEG', data: jpg })
+  return { images, trailing, text: pngText(data), recovery: recoverPng(data) }
 }
 
 const isZip = (b: Uint8Array) => b[0] === 0x50 && b[1] === 0x4b && b[2] === 0x03 && b[3] === 0x04
@@ -134,10 +163,16 @@ async function stripWithExifTool(name: string, data: Uint8Array, loader: ExifToo
     {},
     { args: ['-q', '-q', '-all=', '--icc_profile:all', '-tagsfromfile', '@', '-Orientation'], ...loader },
   )
-  if (res.success) return new Uint8Array(res.data)
   // ExifTool writes no output when there was nothing to remove
-  if (/unchanged|not found/i.test(res.error)) return data
+  if (res.success || /unchanged|not found/i.test(res.error))
+    return cutTrailing(res.success ? new Uint8Array(res.data) : data)
   throw new Error(res.error.replace(/^Error:\s*/, '').trim() || 'ExifTool could not write this file')
+}
+
+/** Drops anything after the end of the image, which ExifTool keeps for some formats */
+function cutTrailing(b: Uint8Array): Uint8Array {
+  const end = imageEnd(b)
+  return end !== undefined && end < b.length ? b.slice(0, end) : b
 }
 
 export async function stripMetadata(name: string, data: Uint8Array, loader: ExifToolLoader = {}): Promise<Uint8Array> {
