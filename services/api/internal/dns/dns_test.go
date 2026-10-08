@@ -14,7 +14,7 @@ var zone = map[uint16][]string{
 	mdns.TypeAAAA:  {"example.test. 300 IN AAAA 2001:db8::1"},
 	mdns.TypeNS:    {"example.test. 3600 IN NS ns1.example.test.", "example.test. 3600 IN NS ns2.example.test."},
 	mdns.TypeMX:    {"example.test. 60 IN MX 10 mail.example.test."},
-	mdns.TypeTXT:   {`example.test. 60 IN TXT "v=spf1" "-all"`},
+	mdns.TypeTXT:   {`example.test. 60 IN TXT "v=spf1 ip4:192.0.2" ".1 -all"`},
 	mdns.TypeSOA:   {"example.test. 3600 IN SOA ns1.example.test. hostmaster.example.test. 2024010101 7200 900 1209600 86400"},
 	mdns.TypeCNAME: {"example.test. 60 IN CNAME target.example.test.", "target.example.test. 60 IN A 192.0.2.9"},
 }
@@ -71,7 +71,7 @@ func TestLookup(t *testing.T) {
 				"A":     {{TTL: "5m0s", Content: "192.0.2.1"}},
 				"AAAA":  {{TTL: "5m0s", Content: "2001:db8::1"}},
 				"MX":    {{TTL: "1m0s", Content: "mail.example.test.", Priority: 10}},
-				"TXT":   {{TTL: "1m0s", Content: "v=spf1 -all"}},
+				"TXT":   {{TTL: "1m0s", Content: "v=spf1 ip4:192.0.2.1 -all"}},
 				"SOA":   {{TTL: "1h0m0s", Content: "ns1.example.test. hostmaster.example.test. 2024010101 7200 900 1209600 86400"}},
 				"CNAME": {{TTL: "1m0s", Content: "target.example.test."}},
 			}
