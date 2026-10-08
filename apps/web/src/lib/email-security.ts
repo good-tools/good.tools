@@ -190,8 +190,9 @@ export async function expandSpf(domain: string, lookup: Lookup): Promise<SpfResu
       res.errors.push(`${node.domain} publishes ${records.length} SPF records; there must be exactly one (permerror)`)
       return undefined
     }
-    node.record = records[0]
-    const parsed = parseSpf(node.record)
+    const record = records[0]!
+    node.record = record
+    const parsed = parseSpf(record)
     const at = isRoot ? '' : `${node.domain}: `
     res.errors.push(...parsed.errors.map((e) => at + e))
     res.warnings.push(...parsed.warnings.map((w) => at + w))
