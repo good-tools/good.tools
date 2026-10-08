@@ -6,7 +6,7 @@ Free, fast, privacy-focused developer tools that run in your browser.
 
 ![good.tools](docs/screenshot.png)
 
-- **Private.** Most tools run entirely client-side, many of them with WebAssembly (Wireshark, FFmpeg, DuckDB, libvips, qpdf, Tesseract, ONNX Runtime with Whisper, zxing, mesh repair). Tools that call a server are labelled **Online**.
+- **Private.** Most tools run entirely client-side, many of them with WebAssembly (Wireshark, FFmpeg, DuckDB, pandoc, libvips, qpdf, Tesseract, ExifTool, YARA-X, OpenCascade, ONNX Runtime with Whisper and Magika, zxing, mesh repair). Tools that call a server are labelled **Online**.
 - **Fast.** Each tool is code-split and loads only when you open it. Press <kbd>⌘K</kbd> / <kbd>Ctrl K</kbd> or <kbd>/</kbd> to jump to any tool.
 - **Works offline.** Install it as an app; the local tools keep working without a connection.
 - **Self-hostable.** One Docker image, configured at runtime.
@@ -15,12 +15,12 @@ Free, fast, privacy-focused developer tools that run in your browser.
 | --------------- | ----- |
 | **Development** | Diff Checker, JSON Formatter, JSON Escape, XML Formatter, YAML / JSON / TOML Converter, Markdown Notes, Regex Tester, Cron Expression, Timestamp Converter, UUID / ULID Generator, CSV / Excel ↔ JSON, Code Beautifier / Minifier, Color Picker & Converter, SQL Query (DuckDB), MCP Browser, Docker Browser |
 | **Encoding**    | Base64, URL Encoder/Decoder, Protobuf Decoder, QR Code & Barcode |
-| **Text**        | Word Counter, Case Converter, Lorem Ipsum Generator |
-| **Security**    | JWT Decoder, Certificate Decoder, Java Object Deserializer, Hash Calculator, Password Generator |
-| **Network**     | Packet Dissector (Wireshark), DNS Lookup, WHOIS, What's My IP, IP to Location |
-| **Image**       | Image Converter, Remove Background, Color Picker & Converter |
+| **Text**        | Word Counter, Case Converter, Lorem Ipsum Generator, Document Converter (pandoc) |
+| **Security**    | JWT Decoder, Certificate Decoder, Java Object Deserializer, Hash Calculator, Password Generator, CSR & Certificate Toolkit, File Identifier (Magika), Metadata Viewer & Stripper (ExifTool), YARA Rule Tester (YARA-X), Binary Explorer |
+| **Network**     | Packet Dissector (Wireshark), DNS Lookup, WHOIS, What's My IP, IP to Location, HTTP & TLS Inspector, Email Security Checker |
+| **Image**       | Image Converter, Remove Background, Metadata Viewer & Stripper, Color Picker & Converter |
 | **Media**       | Video & Audio Converter (FFmpeg), Speech to Text (Whisper) |
-| **3D & CAD**    | STL Repair |
+| **3D & CAD**    | STL Repair, STEP / IGES Viewer (OpenCascade) |
 | **PDF**         | Images to PDF, Merge PDF, Organize PDF, Compress PDF, Edit PDF, Sign PDF, PDF to Images, PDF to Word, Word to PDF, PDF to Text (OCR), Protect / Unlock PDF |
 
 ## Development
