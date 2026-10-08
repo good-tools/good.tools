@@ -155,7 +155,8 @@ export default defineConfig({
   optimizeDeps: {
     // wasm-vips must load its own .wasm next to the JS file
     // ffmpeg.wasm spawns its worker from its own files
-    exclude: ['wasm-vips', '@ffmpeg/ffmpeg'],
+    // YARA-X loads its .wasm relative to its JS file
+    exclude: ['wasm-vips', '@ffmpeg/ffmpeg', '@virustotal/yara-x'],
   },
 
   server: { port: 3000, headers: crossOriginIsolation },

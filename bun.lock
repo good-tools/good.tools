@@ -11,7 +11,7 @@
     },
     "apps/web": {
       "name": "@good-tools/web",
-      "version": "1.29.0",
+      "version": "1.30.0",
       "dependencies": {
         "@cantoo/pdf-lib": "^2.11.1",
         "@duckdb/duckdb-wasm": "1.32.0",
@@ -36,6 +36,7 @@
         "@tanstack/react-table": "^8",
         "@tanstack/react-virtual": "^3.14.13",
         "@tesseract.js-data/eng": "^1.0.0",
+        "@virustotal/yara-x": "^1.21.0",
         "allotment": "^1.20.5",
         "apache-arrow": "17.0.0",
         "buffer": "^6.0.3",
@@ -972,6 +973,8 @@
     "@use-gesture/core": ["@use-gesture/core@10.3.1", "", {}, "sha512-WcINiDt8WjqBdUXye25anHiNxPc0VOrlT8F6LLkU6cycrOGUDyY/yyFmsg3k8i5OLvv25llc0QC45GhR/C8llw=="],
 
     "@use-gesture/react": ["@use-gesture/react@10.3.1", "", { "dependencies": { "@use-gesture/core": "10.3.1" }, "peerDependencies": { "react": ">= 16.8.0" } }, "sha512-Yy19y6O2GJq8f7CHf7L0nxL8bf4PZCPaVOCgJrusOeFHY1LvHgYXnmnXg6N5iwAnbgbZCDjo60SiM6IPJi9C5g=="],
+
+    "@virustotal/yara-x": ["@virustotal/yara-x@1.21.0", "", {}, "sha512-cKMWrgwrMEuMkoYm789q6gPATw9VrNJ6Skw/zLKB3olTxOPbPsA4+cVjhKmblH/70WbeZKtaTEawEGEXvBcDfA=="],
 
     "@vitejs/plugin-react": ["@vitejs/plugin-react@6.1.1", "", { "dependencies": { "@rolldown/pluginutils": "^1.0.1" }, "peerDependencies": { "@rolldown/plugin-babel": "^0.1.7 || ^0.2.0", "babel-plugin-react-compiler": "^1.0.0", "oxc-transform-react": "^0.145.0", "vite": "^8.0.0" }, "optionalPeers": ["@rolldown/plugin-babel", "babel-plugin-react-compiler", "oxc-transform-react"] }, "sha512-yxLaQV9gkhS8ezJqCM6+ndU7mDY6gqAg75NQ+0IjwEI8IYOmQCgkRwHKVSfWXW076DsqMo0Dk+0FK1U+M5RgFw=="],
 

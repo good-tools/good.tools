@@ -47,6 +47,7 @@ import {
   Quote,
   Radio,
   Regex,
+  ScanSearch,
   Search,
   ShieldCheck,
   Signature,
@@ -124,6 +125,19 @@ export const tools: Tool[] = [
         url: 'https://www.npmjs.com/package/@goodtools/protobuf-decoder',
       },
     ],
+  },
+  {
+    title: 'YARA Rule Tester',
+    path: '/yara',
+    description: 'Write YARA rules and test them against files or text with YARA-X, showing every matched string',
+    icon: ScanSearch,
+    categories: [CATEGORIES.SECURITY],
+    searchTags: ['yara', 'yara-x', 'rule', 'malware', 'signature', 'scan', 'detection', 'ioc', 'threat', 'virustotal'],
+    component: lazy(() => import('@/tools/YaraTester')),
+    online: false,
+    dependencies: [{ name: 'YARA-X (BSD-3-Clause)', url: 'https://github.com/VirusTotal/yara-x' }],
+    notice:
+      'This tool downloads a ~6 MB WebAssembly build of YARA-X to compile and scan in your browser. Your rules and files never leave your device.',
   },
   {
     title: 'Java Object Deserializer',

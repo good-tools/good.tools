@@ -27,6 +27,7 @@
     "@tanstack/react-table": "^8",
     "@tanstack/react-virtual": "^3.14.13",
     "@tesseract.js-data/eng": "^1.0.0",
+    "@virustotal/yara-x": "^1.21.0",
     "allotment": "^1.20.5",
     "apache-arrow": "17.0.0",
     "buffer": "^6.0.3",
