@@ -1,7 +1,7 @@
-import { type InputHTMLAttributes, useId } from 'react'
+import { type ComponentProps, useId } from 'react'
 import { cn } from '@/lib/utils'
 
-interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'title'> {
+interface CheckboxProps extends Omit<ComponentProps<'input'>, 'title'> {
   title?: string
   description?: string
 }
