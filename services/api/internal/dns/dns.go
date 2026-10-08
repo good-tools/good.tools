@@ -139,7 +139,8 @@ func exchange(ctx context.Context, domain, server, network string, qtype uint16)
 		case *mdns.MX:
 			rec.Content, rec.Priority = v.Mx, v.Preference
 		case *mdns.TXT:
-			rec.Content = strings.Join(v.Txt, " ")
+			// long records are split into 255-byte strings that are concatenated as-is (RFC 7208 §3.3, RFC 6376 §3.6.2.2)
+			rec.Content = strings.Join(v.Txt, "")
 		case *mdns.SOA:
 			rec.Content = fmt.Sprintf("%s %s %d %d %d %d %d", v.Ns, v.Mbox, v.Serial, v.Refresh, v.Retry, v.Expire, v.Minttl)
 		}
