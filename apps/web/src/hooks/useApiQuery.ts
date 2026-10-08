@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { useLocation, useSearchParams } from 'react-router'
 import { API_CONFIG } from '@/config/api.config'
-import type { DNSResponse, IPLocationResponse, MyIPResponse, WhoisResponse } from '@/types/api.types'
+import type { DNSResponse, InspectResponse, IPLocationResponse, MyIPResponse, WhoisResponse } from '@/types/api.types'
 
 export const EXAMPLE_DOMAINS = ['facebook.com', 'good.tools', 'ronin.ae', 'gmail.com', 'apple.com', 'microsoft.com']
 
@@ -98,5 +98,14 @@ export function useIPLocationQuery(ip: string) {
     queryFn: () => getJSON<IPLocationResponse>('/ip', { ip }, 'IP location lookup failed'),
     enabled: !!ip,
     retry: 1,
+  })
+}
+
+export function useHTTPInspectQuery(url: string) {
+  return useQuery({
+    queryKey: ['http-inspect', url],
+    queryFn: () => getJSON<InspectResponse>('/http-inspect', { url }, 'Inspection failed'),
+    enabled: !!url,
+    retry: false,
   })
 }

@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -324,5 +325,18 @@ func TestDNSRejectsPrivateResolvers(t *testing.T) {
 		if w.Code != http.StatusBadRequest || !strings.Contains(w.Body.String(), "public IP") {
 			t.Errorf("resolver %s: %d %s", r, w.Code, w.Body.String())
 		}
+	}
+}
+
+func TestHTTPInspectRefusesInternalTargets(t *testing.T) {
+	h := newServer(t, nil)
+	for _, u := range []string{"http://127.0.0.1:1/", "localhost", "http://169.254.169.254/latest/meta-data/", "http://[fd00::1]/"} {
+		w := get(h, "/v1/http-inspect?url="+url.QueryEscape(u))
+		if w.Code != http.StatusBadRequest || !strings.Contains(message(t, w), "only public hosts") {
+			t.Errorf("%s: %d %s", u, w.Code, w.Body)
+		}
+	}
+	if w := get(h, "/http-inspect?url=ftp://example.com"); w.Code != http.StatusBadRequest || !strings.Contains(message(t, w), "invalid URL") {
+		t.Errorf("ftp: %d %s", w.Code, w.Body)
 	}
 }

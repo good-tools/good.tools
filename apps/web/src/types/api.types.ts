@@ -128,3 +128,43 @@ export interface DockerFileListItem {
   mime_type?: string
   symlink?: string
 }
+
+/** One certificate from the server's chain (/http-inspect), leaf first */
+export interface InspectCert {
+  subject: string
+  issuer: string
+  sans?: string[]
+  not_before: string
+  not_after: string
+  days_left: number
+  key: string
+  signature: string
+}
+
+export interface InspectTLS {
+  version: string
+  cipher: string
+  alpn?: string
+  ocsp_stapled: boolean
+  trusted: boolean
+  verify_error?: string
+  chain: InspectCert[]
+}
+
+/** One request/response of the redirect chain; timings in ms */
+export interface InspectHop {
+  url: string
+  status: number
+  proto: string
+  location?: string
+  remote_addr?: string
+  timing: { dns: number; connect: number; tls: number; ttfb: number; total: number }
+  headers: Record<string, string[]>
+  tls?: InspectTLS
+}
+
+/** HTTP & TLS inspection (/http-inspect); error says why the chain stopped early */
+export interface InspectResponse {
+  hops: InspectHop[]
+  error?: string
+}
