@@ -71,6 +71,7 @@ export default function StepViewer() {
       if (pending.current) {
         setHidden([])
         setFile({ ...pending.current, model: msg.model })
+        setFit((n) => n + 1)
       }
     }
     return () => {
