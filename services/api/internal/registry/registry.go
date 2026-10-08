@@ -16,14 +16,12 @@ import (
 	"mime"
 	"net"
 	"net/http"
-	"net/netip"
 	"os"
 	"path"
 	"path/filepath"
 	"slices"
 	"sort"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/good-tools/good.tools/services/api/internal/netx"
@@ -154,20 +152,7 @@ func New(opts Options) (*Browser, error) {
 // publicOnlyTransport refuses to dial loopback, private, link-local and other
 // non-public addresses, so image refs can't be used to probe internal networks.
 func publicOnlyTransport() http.RoundTripper {
-	d := &net.Dialer{Timeout: 30 * time.Second, Control: func(_, address string, _ syscall.RawConn) error {
-		host, _, err := net.SplitHostPort(address)
-		if err != nil {
-			return err
-		}
-		ip, err := netip.ParseAddr(host)
-		if err != nil {
-			return err
-		}
-		if !netx.IsPublic(ip) {
-			return ErrForbiddenHost
-		}
-		return nil
-	}}
+	d := &net.Dialer{Timeout: 30 * time.Second, Control: netx.PublicOnly(ErrForbiddenHost)}
 	t := remote.DefaultTransport.(*http.Transport).Clone()
 	t.Proxy = nil
 	t.DialContext = d.DialContext

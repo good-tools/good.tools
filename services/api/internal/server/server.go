@@ -21,6 +21,7 @@ import (
 
 	"github.com/good-tools/good.tools/services/api/internal/dns"
 	"github.com/good-tools/good.tools/services/api/internal/geo"
+	"github.com/good-tools/good.tools/services/api/internal/inspect"
 	"github.com/good-tools/good.tools/services/api/internal/registry"
 	"github.com/good-tools/good.tools/services/api/internal/whois"
 )
@@ -53,6 +54,7 @@ func (s *Server) Handler() http.Handler {
 			{"whois", "whois", s.whois},
 			{"ip", "ip", s.ip},
 			{"my-ip", "my-ip", s.myIP},
+			{"http-inspect", "http-inspect", s.httpInspect},
 			{"image", "image", s.image},
 			{"image/list", "list", s.list},
 			{"image/file", "download", s.file},
@@ -98,8 +100,11 @@ func fail(w http.ResponseWriter, r *http.Request, err error) {
 	switch {
 	case errors.Is(err, dns.ErrInvalidDomain):
 		status, msg = http.StatusBadRequest, "invalid domain"
-	case errors.Is(err, registry.ErrInvalid), errors.Is(err, registry.ErrForbiddenHost):
+	case errors.Is(err, registry.ErrInvalid), errors.Is(err, registry.ErrForbiddenHost),
+		errors.Is(err, inspect.ErrInvalidURL):
 		status, msg = http.StatusBadRequest, err.Error()
+	case errors.Is(err, inspect.ErrForbidden): // the wrapped dial error would echo the address back
+		status, msg = http.StatusBadRequest, inspect.ErrForbidden.Error()
 	case errors.Is(err, registry.ErrNotFound):
 		status, msg = http.StatusNotFound, err.Error()
 	case errors.Is(err, registry.ErrTooLarge):
@@ -109,7 +114,8 @@ func fail(w http.ResponseWriter, r *http.Request, err error) {
 		w.Header().Set("Retry-After", "30")
 	case errors.Is(err, context.DeadlineExceeded), errors.As(err, &ne) && ne.Timeout():
 		status, msg = http.StatusGatewayTimeout, "upstream timed out"
-	case errors.Is(err, dns.ErrUnreachable), errors.Is(err, whois.ErrNoServer), errors.Is(err, registry.ErrUpstream):
+	case errors.Is(err, dns.ErrUnreachable), errors.Is(err, whois.ErrNoServer), errors.Is(err, registry.ErrUpstream),
+		errors.Is(err, inspect.ErrUpstream):
 		status, msg = http.StatusBadGateway, err.Error()
 	case errors.As(err, &ne):
 		status, msg = http.StatusBadGateway, "upstream request failed"
@@ -171,6 +177,17 @@ func (s *Server) ip(w http.ResponseWriter, r *http.Request) {
 		lang = "en"
 	}
 	res, err := s.Geo.Lookup(ip.Unmap(), lang)
+	if err != nil {
+		fail(w, r, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, res)
+}
+
+func (s *Server) httpInspect(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
+	defer cancel()
+	res, err := inspect.Run(ctx, r.URL.Query().Get("url"), inspect.Options{})
 	if err != nil {
 		fail(w, r, err)
 		return

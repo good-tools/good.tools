@@ -47,6 +47,7 @@ import {
   Radio,
   Regex,
   Search,
+  ShieldCheck,
   Signature,
   WholeWord,
 } from 'lucide-react'
@@ -325,6 +326,30 @@ export const tools: Tool[] = [
         url: 'https://threejs.org',
       },
     ],
+  },
+  {
+    title: 'HTTP & TLS Inspector',
+    path: '/http-tls-inspector',
+    description:
+      'Follow redirects, grade security headers and inspect the TLS connection and certificate chain of a site',
+    icon: ShieldCheck,
+    categories: [CATEGORIES.NETWORK, CATEGORIES.SECURITY],
+    searchTags: [
+      'http',
+      'https',
+      'tls',
+      'ssl',
+      'certificate',
+      'redirect',
+      'headers',
+      'security headers',
+      'hsts',
+      'csp',
+      'cipher',
+      'alpn',
+    ],
+    component: lazy(() => import('@/tools/HttpInspector')),
+    online: true,
   },
   {
     title: "What's My IP",
