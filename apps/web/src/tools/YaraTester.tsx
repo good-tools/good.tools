@@ -57,23 +57,32 @@ export default function YaraTester() {
       clearTimeout(timer)
       setBusy(false)
     }
+    // Drop the worker on any failure so the next scan starts fresh (and retries loading the wasm)
+    const fail = (message: string) => {
+      w.terminate()
+      worker.current = null
+      finish()
+      setResult(null)
+      setError(message)
+    }
+    w.onerror = (e) => fail(`Could not run YARA-X: ${e.message || 'the worker crashed'}`)
+    w.onmessageerror = () => fail('Could not run YARA-X: the worker sent an unreadable message')
     w.onmessage = ({ data }: MessageEvent<YaraResponse>) => {
       if (data.type === 'start') {
         // The YARA-X scan timeout doesn't fire in wasm, so a runaway condition is stopped by killing the worker
-        timer = setTimeout(() => {
-          w.terminate()
-          worker.current = null
-          finish()
-          setResult(null)
-          setError(
-            `Scanning took longer than ${TIMEOUT_MS / 1000} s and was stopped. Check for loops over large ranges or very slow conditions.`,
-          )
-        }, TIMEOUT_MS)
+        timer = setTimeout(
+          () =>
+            fail(
+              `Scanning took longer than ${TIMEOUT_MS / 1000} s and was stopped. Check for loops over large ranges or very slow conditions.`,
+            ),
+          TIMEOUT_MS,
+        )
         return
       }
-      finish()
-      if (data.type === 'done') setResult(data.result)
-      else setError(`Could not run YARA-X: ${data.error}`)
+      if (data.type === 'done') {
+        finish()
+        setResult(data.result)
+      } else fail(`Could not run YARA-X: ${data.error}`)
     }
     w.postMessage({ source, samples } satisfies YaraRequest)
   }
