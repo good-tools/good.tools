@@ -50,15 +50,18 @@ function PemPanel({
   value,
   filename,
   placeholder,
+  className,
 }: {
   title: string
   value: string
   filename: string
   placeholder: string
+  className?: string
 }) {
   return (
     <Panel
       title={title}
+      className={className}
       actions={
         <>
           <CopyButton value={value} disabled={!value} />
@@ -121,7 +124,7 @@ function Generate({ selfSigned }: { selfSigned: boolean }) {
       <Split>
         <Panel title={selfSigned ? 'Self-signed certificate' : 'Certificate signing request'}>
           <form
-            className='grid gap-2.5 p-2.5 sm:grid-cols-2'
+            className='grid min-h-0 content-start gap-2.5 overflow-auto p-2.5 sm:grid-cols-2'
             onSubmit={(e) => {
               e.preventDefault()
               void run()
@@ -457,6 +460,7 @@ function DerToPem() {
         value={out.pem}
         filename={`${out.name.replace(/\.[^.]+$/, '') || 'converted'}.pem`}
         placeholder='The PEM appears here'
+        className='flex-1'
       />
     </>
   )
@@ -504,6 +508,7 @@ function Pkcs12ToPem() {
         value={pem}
         filename='bundle.pem'
         placeholder='Extracted PEM appears here'
+        className='flex-1'
       />
     </>
   )
@@ -540,7 +545,7 @@ function PemToPkcs12() {
         </Panel>
         <Panel title='PKCS#12'>
           <form
-            className='flex max-w-sm flex-col gap-2.5 p-2.5'
+            className='flex min-h-0 max-w-sm flex-col gap-2.5 overflow-auto p-2.5'
             onSubmit={(e) => {
               e.preventDefault()
               void run()
