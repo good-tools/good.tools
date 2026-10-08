@@ -291,7 +291,7 @@ export const tools: Tool[] = [
     title: 'Metadata Viewer & Stripper',
     path: '/metadata',
     description:
-      'See the hidden metadata in photos, PDFs and Office files, including GPS location, embedded thumbnails and data left after the image, and remove it',
+      'See and remove the hidden metadata in photos, PDFs and Office files, from GPS location to edited thumbnails',
     icon: EyeOff,
     categories: [CATEGORIES.SECURITY, CATEGORIES.IMAGE],
     searchTags: [

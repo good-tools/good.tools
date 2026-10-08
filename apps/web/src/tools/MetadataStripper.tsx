@@ -362,6 +362,11 @@ function HiddenData({ file, meta }: { file: File; meta: Metadata }) {
       )}
       {h?.trailing && <Trailing trailing={h.trailing} stem={stem} />}
       {h?.recovery && <Recovered rec={h.recovery} stem={stem} />}
+      {h?.trailing && !h.recovery && file.type === 'image/png' && (
+        <p className='border-b px-2.5 py-1 text-[11px] text-muted-foreground'>
+          No deflate block of the original image starts in this data, so its pixels can&apos;t be rebuilt.
+        </p>
+      )}
       {(tags.length > 0 || text.length > 0) && (
         <dl className='text-[13px]'>
           {[...tags, ...text.map(([k, v]) => ['PNG text', k, v] as const)].map(([category, tag, value], i) => (
