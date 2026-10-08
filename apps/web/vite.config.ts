@@ -126,6 +126,8 @@ export default defineConfig({
       // The Document Converter loads pandoc's wasm itself (gzipped) and only needs the package's core
       'pandoc-wasm/src': path.dirname(createRequire(import.meta.url).resolve('pandoc-wasm')),
       ws: path.resolve(import.meta.dirname, './src/ws-mock.ts'),
+      // Not in the package's exports map, so it can't be imported by its package path
+      'zeroperl.wasm': path.resolve(import.meta.dirname, './node_modules/@6over3/zeroperl-ts/dist/esm/zeroperl.wasm'),
     },
   },
 

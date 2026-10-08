@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@6over3/zeroperl-ts": "1.0.10",
     "@cantoo/pdf-lib": "^2.11.1",
     "@duckdb/duckdb-wasm": "1.32.0",
     "@ffmpeg/core-mt": "0.12.10",
@@ -27,6 +28,7 @@
     "@tanstack/react-table": "^8",
     "@tanstack/react-virtual": "^3.14.13",
     "@tesseract.js-data/eng": "^1.0.0",
+    "@uswriting/exiftool": "1.0.9",
     "@virustotal/yara-x": "^1.21.0",
     "allotment": "^1.20.5",
     "apache-arrow": "17.0.0",

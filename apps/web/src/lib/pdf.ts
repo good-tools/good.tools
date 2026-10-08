@@ -1,4 +1,4 @@
-import { degrees, PDFDocument } from '@cantoo/pdf-lib'
+import { degrees, type LoadOptions, PDFDocument } from '@cantoo/pdf-lib'
 
 /** Millimetres to PDF points (1/72 in). */
 export const mm = (v: number) => (v * 72) / 25.4
@@ -156,9 +156,9 @@ export async function imagesToPdf(images: PdfImage[], pages: PageLayout[]): Prom
  * Opens a PDF. Files with only an owner password (restrictions, no open password) open without one.
  * Throws a `PasswordError` when an open password is needed or wrong.
  */
-export async function openPdf(bytes: Uint8Array, password = ''): Promise<PDFDocument> {
+export async function openPdf(bytes: Uint8Array, password = '', options: LoadOptions = {}): Promise<PDFDocument> {
   try {
-    return await PDFDocument.load(bytes, { password })
+    return await PDFDocument.load(bytes, { ...options, password })
   } catch (e) {
     const msg = e instanceof Error ? e.message : ''
     if (msg === 'NEEDS PASSWORD') throw new PasswordError('This PDF needs a password')
